@@ -6,10 +6,11 @@ export class Email {
   }
 
   static create(email: string): Email {
-    if (!Email.isValid(email)) {
+    const normalizedEmail = email.toLowerCase().trim();
+    if (!Email.isValid(normalizedEmail)) {
       throw new Error('Invalid email format');
     }
-    return new Email(email.toLowerCase().trim());
+    return new Email(normalizedEmail);
   }
 
   private static isValid(email: string): boolean {

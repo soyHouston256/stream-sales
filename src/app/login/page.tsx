@@ -30,9 +30,10 @@ export default function LoginPage() {
         throw new Error(data.error || 'Login failed');
       }
 
-      // Store token in localStorage
+      // Store token in localStorage for API calls
       localStorage.setItem('token', data.token);
-      document.cookie = `token=${data.token}; path=/`;
+
+      // Cookie is set by the server automatically
 
       // Redirect to dashboard
       router.push('/dashboard');

@@ -31,10 +31,25 @@ export async function POST(request: NextRequest) {
       role: result.user.role,
     });
 
-    return NextResponse.json({
+    // Create response with token
+    const response = NextResponse.json({
       user: result.user,
       token,
     });
+
+    // Set cookie on the server side (more reliable than client-side)
+    const expirationDate = new Date();
+    expirationDate.setDate(expirationDate.getDate() + 7);
+
+    response.cookies.set('token', token, {
+      httpOnly: false, // Allow JavaScript access for localStorage sync
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      expires: expirationDate,
+      path: '/',
+    });
+
+    return response;
 
   } catch (error) {
     if (error instanceof InvalidCredentialsException) {

@@ -1,24 +1,30 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GetUserByIdUseCase } from '@/application/use-cases/GetUserByIdUseCase';
 import { PrismaUserRepository } from '@/infrastructure/repositories/PrismaUserRepository';
-import { getUserFromRequest } from '@/infrastructure/auth/middleware';
+import { JwtService } from '@/infrastructure/auth/JwtService';
 import { UserNotFoundException } from '@/domain/exceptions/DomainException';
 
 const userRepository = new PrismaUserRepository();
 const getUserByIdUseCase = new GetUserByIdUseCase(userRepository);
+const jwtService = new JwtService();
 
 export async function GET(request: NextRequest) {
   try {
-    const user = getUserFromRequest(request);
+    // Validate JWT token from Authorization header
+    const token = request.headers.get('authorization')?.replace('Bearer ', '');
 
-    if (!user) {
+    if (!token) {
       return NextResponse.json(
-        { error: 'Unauthorized' },
+        { error: 'No token provided' },
         { status: 401 }
       );
     }
 
-    const result = await getUserByIdUseCase.execute(user.userId);
+    // Verify JWT (runs in Node.js runtime, not Edge)
+    const payload = jwtService.verify(token);
+
+    // Get user from database
+    const result = await getUserByIdUseCase.execute(payload.userId);
 
     return NextResponse.json({
       user: result.user,
@@ -29,6 +35,13 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(
         { error: error.message },
         { status: 404 }
+      );
+    }
+
+    if (error instanceof Error && error.message === 'Invalid token') {
+      return NextResponse.json(
+        { error: 'Invalid or expired token' },
+        { status: 401 }
       );
     }
 

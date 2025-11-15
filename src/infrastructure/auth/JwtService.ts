@@ -1,4 +1,4 @@
-import jwt from 'jsonwebtoken';
+import jwt, { SignOptions } from 'jsonwebtoken';
 
 export interface JwtPayload {
   userId: string;
@@ -8,7 +8,7 @@ export interface JwtPayload {
 
 export class JwtService {
   private secret: string;
-  private expiresIn: string;
+  private expiresIn: string | number;
 
   constructor() {
     this.secret = process.env.JWT_SECRET || 'default-secret-change-in-production';
@@ -18,7 +18,7 @@ export class JwtService {
   sign(payload: JwtPayload): string {
     return jwt.sign(payload, this.secret, {
       expiresIn: this.expiresIn,
-    });
+    } as SignOptions);
   }
 
   verify(token: string): JwtPayload {

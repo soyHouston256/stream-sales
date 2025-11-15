@@ -31,9 +31,10 @@ export default function RegisterPage() {
         throw new Error(data.error || 'Registration failed');
       }
 
-      // Store token in localStorage
+      // Store token in localStorage for API calls
       localStorage.setItem('token', data.token);
-      document.cookie = `token=${data.token}; path=/`;
+
+      // Cookie is set by the server automatically
 
       // Redirect to dashboard
       router.push('/dashboard');
