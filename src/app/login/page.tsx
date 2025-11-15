@@ -16,7 +16,8 @@ export default function LoginPage() {
       const dashboardRoute = getDashboardRoute(user.role);
       router.push(dashboardRoute);
     }
-  }, [user, isLoading, router]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, isLoading]);
 
   // Show loading state while checking authentication
   if (isLoading) {
