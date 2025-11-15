@@ -1,0 +1,105 @@
+import { LoginUserUseCase } from '../LoginUserUseCase';
+import { RegisterUserUseCase } from '../RegisterUserUseCase';
+import { IUserRepository } from '@/domain/repositories/IUserRepository';
+import { User } from '@/domain/entities/User';
+import { Email } from '@/domain/value-objects/Email';
+import { InvalidCredentialsException } from '@/domain/exceptions/DomainException';
+
+class MockUserRepository implements IUserRepository {
+  private users: User[] = [];
+
+  async save(user: User): Promise<User> {
+    this.users.push(user);
+    return user;
+  }
+
+  async findById(id: string): Promise<User | null> {
+    return this.users.find((u) => u.id === id) || null;
+  }
+
+  async findByEmail(email: Email): Promise<User | null> {
+    return this.users.find((u) => u.email.equals(email)) || null;
+  }
+
+  async existsByEmail(email: Email): Promise<boolean> {
+    return this.users.some((u) => u.email.equals(email));
+  }
+}
+
+describe('LoginUserUseCase', () => {
+  let userRepository: MockUserRepository;
+  let loginUserUseCase: LoginUserUseCase;
+  let registerUserUseCase: RegisterUserUseCase;
+
+  beforeEach(() => {
+    userRepository = new MockUserRepository();
+    loginUserUseCase = new LoginUserUseCase(userRepository);
+    registerUserUseCase = new RegisterUserUseCase(userRepository);
+  });
+
+  it('should login user with correct credentials', async () => {
+    // First register a user
+    await registerUserUseCase.execute({
+      email: 'test@example.com',
+      password: 'password123',
+      name: 'Test User',
+    });
+
+    // Then try to login
+    const result = await loginUserUseCase.execute({
+      email: 'test@example.com',
+      password: 'password123',
+    });
+
+    expect(result.user).toBeDefined();
+    expect(result.user.email).toBe('test@example.com');
+    expect(result.user.name).toBe('Test User');
+  });
+
+  it('should throw error for non-existent user', async () => {
+    await expect(
+      loginUserUseCase.execute({
+        email: 'nonexistent@example.com',
+        password: 'password123',
+      })
+    ).rejects.toThrow(InvalidCredentialsException);
+  });
+
+  it('should throw error for incorrect password', async () => {
+    await registerUserUseCase.execute({
+      email: 'test@example.com',
+      password: 'password123',
+    });
+
+    await expect(
+      loginUserUseCase.execute({
+        email: 'test@example.com',
+        password: 'wrongpassword',
+      })
+    ).rejects.toThrow(InvalidCredentialsException);
+  });
+
+  it('should login with email in different case', async () => {
+    await registerUserUseCase.execute({
+      email: 'test@example.com',
+      password: 'password123',
+    });
+
+    const result = await loginUserUseCase.execute({
+      email: 'TEST@EXAMPLE.COM',
+      password: 'password123',
+    });
+
+    expect(result.user).toBeDefined();
+    expect(result.user.email).toBe('test@example.com');
+  });
+
+  it('should throw error for invalid email format', async () => {
+    await expect(
+      loginUserUseCase.execute({
+        email: 'invalid-email',
+        password: 'password123',
+      })
+    ).rejects.toThrow('Invalid email format');
+  });
+});
