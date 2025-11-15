@@ -4,6 +4,18 @@ import { IPurchaseRepository } from '../../domain/repositories/IPurchaseReposito
 import { Money } from '../../domain/value-objects/Money';
 import { Decimal } from 'decimal.js';
 
+type PrismaPurchase = {
+  id: string;
+  userId: string;
+  productId: string;
+  amount: any;
+  currency: string;
+  status: string;
+  createdAt: Date;
+  updatedAt: Date;
+  completedAt: Date | null;
+};
+
 /**
  * PrismaPurchaseRepository
  *
@@ -121,7 +133,7 @@ export class PrismaPurchaseRepository implements IPurchaseRepository {
       take: filters?.limit || 20, // Default 20
     });
 
-    return purchases.map((p) => this.toDomain(p));
+    return purchases.map((p: PrismaPurchase) => this.toDomain(p));
   }
 
   /**
@@ -143,7 +155,7 @@ export class PrismaPurchaseRepository implements IPurchaseRepository {
       where: { productId },
     });
 
-    return purchases.map((p) => this.toDomain(p));
+    return purchases.map((p: PrismaPurchase) => this.toDomain(p));
   }
 
   /**

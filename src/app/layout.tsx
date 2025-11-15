@@ -1,4 +1,7 @@
 import type { Metadata } from 'next';
+import './globals.css';
+import { AuthProvider } from '@/lib/auth/AuthContext';
+import { Toaster } from '@/components/ui/toaster';
 
 export const metadata: Metadata = {
   title: 'Stream Sales - Login & Dashboard',
@@ -11,9 +14,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body style={{ margin: 0, padding: 0, fontFamily: 'system-ui, -apple-system, sans-serif' }}>
-        {children}
+    <html lang="es" suppressHydrationWarning>
+      <body className="min-h-screen bg-background font-sans antialiased">
+        <AuthProvider>
+          {children}
+          <Toaster />
+        </AuthProvider>
       </body>
     </html>
   );

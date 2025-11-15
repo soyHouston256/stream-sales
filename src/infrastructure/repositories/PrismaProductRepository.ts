@@ -5,6 +5,22 @@ import { ProductStatus } from '../../domain/value-objects/ProductStatus';
 import { IProductRepository } from '../../domain/repositories/IProductRepository';
 import * as crypto from 'crypto';
 
+type PrismaProduct = {
+  id: string;
+  name: string;
+  description: string;
+  price: string;
+  currency: string;
+  providerId: string;
+  category: string;
+  accountEmail: string;
+  accountPassword: string;
+  downloadLink: string | null;
+  available: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
 /**
  * PrismaProductRepository
  *
@@ -133,7 +149,7 @@ export class PrismaProductRepository implements IProductRepository {
       orderBy: { createdAt: 'desc' },
     });
 
-    return products.map((p) => this.toDomain(p));
+    return products.map((p: PrismaProduct) => this.toDomain(p));
   }
 
   /**
@@ -171,7 +187,7 @@ export class PrismaProductRepository implements IProductRepository {
       skip: filters?.offset,
     });
 
-    return products.map((p) => this.toDomain(p));
+    return products.map((p: PrismaProduct) => this.toDomain(p));
   }
 
   /**
@@ -183,7 +199,7 @@ export class PrismaProductRepository implements IProductRepository {
       orderBy: { createdAt: 'desc' },
     });
 
-    return products.map((p) => this.toDomain(p));
+    return products.map((p: PrismaProduct) => this.toDomain(p));
   }
 
   /**
@@ -195,7 +211,7 @@ export class PrismaProductRepository implements IProductRepository {
       orderBy: { createdAt: 'desc' },
     });
 
-    return products.map((p) => this.toDomain(p));
+    return products.map((p: PrismaProduct) => this.toDomain(p));
   }
 
   /**
