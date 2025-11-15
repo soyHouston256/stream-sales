@@ -3,7 +3,6 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth/useAuth';
-import { canAccessRoute } from '@/lib/utils/roleRedirect';
 import type { UserRole } from '@/types/auth';
 
 interface ProtectedRouteProps {
@@ -49,7 +48,8 @@ export function ProtectedRoute({
         return;
       }
     }
-  }, [user, isLoading, isAuthenticated, requiredRole, allowedRoles, router]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, isLoading, isAuthenticated, requiredRole, allowedRoles]);
 
   // Show loading state while checking authentication
   if (isLoading) {
