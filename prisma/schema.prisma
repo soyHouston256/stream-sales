@@ -213,7 +213,7 @@ model Affiliation {
 
 model Dispute {
   id             String    @id @default(cuid())
-  purchaseId     String
+  purchaseId     String    @unique
   sellerId       String    // Denormalizado
   providerId     String    // Denormalizado
   conciliatorId  String?
