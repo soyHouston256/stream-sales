@@ -4,6 +4,7 @@ import {
   Settings,
   DollarSign,
   ArrowLeftRight,
+  Wallet,
 } from 'lucide-react';
 import type { NavItem } from '../Sidebar';
 
@@ -19,6 +20,12 @@ export const adminNavItems: NavItem[] = [
     href: '/dashboard/admin/users',
     icon: Users,
     description: 'Gestión de usuarios',
+  },
+  {
+    title: 'Recargas',
+    href: '/dashboard/admin/recharges',
+    icon: Wallet,
+    description: 'Gestión de recargas de saldo',
   },
   {
     title: 'Comisiones',

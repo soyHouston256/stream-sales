@@ -87,7 +87,7 @@ export default function AdminRechargesPage() {
         limit: '10',
       });
 
-      if (statusFilter) params.append('status', statusFilter);
+      if (statusFilter && statusFilter !== 'all') params.append('status', statusFilter);
       if (searchTerm) params.append('search', searchTerm);
 
       const response = await fetch(`/api/admin/recharges?${params}`, {
@@ -323,7 +323,7 @@ export default function AdminRechargesPage() {
                   <SelectItem value="completed">Completadas</SelectItem>
                   <SelectItem value="failed">Fallidas</SelectItem>
                   <SelectItem value="cancelled">Canceladas</SelectItem>
-                  <SelectItem value="">Todas</SelectItem>
+                  <SelectItem value="all">Todas</SelectItem>
                 </SelectContent>
               </Select>
             </div>
