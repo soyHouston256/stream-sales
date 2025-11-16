@@ -2,30 +2,21 @@
 const nextConfig = {
   reactStrictMode: true,
   images: {
+    domains: [
+      'streams-laboratory.s3.sa-east-1.amazonaws.com',
+      'vortex-streaming.com',
+      'imgur.com',
+      'i.imgur.com',
+      'localhost',
+    ],
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: '**.amazonaws.com', // AWS S3 buckets
+        hostname: '**.amazonaws.com',
       },
       {
         protocol: 'https',
-        hostname: 'vortex-streaming.com',
-      },
-      {
-        protocol: 'https',
-        hostname: '**.cloudinary.com', // Cloudinary CDN
-      },
-      {
-        protocol: 'https',
-        hostname: 'imgur.com',
-      },
-      {
-        protocol: 'https',
-        hostname: 'i.imgur.com',
-      },
-      {
-        protocol: 'http',
-        hostname: 'localhost',
+        hostname: '**.cloudinary.com',
       },
     ],
   },
