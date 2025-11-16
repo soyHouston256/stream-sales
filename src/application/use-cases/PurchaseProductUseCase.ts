@@ -147,44 +147,47 @@ export class PurchaseProductUseCase {
       throw new Error('Provider wallet not found');
     }
 
-    // Admin wallet (recibe comisiones)
-    let adminWallet = await this.walletRepository.findByUserId(
-      this.ADMIN_USER_ID
-    );
+    // ============================================
+    // PASO 1: Encontrar o crear usuario admin
+    // ============================================
 
-    // Auto-crear usuario admin y wallet si no existe (para facilitar desarrollo)
+    // Verificar si existe el usuario admin (por ID o por email)
+    let adminUser = await this.userRepository.findById(this.ADMIN_USER_ID);
+
+    if (!adminUser) {
+      // Buscar por email por si existe con otro ID
+      const adminEmail = Email.create('admin@streamsales.com');
+      adminUser = await this.userRepository.findByEmail(adminEmail);
+    }
+
+    // Si no existe el usuario, crearlo
+    if (!adminUser) {
+      console.warn('[PurchaseProductUseCase] Admin user not found. Creating admin user...');
+
+      const adminEmail = Email.create('admin@streamsales.com');
+      const adminPassword = await Password.create('admin123'); // Password temporal
+
+      adminUser = User.create({
+        id: this.ADMIN_USER_ID,
+        email: adminEmail,
+        password: adminPassword,
+        name: 'Administrator',
+        role: 'admin',
+      });
+
+      await this.userRepository.save(adminUser);
+      console.log('[PurchaseProductUseCase] Admin user created with ID:', adminUser.id);
+    }
+
+    // ============================================
+    // PASO 2: Buscar o crear wallet del admin usando el ID real del usuario
+    // ============================================
+
+    let adminWallet = await this.walletRepository.findByUserId(adminUser.id);
+
     if (!adminWallet) {
-      console.warn('[PurchaseProductUseCase] Admin wallet not found. Creating admin user and wallet automatically...');
+      console.warn('[PurchaseProductUseCase] Admin wallet not found. Creating wallet for admin user ID:', adminUser.id);
 
-      // Verificar si existe el usuario admin (por ID o por email)
-      let adminUser = await this.userRepository.findById(this.ADMIN_USER_ID);
-
-      if (!adminUser) {
-        // Buscar por email por si existe con otro ID
-        const adminEmail = Email.create('admin@streamsales.com');
-        adminUser = await this.userRepository.findByEmail(adminEmail);
-      }
-
-      // Si no existe el usuario, crearlo
-      if (!adminUser) {
-        const adminEmail = Email.create('admin@streamsales.com');
-        const adminPassword = await Password.create('admin123'); // Password temporal
-
-        adminUser = User.create({
-          id: this.ADMIN_USER_ID,
-          email: adminEmail,
-          password: adminPassword,
-          name: 'Administrator',
-          role: 'admin',
-        });
-
-        await this.userRepository.save(adminUser);
-        console.log('[PurchaseProductUseCase] Admin user created');
-      } else {
-        console.log('[PurchaseProductUseCase] Admin user already exists, creating wallet only');
-      }
-
-      // Crear wallet para el admin (usar el ID del usuario encontrado o creado)
       adminWallet = Wallet.create({ userId: adminUser.id });
       await this.walletRepository.save(adminWallet);
       console.log('[PurchaseProductUseCase] Admin wallet created successfully');
