@@ -102,12 +102,12 @@ export default function ProductDetailsPage() {
             <CardDescription>{error || 'Product not found'}</CardDescription>
           </CardHeader>
           <CardContent>
-            <Link href="/">
-              <Button variant="outline" className="w-full">
+            <Button variant="outline" className="w-full" asChild>
+              <Link href="/">
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Back to Marketplace
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           </CardContent>
         </Card>
       </div>
@@ -122,23 +122,23 @@ export default function ProductDetailsPage() {
       <header className="bg-white shadow-sm border-b sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
-            <Link href="/">
-              <Button variant="ghost" size="sm">
+            <Button variant="ghost" size="sm" asChild>
+              <Link href="/">
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Back to Marketplace
-              </Button>
-            </Link>
+              </Link>
+            </Button>
             <div className="flex items-center gap-4">
-              <Link href="/login">
-                <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" asChild>
+                <Link href="/login">
                   Login
-                </Button>
-              </Link>
-              <Link href="/register">
-                <Button size="sm">
+                </Link>
+              </Button>
+              <Button size="sm" asChild>
+                <Link href="/register">
                   Sign Up
-                </Button>
-              </Link>
+                </Link>
+              </Button>
             </div>
           </div>
         </div>

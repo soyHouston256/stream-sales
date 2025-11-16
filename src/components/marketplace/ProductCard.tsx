@@ -78,11 +78,11 @@ export function ProductCard({ product, onViewDetails }: ProductCardProps) {
         </div>
       </CardContent>
       <CardFooter>
-        <Link href={`/marketplace/${product.id}`} className="w-full">
-          <Button className="w-full">
+        <Button className="w-full" asChild>
+          <Link href={`/marketplace/${product.id}`}>
             View Details
-          </Button>
-        </Link>
+          </Link>
+        </Button>
       </CardFooter>
     </Card>
   );
