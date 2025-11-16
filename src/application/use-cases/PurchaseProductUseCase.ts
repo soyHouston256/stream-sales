@@ -1,9 +1,13 @@
 import { IWalletRepository } from '../../domain/repositories/IWalletRepository';
 import { IProductRepository } from '../../domain/repositories/IProductRepository';
 import { IPurchaseRepository } from '../../domain/repositories/IPurchaseRepository';
+import { IUserRepository } from '../../domain/repositories/IUserRepository';
 import { Purchase } from '../../domain/entities/Purchase';
 import { Money } from '../../domain/value-objects/Money';
 import { Wallet } from '../../domain/entities/Wallet';
+import { User } from '../../domain/entities/User';
+import { Email } from '../../domain/value-objects/Email';
+import { Password } from '../../domain/value-objects/Password';
 
 /**
  * PurchaseProductUseCase
@@ -86,7 +90,8 @@ export class PurchaseProductUseCase {
   constructor(
     private walletRepository: IWalletRepository,
     private productRepository: IProductRepository,
-    private purchaseRepository: IPurchaseRepository
+    private purchaseRepository: IPurchaseRepository,
+    private userRepository: IUserRepository
   ) {}
 
   async execute(data: PurchaseProductDTO): Promise<PurchaseProductResponse> {
@@ -147,9 +152,31 @@ export class PurchaseProductUseCase {
       this.ADMIN_USER_ID
     );
 
-    // Auto-crear wallet de admin si no existe (para facilitar desarrollo)
+    // Auto-crear usuario admin y wallet si no existe (para facilitar desarrollo)
     if (!adminWallet) {
-      console.warn('[PurchaseProductUseCase] Admin wallet not found. Creating automatically...');
+      console.warn('[PurchaseProductUseCase] Admin wallet not found. Creating admin user and wallet automatically...');
+
+      // Verificar si existe el usuario admin
+      let adminUser = await this.userRepository.findById(this.ADMIN_USER_ID);
+
+      // Si no existe el usuario, crearlo
+      if (!adminUser) {
+        const adminEmail = Email.create('admin@streamsales.com');
+        const adminPassword = await Password.create('admin123'); // Password temporal
+
+        adminUser = User.create({
+          id: this.ADMIN_USER_ID,
+          email: adminEmail,
+          password: adminPassword,
+          name: 'Administrator',
+          role: 'admin',
+        });
+
+        await this.userRepository.save(adminUser);
+        console.log('[PurchaseProductUseCase] Admin user created');
+      }
+
+      // Crear wallet para el admin
       adminWallet = Wallet.create({ userId: this.ADMIN_USER_ID });
       await this.walletRepository.save(adminWallet);
       console.log('[PurchaseProductUseCase] Admin wallet created successfully');
