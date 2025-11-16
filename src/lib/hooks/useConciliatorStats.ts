@@ -1,4 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
+
+import { tokenManager } from '@/lib/utils/tokenManager';
 import { ConciliatorStats, ResolutionsByDay } from '@/types/conciliator';
 
 /**
@@ -10,7 +12,7 @@ export function useConciliatorStats() {
     queryFn: async () => {
       const response = await fetch('/api/conciliator/stats', {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Authorization': `Bearer ${tokenManager.getToken()}`,
         },
       });
 
@@ -33,7 +35,7 @@ export function useResolutionsByDay(days: number = 30) {
     queryFn: async () => {
       const response = await fetch(`/api/conciliator/stats/resolutions-by-day?days=${days}`, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Authorization': `Bearer ${tokenManager.getToken()}`,
         },
       });
 

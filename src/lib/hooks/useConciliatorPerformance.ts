@@ -1,4 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
+
+import { tokenManager } from '@/lib/utils/tokenManager';
 import { ConciliatorPerformance, HistoryResponse, DisputeFilters } from '@/types/conciliator';
 
 /**
@@ -10,7 +12,7 @@ export function useConciliatorPerformance() {
     queryFn: async () => {
       const response = await fetch('/api/conciliator/performance', {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Authorization': `Bearer ${tokenManager.getToken()}`,
         },
       });
 
@@ -39,7 +41,7 @@ export function useMyHistory(filters: Partial<DisputeFilters> = {}) {
     queryFn: async () => {
       const response = await fetch(`/api/conciliator/history?${queryParams.toString()}`, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Authorization': `Bearer ${tokenManager.getToken()}`,
         },
       });
 

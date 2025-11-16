@@ -1,5 +1,7 @@
 'use client';
 
+import { tokenManager } from '@/lib/utils/tokenManager';
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Product,
@@ -13,7 +15,7 @@ import { useToast } from './useToast';
 async function fetchProducts(
   filters: ProductFilters
 ): Promise<PaginatedResponse<Product>> {
-  const token = localStorage.getItem('token');
+  const token = tokenManager.getToken();
   const params = new URLSearchParams();
 
   if (filters.page) params.append('page', filters.page.toString());
@@ -36,7 +38,7 @@ async function fetchProducts(
 }
 
 async function fetchProductById(id: string): Promise<Product> {
-  const token = localStorage.getItem('token');
+  const token = tokenManager.getToken();
   const response = await fetch(`/api/provider/products/${id}`, {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -51,7 +53,7 @@ async function fetchProductById(id: string): Promise<Product> {
 }
 
 async function createProduct(data: CreateProductDTO): Promise<Product> {
-  const token = localStorage.getItem('token');
+  const token = tokenManager.getToken();
   const response = await fetch('/api/provider/products', {
     method: 'POST',
     headers: {
@@ -73,7 +75,7 @@ async function updateProduct(
   id: string,
   data: UpdateProductDTO
 ): Promise<Product> {
-  const token = localStorage.getItem('token');
+  const token = tokenManager.getToken();
   const response = await fetch(`/api/provider/products/${id}`, {
     method: 'PUT',
     headers: {
@@ -92,7 +94,7 @@ async function updateProduct(
 }
 
 async function deleteProduct(id: string): Promise<void> {
-  const token = localStorage.getItem('token');
+  const token = tokenManager.getToken();
   const response = await fetch(`/api/provider/products/${id}`, {
     method: 'DELETE',
     headers: {

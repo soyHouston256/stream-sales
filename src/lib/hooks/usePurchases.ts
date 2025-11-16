@@ -8,11 +8,12 @@ import {
   PaginatedResponse,
 } from '@/types/seller';
 import { useToast } from './useToast';
+import { tokenManager } from '@/lib/utils/tokenManager';
 
 async function fetchPurchases(
   filters: PurchasesFilters
 ): Promise<PaginatedResponse<Purchase>> {
-  const token = localStorage.getItem('token');
+  const token = tokenManager.getToken();
   const params = new URLSearchParams();
 
   if (filters.page) params.append('page', filters.page.toString());
@@ -36,7 +37,7 @@ async function fetchPurchases(
 }
 
 async function fetchPurchaseDetails(id: string): Promise<Purchase> {
-  const token = localStorage.getItem('token');
+  const token = tokenManager.getToken();
   const response = await fetch(`/api/seller/purchases/${id}`, {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -51,7 +52,7 @@ async function fetchPurchaseDetails(id: string): Promise<Purchase> {
 }
 
 async function createPurchase(data: PurchaseRequest): Promise<Purchase> {
-  const token = localStorage.getItem('token');
+  const token = tokenManager.getToken();
   const response = await fetch('/api/seller/purchases', {
     method: 'POST',
     headers: {

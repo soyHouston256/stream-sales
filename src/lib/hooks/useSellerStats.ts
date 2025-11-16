@@ -2,9 +2,10 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { SellerStats } from '@/types/seller';
+import { tokenManager } from '@/lib/utils/tokenManager';
 
 async function fetchSellerStats(): Promise<SellerStats> {
-  const token = localStorage.getItem('token');
+  const token = tokenManager.getToken();
   const response = await fetch('/api/seller/stats', {
     headers: {
       Authorization: `Bearer ${token}`,

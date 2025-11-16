@@ -1,10 +1,12 @@
 'use client';
 
+import { tokenManager } from '@/lib/utils/tokenManager';
+
 import { useQuery } from '@tanstack/react-query';
 import { PaginatedReferrals, ReferralFilters, ReferralDetails } from '@/types/affiliate';
 
 async function fetchReferrals(filters: ReferralFilters): Promise<PaginatedReferrals> {
-  const token = localStorage.getItem('token');
+  const token = tokenManager.getToken();
 
   // Build query string from filters
   const params = new URLSearchParams();
@@ -30,7 +32,7 @@ async function fetchReferrals(filters: ReferralFilters): Promise<PaginatedReferr
 }
 
 async function fetchReferralDetails(id: string): Promise<ReferralDetails> {
-  const token = localStorage.getItem('token');
+  const token = tokenManager.getToken();
   const response = await fetch(`/api/affiliate/referrals/${id}`, {
     headers: {
       Authorization: `Bearer ${token}`,

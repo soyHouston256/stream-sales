@@ -1,12 +1,14 @@
 'use client';
 
+import { tokenManager } from '@/lib/utils/tokenManager';
+
 import { useQuery } from '@tanstack/react-query';
 import { ProviderSale, SalesFilters, PaginatedResponse } from '@/types/provider';
 
 async function fetchProviderSales(
   filters: SalesFilters
 ): Promise<PaginatedResponse<ProviderSale>> {
-  const token = localStorage.getItem('token');
+  const token = tokenManager.getToken();
   const params = new URLSearchParams();
 
   if (filters.page) params.append('page', filters.page.toString());
@@ -29,7 +31,7 @@ async function fetchProviderSales(
 }
 
 async function fetchProviderSaleDetails(id: string): Promise<ProviderSale> {
-  const token = localStorage.getItem('token');
+  const token = tokenManager.getToken();
   const response = await fetch(`/api/provider/sales/${id}`, {
     headers: {
       Authorization: `Bearer ${token}`,

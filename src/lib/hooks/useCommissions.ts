@@ -1,10 +1,12 @@
 'use client';
 
+import { tokenManager } from '@/lib/utils/tokenManager';
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { CommissionConfig, CommissionHistory } from '@/types/admin';
 
 async function fetchCommissionConfig(): Promise<CommissionConfig> {
-  const token = localStorage.getItem('token');
+  const token = tokenManager.getToken();
   const response = await fetch('/api/admin/commissions', {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -21,7 +23,7 @@ async function fetchCommissionConfig(): Promise<CommissionConfig> {
 async function updateCommissionConfig(
   config: Partial<CommissionConfig>
 ): Promise<CommissionConfig> {
-  const token = localStorage.getItem('token');
+  const token = tokenManager.getToken();
   const response = await fetch('/api/admin/commissions', {
     method: 'PUT',
     headers: {
@@ -39,7 +41,7 @@ async function updateCommissionConfig(
 }
 
 async function fetchCommissionHistory(): Promise<CommissionHistory[]> {
-  const token = localStorage.getItem('token');
+  const token = tokenManager.getToken();
   const response = await fetch('/api/admin/commissions/history', {
     headers: {
       Authorization: `Bearer ${token}`,

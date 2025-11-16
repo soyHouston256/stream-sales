@@ -10,9 +10,10 @@ import {
   PaginatedResponse,
 } from '@/types/seller';
 import { useToast } from './useToast';
+import { tokenManager } from '@/lib/utils/tokenManager';
 
 async function fetchWalletBalance(): Promise<WalletBalance> {
-  const token = localStorage.getItem('token');
+  const token = tokenManager.getToken();
   const response = await fetch('/api/seller/wallet/balance', {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -29,7 +30,7 @@ async function fetchWalletBalance(): Promise<WalletBalance> {
 async function fetchWalletTransactions(
   filters: TransactionsFilters
 ): Promise<PaginatedResponse<WalletTransaction>> {
-  const token = localStorage.getItem('token');
+  const token = tokenManager.getToken();
   const params = new URLSearchParams();
 
   if (filters.page) params.append('page', filters.page.toString());
@@ -55,7 +56,7 @@ async function fetchWalletTransactions(
 }
 
 async function fetchRecharges(): Promise<Recharge[]> {
-  const token = localStorage.getItem('token');
+  const token = tokenManager.getToken();
   const response = await fetch('/api/seller/wallet/recharges', {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -70,7 +71,7 @@ async function fetchRecharges(): Promise<Recharge[]> {
 }
 
 async function createRecharge(data: RechargeRequest): Promise<Recharge> {
-  const token = localStorage.getItem('token');
+  const token = tokenManager.getToken();
   const response = await fetch('/api/seller/wallet/recharge', {
     method: 'POST',
     headers: {

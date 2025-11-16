@@ -1,10 +1,12 @@
 'use client';
 
+import { tokenManager } from '@/lib/utils/tokenManager';
+
 import { useQuery } from '@tanstack/react-query';
 import { MarketingTemplate, MarketingStats } from '@/types/affiliate';
 
 async function fetchMarketingTemplates(): Promise<MarketingTemplate[]> {
-  const token = localStorage.getItem('token');
+  const token = tokenManager.getToken();
   const response = await fetch('/api/affiliate/marketing/templates', {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -19,7 +21,7 @@ async function fetchMarketingTemplates(): Promise<MarketingTemplate[]> {
 }
 
 async function fetchMarketingStats(): Promise<MarketingStats> {
-  const token = localStorage.getItem('token');
+  const token = tokenManager.getToken();
   const response = await fetch('/api/affiliate/marketing/stats', {
     headers: {
       Authorization: `Bearer ${token}`,

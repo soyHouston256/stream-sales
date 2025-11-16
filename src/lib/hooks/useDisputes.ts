@@ -1,4 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+
+import { tokenManager } from '@/lib/utils/tokenManager';
 import { Dispute, DisputeFilters, DisputesResponse, ResolveDisputeRequest } from '@/types/conciliator';
 import { toast } from 'sonner';
 
@@ -22,7 +24,7 @@ export function useDisputes(filters: DisputeFilters = {}) {
     queryFn: async () => {
       const response = await fetch(`/api/conciliator/disputes?${queryParams.toString()}`, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Authorization': `Bearer ${tokenManager.getToken()}`,
         },
       });
 
@@ -45,7 +47,7 @@ export function useDisputeDetails(id: string) {
     queryFn: async () => {
       const response = await fetch(`/api/conciliator/disputes/${id}`, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Authorization': `Bearer ${tokenManager.getToken()}`,
         },
       });
 
@@ -70,7 +72,7 @@ export function useAssignDispute() {
       const response = await fetch(`/api/conciliator/disputes/${disputeId}/assign`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Authorization': `Bearer ${tokenManager.getToken()}`,
           'Content-Type': 'application/json',
         },
       });
@@ -105,7 +107,7 @@ export function useResolveDispute() {
       const response = await fetch(`/api/conciliator/disputes/${disputeId}/resolve`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Authorization': `Bearer ${tokenManager.getToken()}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(data),
@@ -143,7 +145,7 @@ export function useReassignDispute() {
       const response = await fetch(`/api/conciliator/disputes/${disputeId}/reassign`, {
         method: 'PUT',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Authorization': `Bearer ${tokenManager.getToken()}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ conciliatorId }),

@@ -6,11 +6,12 @@ import {
   MarketplaceFilters,
   PaginatedResponse,
 } from '@/types/seller';
+import { tokenManager } from '@/lib/utils/tokenManager';
 
 async function fetchMarketplaceProducts(
   filters: MarketplaceFilters
 ): Promise<PaginatedResponse<MarketplaceProduct>> {
-  const token = localStorage.getItem('token');
+  const token = tokenManager.getToken();
   const params = new URLSearchParams();
 
   if (filters.page) params.append('page', filters.page.toString());
@@ -39,7 +40,7 @@ async function fetchMarketplaceProducts(
 async function fetchMarketplaceProduct(
   id: string
 ): Promise<MarketplaceProduct> {
-  const token = localStorage.getItem('token');
+  const token = tokenManager.getToken();
   const response = await fetch(`/api/seller/marketplace/${id}`, {
     headers: {
       Authorization: `Bearer ${token}`,

@@ -1,4 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+
+import { tokenManager } from '@/lib/utils/tokenManager';
 import { DisputeMessage, MessagesResponse, AddMessageRequest } from '@/types/conciliator';
 import { toast } from 'sonner';
 
@@ -11,7 +13,7 @@ export function useDisputeMessages(disputeId: string) {
     queryFn: async () => {
       const response = await fetch(`/api/conciliator/disputes/${disputeId}/messages`, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Authorization': `Bearer ${tokenManager.getToken()}`,
         },
       });
 
@@ -37,7 +39,7 @@ export function useAddMessage() {
       const response = await fetch(`/api/conciliator/disputes/${disputeId}/messages`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Authorization': `Bearer ${tokenManager.getToken()}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(data),
@@ -72,7 +74,7 @@ export function useAddInternalNote() {
       const response = await fetch(`/api/conciliator/disputes/${disputeId}/internal-notes`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Authorization': `Bearer ${tokenManager.getToken()}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ message }),

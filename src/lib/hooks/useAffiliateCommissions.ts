@@ -1,5 +1,7 @@
 'use client';
 
+import { tokenManager } from '@/lib/utils/tokenManager';
+
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   PaginatedCommissions,
@@ -9,7 +11,7 @@ import {
 } from '@/types/affiliate';
 
 async function fetchCommissions(filters: CommissionFilters): Promise<PaginatedCommissions> {
-  const token = localStorage.getItem('token');
+  const token = tokenManager.getToken();
 
   // Build query string from filters
   const params = new URLSearchParams();
@@ -34,7 +36,7 @@ async function fetchCommissions(filters: CommissionFilters): Promise<PaginatedCo
 }
 
 async function fetchCommissionBalance(): Promise<CommissionBalance> {
-  const token = localStorage.getItem('token');
+  const token = tokenManager.getToken();
   const response = await fetch('/api/affiliate/commissions/balance', {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -49,7 +51,7 @@ async function fetchCommissionBalance(): Promise<CommissionBalance> {
 }
 
 async function requestPayment(data: PaymentRequest): Promise<void> {
-  const token = localStorage.getItem('token');
+  const token = tokenManager.getToken();
   const response = await fetch('/api/affiliate/commissions/request-payment', {
     method: 'POST',
     headers: {

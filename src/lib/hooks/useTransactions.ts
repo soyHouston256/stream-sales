@@ -1,5 +1,7 @@
 'use client';
 
+import { tokenManager } from '@/lib/utils/tokenManager';
+
 import { useQuery } from '@tanstack/react-query';
 import { Transaction, PaginatedResponse } from '@/types/admin';
 
@@ -14,7 +16,7 @@ interface TransactionsFilters {
 async function fetchTransactions(
   filters: TransactionsFilters
 ): Promise<PaginatedResponse<Transaction>> {
-  const token = localStorage.getItem('token');
+  const token = tokenManager.getToken();
   const params = new URLSearchParams();
 
   if (filters.page) params.append('page', filters.page.toString());

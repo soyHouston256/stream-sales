@@ -1,5 +1,7 @@
 'use client';
 
+import { tokenManager } from '@/lib/utils/tokenManager';
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { User, PaginatedResponse } from '@/types/admin';
 
@@ -12,7 +14,7 @@ interface UsersFilters {
 }
 
 async function fetchUsers(filters: UsersFilters): Promise<PaginatedResponse<User>> {
-  const token = localStorage.getItem('token');
+  const token = tokenManager.getToken();
   const params = new URLSearchParams();
 
   if (filters.page) params.append('page', filters.page.toString());
@@ -35,7 +37,7 @@ async function fetchUsers(filters: UsersFilters): Promise<PaginatedResponse<User
 }
 
 async function updateUser(userId: string, data: Partial<User>): Promise<User> {
-  const token = localStorage.getItem('token');
+  const token = tokenManager.getToken();
   const response = await fetch(`/api/admin/users/${userId}`, {
     method: 'PUT',
     headers: {

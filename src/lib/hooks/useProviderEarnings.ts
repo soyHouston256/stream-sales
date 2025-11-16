@@ -1,5 +1,7 @@
 'use client';
 
+import { tokenManager } from '@/lib/utils/tokenManager';
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   WalletBalance,
@@ -12,7 +14,7 @@ import {
 import { useToast } from './useToast';
 
 async function fetchProviderBalance(): Promise<WalletBalance> {
-  const token = localStorage.getItem('token');
+  const token = tokenManager.getToken();
   const response = await fetch('/api/provider/earnings/balance', {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -29,7 +31,7 @@ async function fetchProviderBalance(): Promise<WalletBalance> {
 async function fetchEarningsTransactions(
   filters: TransactionsFilters
 ): Promise<PaginatedResponse<Transaction>> {
-  const token = localStorage.getItem('token');
+  const token = tokenManager.getToken();
   const params = new URLSearchParams();
 
   if (filters.page) params.append('page', filters.page.toString());
@@ -55,7 +57,7 @@ async function fetchEarningsTransactions(
 }
 
 async function fetchWithdrawals(): Promise<WithdrawalRequest[]> {
-  const token = localStorage.getItem('token');
+  const token = tokenManager.getToken();
   const response = await fetch('/api/provider/earnings/withdrawals', {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -72,7 +74,7 @@ async function fetchWithdrawals(): Promise<WithdrawalRequest[]> {
 async function createWithdrawal(
   data: CreateWithdrawalDTO
 ): Promise<WithdrawalRequest> {
-  const token = localStorage.getItem('token');
+  const token = tokenManager.getToken();
   const response = await fetch('/api/provider/earnings/withdraw', {
     method: 'POST',
     headers: {

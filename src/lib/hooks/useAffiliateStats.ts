@@ -1,10 +1,12 @@
 'use client';
 
+import { tokenManager } from '@/lib/utils/tokenManager';
+
 import { useQuery } from '@tanstack/react-query';
 import { AffiliateStats, ReferralsByMonth } from '@/types/affiliate';
 
 async function fetchAffiliateStats(): Promise<AffiliateStats> {
-  const token = localStorage.getItem('token');
+  const token = tokenManager.getToken();
   const response = await fetch('/api/affiliate/stats', {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -19,7 +21,7 @@ async function fetchAffiliateStats(): Promise<AffiliateStats> {
 }
 
 async function fetchReferralsByMonth(months: number): Promise<ReferralsByMonth[]> {
-  const token = localStorage.getItem('token');
+  const token = tokenManager.getToken();
   const response = await fetch(`/api/affiliate/stats/referrals-by-month?months=${months}`, {
     headers: {
       Authorization: `Bearer ${token}`,

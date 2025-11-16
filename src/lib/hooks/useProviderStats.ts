@@ -1,10 +1,12 @@
 'use client';
 
+import { tokenManager } from '@/lib/utils/tokenManager';
+
 import { useQuery } from '@tanstack/react-query';
 import { ProviderStats, SalesByCategory } from '@/types/provider';
 
 async function fetchProviderStats(): Promise<ProviderStats> {
-  const token = localStorage.getItem('token');
+  const token = tokenManager.getToken();
   const response = await fetch('/api/provider/stats', {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -19,7 +21,7 @@ async function fetchProviderStats(): Promise<ProviderStats> {
 }
 
 async function fetchSalesByCategory(): Promise<SalesByCategory[]> {
-  const token = localStorage.getItem('token');
+  const token = tokenManager.getToken();
   const response = await fetch('/api/provider/stats/sales-by-category', {
     headers: {
       Authorization: `Bearer ${token}`,
