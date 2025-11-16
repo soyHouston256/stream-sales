@@ -39,8 +39,8 @@ const roleColors: Record<string, 'default' | 'secondary' | 'destructive' | 'outl
 export default function UsersPage() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
-  const [roleFilter, setRoleFilter] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
+  const [roleFilter, setRoleFilter] = useState<string>('all');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
 
@@ -48,8 +48,8 @@ export default function UsersPage() {
     page,
     limit: 10,
     search: search || undefined,
-    role: roleFilter || undefined,
-    status: statusFilter || undefined,
+    role: roleFilter === 'all' ? undefined : roleFilter,
+    status: statusFilter === 'all' ? undefined : statusFilter,
   });
 
   const columns: Column<User>[] = [
@@ -161,7 +161,7 @@ export default function UsersPage() {
                 <SelectValue placeholder="Todos los roles" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Todos los roles</SelectItem>
+                <SelectItem value="all">Todos los roles</SelectItem>
                 <SelectItem value="admin">Admin</SelectItem>
                 <SelectItem value="seller">Vendedor</SelectItem>
                 <SelectItem value="affiliate">Afiliado</SelectItem>
@@ -174,7 +174,7 @@ export default function UsersPage() {
                 <SelectValue placeholder="Todos los estados" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Todos los estados</SelectItem>
+                <SelectItem value="all">Todos los estados</SelectItem>
                 <SelectItem value="active">Activo</SelectItem>
                 <SelectItem value="suspended">Suspendido</SelectItem>
               </SelectContent>

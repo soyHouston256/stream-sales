@@ -24,16 +24,16 @@ import { format } from 'date-fns';
 
 export default function ProductsPage() {
   const [page, setPage] = useState(1);
-  const [category, setCategory] = useState<ProductCategory | ''>('');
-  const [status, setStatus] = useState<ProductStatus | ''>('');
+  const [category, setCategory] = useState<ProductCategory | 'all'>('all');
+  const [status, setStatus] = useState<ProductStatus | 'all'>('all');
   const [search, setSearch] = useState('');
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
 
   const { data, isLoading } = useProducts({
     page,
     limit: 10,
-    category: category || undefined,
-    status: status || undefined,
+    category: category === 'all' ? undefined : category,
+    status: status === 'all' ? undefined : status,
     search: search || undefined,
   });
 
@@ -161,7 +161,7 @@ export default function ProductsPage() {
               <Select
                 value={category}
                 onValueChange={(value) => {
-                  setCategory(value as ProductCategory | '');
+                  setCategory(value as ProductCategory | 'all');
                   setPage(1);
                 }}
               >
@@ -169,7 +169,7 @@ export default function ProductsPage() {
                   <SelectValue placeholder="All categories" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All categories</SelectItem>
+                  <SelectItem value="all">All categories</SelectItem>
                   <SelectItem value="netflix">Netflix</SelectItem>
                   <SelectItem value="spotify">Spotify</SelectItem>
                   <SelectItem value="hbo">HBO</SelectItem>
@@ -186,7 +186,7 @@ export default function ProductsPage() {
               <Select
                 value={status}
                 onValueChange={(value) => {
-                  setStatus(value as ProductStatus | '');
+                  setStatus(value as ProductStatus | 'all');
                   setPage(1);
                 }}
               >
@@ -194,7 +194,7 @@ export default function ProductsPage() {
                   <SelectValue placeholder="All statuses" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All statuses</SelectItem>
+                  <SelectItem value="all">All statuses</SelectItem>
                   <SelectItem value="available">Available</SelectItem>
                   <SelectItem value="reserved">Reserved</SelectItem>
                   <SelectItem value="sold">Sold</SelectItem>
@@ -207,8 +207,8 @@ export default function ProductsPage() {
               <Button
                 variant="outline"
                 onClick={() => {
-                  setCategory('');
-                  setStatus('');
+                  setCategory('all');
+                  setStatus('all');
                   setSearch('');
                   setPage(1);
                 }}

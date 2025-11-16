@@ -22,14 +22,14 @@ import { TrendingUp, DollarSign } from 'lucide-react';
 
 export default function SalesPage() {
   const [page, setPage] = useState(1);
-  const [status, setStatus] = useState<'completed' | 'refunded' | ''>('');
+  const [status, setStatus] = useState<'completed' | 'refunded' | 'all'>('all');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
 
   const { data, isLoading } = useProviderSales({
     page,
     limit: 10,
-    status: status || undefined,
+    status: status === 'all' ? undefined : status,
     startDate: startDate || undefined,
     endDate: endDate || undefined,
   });
@@ -222,7 +222,7 @@ export default function SalesPage() {
               <Select
                 value={status}
                 onValueChange={(value) => {
-                  setStatus(value as any);
+                  setStatus(value as 'completed' | 'refunded' | 'all');
                   setPage(1);
                 }}
               >
@@ -230,7 +230,7 @@ export default function SalesPage() {
                   <SelectValue placeholder="All statuses" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All statuses</SelectItem>
+                  <SelectItem value="all">All statuses</SelectItem>
                   <SelectItem value="completed">Completed</SelectItem>
                   <SelectItem value="refunded">Refunded</SelectItem>
                 </SelectContent>
@@ -242,7 +242,7 @@ export default function SalesPage() {
               <Button
                 variant="outline"
                 onClick={() => {
-                  setStatus('');
+                  setStatus('all');
                   setStartDate('');
                   setEndDate('');
                   setPage(1);

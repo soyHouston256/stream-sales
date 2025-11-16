@@ -32,12 +32,12 @@ const typeColors: Record<string, 'default' | 'secondary' | 'destructive' | 'succ
 
 export default function TransactionsPage() {
   const [page, setPage] = useState(1);
-  const [typeFilter, setTypeFilter] = useState('');
+  const [typeFilter, setTypeFilter] = useState('all');
 
   const { data, isLoading } = useTransactions({
     page,
     limit: 10,
-    type: typeFilter || undefined,
+    type: typeFilter === 'all' ? undefined : typeFilter,
   });
 
   const handleExport = () => {
@@ -170,7 +170,7 @@ export default function TransactionsPage() {
                 <SelectValue placeholder="Todos los tipos" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Todos los tipos</SelectItem>
+                <SelectItem value="all">Todos los tipos</SelectItem>
                 <SelectItem value="credit">Crédito</SelectItem>
                 <SelectItem value="debit">Débito</SelectItem>
                 <SelectItem value="transfer">Transferencia</SelectItem>
