@@ -150,18 +150,18 @@ export default function ProductDetailsPage() {
           {/* Left Column - Product Image */}
           <div>
             {product.imageUrl ? (
-              <div className="relative w-full aspect-[4/3] rounded-lg overflow-hidden shadow-lg">
+              <div className="relative w-full aspect-square rounded-lg overflow-hidden shadow-lg bg-gradient-to-br from-gray-50 to-gray-100">
                 <Image
                   src={product.imageUrl}
                   alt={product.name}
                   fill
-                  className="object-cover"
+                  className="object-contain p-4"
                   priority
                   sizes="(max-width: 1024px) 100vw, 50vw"
                 />
               </div>
             ) : (
-              <div className="w-full aspect-[4/3] bg-gradient-to-br from-purple-200 to-blue-200 rounded-lg shadow-lg flex items-center justify-center">
+              <div className="w-full aspect-square bg-gradient-to-br from-purple-200 to-blue-200 rounded-lg shadow-lg flex items-center justify-center">
                 <div className="text-center text-gray-600">
                   <Package className="mx-auto h-24 w-24 text-gray-400" />
                   <p className="mt-4 text-lg">No image available</p>

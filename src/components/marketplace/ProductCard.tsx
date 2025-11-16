@@ -26,20 +26,20 @@ interface ProductCardProps {
 
 export function ProductCard({ product, onViewDetails }: ProductCardProps) {
   return (
-    <Card className="flex flex-col h-full hover:shadow-lg transition-shadow">
+    <Card className="flex flex-col h-full hover:shadow-lg transition-shadow overflow-hidden">
       {/* Product Image */}
       {product.imageUrl ? (
-        <div className="relative w-full h-48 overflow-hidden rounded-t-lg">
+        <div className="relative w-full aspect-video overflow-hidden">
           <Image
             src={product.imageUrl}
             alt={product.name}
             fill
-            className="object-cover"
+            className="object-contain bg-gradient-to-br from-gray-50 to-gray-100"
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
         </div>
       ) : (
-        <div className="w-full h-48 bg-gradient-to-br from-purple-100 to-blue-100 flex items-center justify-center rounded-t-lg">
+        <div className="w-full aspect-video bg-gradient-to-br from-purple-100 to-blue-100 flex items-center justify-center">
           <div className="text-center text-muted-foreground">
             <svg
               className="mx-auto h-12 w-12 text-gray-400"
