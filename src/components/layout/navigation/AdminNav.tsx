@@ -3,8 +3,7 @@ import {
   Users,
   Settings,
   DollarSign,
-  FileText,
-  Activity,
+  ArrowLeftRight,
 } from 'lucide-react';
 import type { NavItem } from '../Sidebar';
 
@@ -22,27 +21,15 @@ export const adminNavItems: NavItem[] = [
     description: 'Gestión de usuarios',
   },
   {
-    title: 'Finanzas',
-    href: '/dashboard/admin/finances',
-    icon: DollarSign,
-    description: 'Resumen financiero',
-  },
-  {
-    title: 'Actividad',
-    href: '/dashboard/admin/activity',
-    icon: Activity,
-    description: 'Monitoreo en tiempo real',
-  },
-  {
-    title: 'Reportes',
-    href: '/dashboard/admin/reports',
-    icon: FileText,
-    description: 'Reportes y auditoría',
-  },
-  {
-    title: 'Configuración',
-    href: '/dashboard/admin/settings',
+    title: 'Comisiones',
+    href: '/dashboard/admin/commissions',
     icon: Settings,
-    description: 'Configuración del sistema',
+    description: 'Configuración de comisiones',
+  },
+  {
+    title: 'Transacciones',
+    href: '/dashboard/admin/transactions',
+    icon: ArrowLeftRight,
+    description: 'Monitoreo de transacciones',
   },
 ];

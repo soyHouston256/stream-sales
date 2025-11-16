@@ -1,38 +1,18 @@
 'use client';
 
 import { useAuth } from '@/lib/auth/useAuth';
+import { Users, DollarSign, AlertCircle, TrendingUp } from 'lucide-react';
+import { StatsCard } from '@/components/admin/StatsCard';
+import { SalesChart } from '@/components/admin/SalesChart';
+import { useAdminStats, useSalesData } from '@/lib/hooks/useAdminStats';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, DollarSign, Activity, TrendingUp } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
 
 export default function AdminDashboard() {
   const { user } = useAuth();
-
-  const stats = [
-    {
-      title: 'Total Usuarios',
-      value: '1,234',
-      icon: Users,
-      description: '+12% desde el mes pasado',
-    },
-    {
-      title: 'Ingresos Totales',
-      value: '$45,231',
-      icon: DollarSign,
-      description: '+20% desde el mes pasado',
-    },
-    {
-      title: 'Actividad',
-      value: '573',
-      icon: Activity,
-      description: 'Transacciones hoy',
-    },
-    {
-      title: 'Crecimiento',
-      value: '+12.5%',
-      icon: TrendingUp,
-      description: 'vs mes anterior',
-    },
-  ];
+  const { data: stats, isLoading: statsLoading } = useAdminStats();
+  const { data: salesData = [], isLoading: salesLoading } = useSalesData(7);
 
   return (
     <div className="space-y-6">
@@ -44,40 +24,80 @@ export default function AdminDashboard() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {stats.map((stat) => {
-          const Icon = stat.icon;
-          return (
-            <Card key={stat.title}>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  {stat.title}
-                </CardTitle>
-                <Icon className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stat.value}</div>
-                <p className="text-xs text-muted-foreground">
-                  {stat.description}
-                </p>
-              </CardContent>
-            </Card>
-          );
-        })}
+        <StatsCard
+          title="Total Usuarios"
+          value={stats?.totalUsers ?? 0}
+          icon={Users}
+          isLoading={statsLoading}
+          trend={
+            stats?.usersGrowth
+              ? {
+                  value: stats.usersGrowth,
+                  isPositive: stats.usersGrowth > 0,
+                }
+              : undefined
+          }
+        />
+        <StatsCard
+          title="Total Ventas"
+          value={`$${stats?.totalSales.toFixed(2) ?? '0.00'}`}
+          icon={DollarSign}
+          isLoading={statsLoading}
+          trend={
+            stats?.salesGrowth
+              ? {
+                  value: stats.salesGrowth,
+                  isPositive: stats.salesGrowth > 0,
+                }
+              : undefined
+          }
+        />
+        <StatsCard
+          title="Comisiones Generadas"
+          value={`$${stats?.totalCommissions.toFixed(2) ?? '0.00'}`}
+          icon={TrendingUp}
+          isLoading={statsLoading}
+        />
+        <StatsCard
+          title="Disputas Activas"
+          value={stats?.activeDisputes ?? 0}
+          icon={AlertCircle}
+          isLoading={statsLoading}
+        />
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Vista General del Sistema</CardTitle>
-          <CardDescription>
-            Monitoreo y gestión centralizada de Stream Sales
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground">
-            Desde aquí puedes gestionar usuarios, configurar el sistema, revisar finanzas y monitorear la actividad en tiempo real.
-          </p>
-        </CardContent>
-      </Card>
+      <div className="grid gap-6 md:grid-cols-2">
+        <SalesChart data={salesData} isLoading={salesLoading} />
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Acciones Rápidas</CardTitle>
+            <CardDescription>
+              Accede rápidamente a las funciones principales
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            <Link href="/dashboard/admin/users" className="block">
+              <Button variant="outline" className="w-full justify-start">
+                <Users className="mr-2 h-4 w-4" />
+                Gestionar Usuarios
+              </Button>
+            </Link>
+            <Link href="/dashboard/admin/commissions" className="block">
+              <Button variant="outline" className="w-full justify-start">
+                <TrendingUp className="mr-2 h-4 w-4" />
+                Configurar Comisiones
+              </Button>
+            </Link>
+            <Link href="/dashboard/admin/transactions" className="block">
+              <Button variant="outline" className="w-full justify-start">
+                <DollarSign className="mr-2 h-4 w-4" />
+                Ver Transacciones
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

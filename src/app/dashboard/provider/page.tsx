@@ -2,82 +2,128 @@
 
 import { useAuth } from '@/lib/auth/useAuth';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Package, TrendingUp, Wallet, ShoppingCart } from 'lucide-react';
+import { Package, DollarSign, Wallet, ShoppingCart } from 'lucide-react';
+import { StatsCard } from '@/components/admin/StatsCard';
+import { SalesByCategoryChart } from '@/components/provider/SalesByCategoryChart';
+import { CreateProductDialog } from '@/components/provider/CreateProductDialog';
+import { DataTable, Column } from '@/components/admin/DataTable';
+import { useProviderStats } from '@/lib/hooks/useProviderStats';
+import { useProviderSales } from '@/lib/hooks/useProviderSales';
+import { ProviderSale } from '@/types/provider';
+import { CategoryBadge } from '@/components/provider/CategoryBadge';
+import { format } from 'date-fns';
 
 export default function ProviderDashboard() {
   const { user } = useAuth();
+  const { data: stats, isLoading: statsLoading } = useProviderStats();
+  const { data: salesData, isLoading: salesLoading } = useProviderSales({
+    page: 1,
+    limit: 5,
+  });
 
-  const stats = [
+  const recentSales = salesData?.data || [];
+
+  const columns: Column<ProviderSale>[] = [
     {
-      title: 'Productos Activos',
-      value: '24',
-      icon: Package,
-      description: '3 nuevos este mes',
+      key: 'productCategory',
+      label: 'Category',
+      render: (sale) => <CategoryBadge category={sale.productCategory} />,
     },
     {
-      title: 'Ventas Totales',
-      value: '$12,450',
-      icon: TrendingUp,
-      description: '+18% desde el mes pasado',
+      key: 'productName',
+      label: 'Product',
+      render: (sale) => (
+        <div>
+          <p className="font-medium">{sale.productName}</p>
+          <p className="text-xs text-muted-foreground">{sale.buyerEmail}</p>
+        </div>
+      ),
     },
     {
-      title: 'Balance',
-      value: '$3,250',
-      icon: Wallet,
-      description: 'Disponible para retiro',
+      key: 'amount',
+      label: 'Sale Price',
+      render: (sale) => <span className="font-medium">${sale.amount}</span>,
     },
     {
-      title: 'Pedidos',
-      value: '143',
-      icon: ShoppingCart,
-      description: 'Este mes',
+      key: 'providerEarnings',
+      label: 'Your Earnings',
+      render: (sale) => (
+        <span className="font-medium text-green-600">
+          ${sale.providerEarnings}
+        </span>
+      ),
+    },
+    {
+      key: 'completedAt',
+      label: 'Date',
+      render: (sale) =>
+        sale.completedAt
+          ? format(new Date(sale.completedAt), 'MMM dd, yyyy')
+          : '-',
     },
   ];
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Dashboard de Proveedor</h1>
-        <p className="text-muted-foreground mt-2">
-          Bienvenido, {user?.name || user?.email}
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold">Provider Dashboard</h1>
+          <p className="text-muted-foreground mt-2">
+            Welcome back, {user?.name || user?.email}
+          </p>
+        </div>
+        <CreateProductDialog />
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {stats.map((stat) => {
-          const Icon = stat.icon;
-          return (
-            <Card key={stat.title}>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  {stat.title}
-                </CardTitle>
-                <Icon className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stat.value}</div>
-                <p className="text-xs text-muted-foreground">
-                  {stat.description}
-                </p>
-              </CardContent>
-            </Card>
-          );
-        })}
+        <StatsCard
+          title="Total Products"
+          value={stats?.totalProducts ?? 0}
+          description={`${stats?.availableProducts ?? 0} available, ${stats?.soldProducts ?? 0} sold`}
+          icon={Package}
+          isLoading={statsLoading}
+        />
+        <StatsCard
+          title="Total Earnings"
+          value={stats ? `$${parseFloat(stats.totalEarnings).toFixed(2)}` : '$0.00'}
+          description="Lifetime earnings"
+          icon={DollarSign}
+          isLoading={statsLoading}
+        />
+        <StatsCard
+          title="This Month"
+          value={stats ? `$${parseFloat(stats.thisMonthEarnings).toFixed(2)}` : '$0.00'}
+          description={`${stats?.thisMonthSales ?? 0} sales this month`}
+          icon={ShoppingCart}
+          isLoading={statsLoading}
+        />
+        <StatsCard
+          title="Pending Balance"
+          value={stats ? `$${parseFloat(stats.pendingBalance).toFixed(2)}` : '$0.00'}
+          description="Available for withdrawal"
+          icon={Wallet}
+          isLoading={statsLoading}
+        />
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Gestión de Productos</CardTitle>
-          <CardDescription>
-            Crea, gestiona y vende tus productos digitales
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground">
-            Administra tu catálogo de productos, analiza tus ventas y monitorea tu billetera desde este panel.
-          </p>
-        </CardContent>
-      </Card>
+      <div className="grid gap-6 md:grid-cols-2">
+        <SalesByCategoryChart />
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Recent Sales</CardTitle>
+            <CardDescription>Your latest 5 sales</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <DataTable
+              data={recentSales}
+              columns={columns}
+              isLoading={salesLoading}
+              emptyMessage="No sales yet. Start selling your products!"
+            />
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

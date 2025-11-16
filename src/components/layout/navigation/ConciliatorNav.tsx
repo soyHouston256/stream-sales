@@ -1,10 +1,8 @@
 import {
   LayoutDashboard,
-  CheckCircle,
-  CreditCard,
-  Building2,
+  Inbox,
   History,
-  DollarSign,
+  Settings,
 } from 'lucide-react';
 import type { NavItem } from '../Sidebar';
 
@@ -13,36 +11,24 @@ export const conciliatorNavItems: NavItem[] = [
     title: 'Dashboard',
     href: '/dashboard/conciliator',
     icon: LayoutDashboard,
-    description: 'Vista general',
+    description: 'Overview and quick stats',
   },
   {
-    title: 'Cola de Validación',
-    href: '/dashboard/conciliator/queue',
-    icon: CheckCircle,
-    description: 'Validaciones pendientes',
+    title: 'All Disputes',
+    href: '/dashboard/conciliator/disputes',
+    icon: Inbox,
+    description: 'Manage all disputes',
   },
   {
-    title: 'Verificar Pagos',
-    href: '/dashboard/conciliator/payments',
-    icon: CreditCard,
-    description: 'Verificación de pagos',
-  },
-  {
-    title: 'Cuentas Bancarias',
-    href: '/dashboard/conciliator/accounts',
-    icon: Building2,
-    description: 'Gestión de cuentas',
-  },
-  {
-    title: 'Historial',
+    title: 'My History',
     href: '/dashboard/conciliator/history',
     icon: History,
-    description: 'Validaciones completadas',
+    description: 'Your resolution history',
   },
   {
-    title: 'Ingresos',
-    href: '/dashboard/conciliator/income',
-    icon: DollarSign,
-    description: 'Reportes de ingresos',
+    title: 'Settings',
+    href: '/dashboard/conciliator/settings',
+    icon: Settings,
+    description: 'Account settings',
   },
 ];

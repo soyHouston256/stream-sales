@@ -1,10 +1,8 @@
 import {
   LayoutDashboard,
   Users,
-  Link as LinkIcon,
-  TrendingUp,
   DollarSign,
-  FileText,
+  Megaphone,
 } from 'lucide-react';
 import type { NavItem } from '../Sidebar';
 
@@ -16,33 +14,21 @@ export const affiliateNavItems: NavItem[] = [
     description: 'Vista general',
   },
   {
-    title: 'Mis Enlaces',
-    href: '/dashboard/affiliate/links',
-    icon: LinkIcon,
-    description: 'Enlaces de referido',
-  },
-  {
-    title: 'Referidos',
+    title: 'Referrals',
     href: '/dashboard/affiliate/referrals',
     icon: Users,
     description: 'Usuarios referidos',
   },
   {
-    title: 'Comisiones',
+    title: 'Commissions',
     href: '/dashboard/affiliate/commissions',
     icon: DollarSign,
-    description: 'Earnings por referido',
+    description: 'Comisiones ganadas',
   },
   {
-    title: 'Performance',
-    href: '/dashboard/affiliate/performance',
-    icon: TrendingUp,
-    description: 'Métricas de rendimiento',
-  },
-  {
-    title: 'Reportes',
-    href: '/dashboard/affiliate/reports',
-    icon: FileText,
-    description: 'Reportes mensuales',
+    title: 'Marketing',
+    href: '/dashboard/affiliate/marketing',
+    icon: Megaphone,
+    description: 'Material de marketing',
   },
 ];
