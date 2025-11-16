@@ -16,6 +16,7 @@ interface MarketplaceProduct {
   name: string;
   description: string;
   price: string;
+  imageUrl?: string;
   createdAt: string;
 }
 
