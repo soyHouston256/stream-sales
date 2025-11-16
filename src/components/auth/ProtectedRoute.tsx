@@ -1,7 +1,8 @@
 'use client';
 
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth/useAuth';
-import { redirect } from 'next/navigation';
 import type { UserRole } from '@/types/auth';
 
 interface ProtectedRouteProps {
@@ -20,7 +21,35 @@ export function ProtectedRoute({
   requiredRole,
   allowedRoles,
 }: ProtectedRouteProps) {
+  const router = useRouter();
   const { user, isLoading, isAuthenticated } = useAuth();
+  const [shouldRedirect, setShouldRedirect] = useState(false);
+
+  // Handle redirect in useEffect to avoid render loop
+  useEffect(() => {
+    if (isLoading || shouldRedirect) return;
+
+    // Redirect to login if not authenticated
+    if (!isAuthenticated || !user) {
+      setShouldRedirect(true);
+      router.replace('/login');
+      return;
+    }
+
+    // Check if specific role is required
+    if (requiredRole && user.role !== requiredRole) {
+      setShouldRedirect(true);
+      router.replace('/login');
+      return;
+    }
+
+    // Check if user's role is in allowed roles list
+    if (allowedRoles && !allowedRoles.includes(user.role)) {
+      setShouldRedirect(true);
+      router.replace('/login');
+      return;
+    }
+  }, [user, isLoading, isAuthenticated, requiredRole, allowedRoles, shouldRedirect, router]);
 
   // Show loading state while checking authentication
   if (isLoading) {
@@ -34,19 +63,25 @@ export function ProtectedRoute({
     );
   }
 
-  // Redirect to login if not authenticated
-  if (!isAuthenticated || !user) {
-    redirect('/login');
+  // Don't render content if redirecting or not authenticated
+  if (shouldRedirect || !isAuthenticated || !user) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]" />
+          <p className="mt-4 text-muted-foreground">Redirigiendo...</p>
+        </div>
+      </div>
+    );
   }
 
-  // Check if specific role is required
+  // Don't render if role check fails
   if (requiredRole && user.role !== requiredRole) {
-    redirect('/login');
+    return null;
   }
 
-  // Check if user's role is in allowed roles list
   if (allowedRoles && !allowedRoles.includes(user.role)) {
-    redirect('/login');
+    return null;
   }
 
   // Render protected content
