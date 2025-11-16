@@ -40,7 +40,7 @@ export default function AdminDashboard() {
         />
         <StatsCard
           title="Total Ventas"
-          value={`$${stats?.totalSales.toFixed(2) ?? '0.00'}`}
+          value={`$${stats?.totalSales ? parseFloat(stats.totalSales).toFixed(2) : '0.00'}`}
           icon={DollarSign}
           isLoading={statsLoading}
           trend={
@@ -54,7 +54,7 @@ export default function AdminDashboard() {
         />
         <StatsCard
           title="Comisiones Generadas"
-          value={`$${stats?.totalCommissions.toFixed(2) ?? '0.00'}`}
+          value={`$${stats?.totalCommissions ? parseFloat(stats.totalCommissions).toFixed(2) : '0.00'}`}
           icon={TrendingUp}
           isLoading={statsLoading}
         />

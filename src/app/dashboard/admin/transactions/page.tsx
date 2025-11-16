@@ -75,7 +75,7 @@ export default function TransactionsPage() {
       label: 'Monto',
       render: (tx) => (
         <div className="font-semibold">
-          ${tx.amount.toFixed(2)}
+          ${parseFloat(tx.amount).toFixed(2)}
         </div>
       ),
       className: 'w-[120px]',

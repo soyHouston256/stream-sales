@@ -55,13 +55,13 @@ export default function ConciliatorHistoryPage() {
           />
           <StatsCard
             title="Avg Resolution Time"
-            value={`${performance.averageResolutionTimeHours.toFixed(1)}h`}
+            value={`${parseFloat(String(performance.averageResolutionTimeHours)).toFixed(1)}h`}
             description="Average time to resolve"
             icon={Clock}
           />
           <StatsCard
             title="Refund Rate"
-            value={`${performance.refundRate.toFixed(0)}%`}
+            value={`${parseFloat(String(performance.refundRate)).toFixed(0)}%`}
             description="Disputes resolved with refund"
             icon={TrendingUp}
           />
