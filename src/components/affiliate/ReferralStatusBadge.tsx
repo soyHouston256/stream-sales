@@ -1,8 +1,9 @@
 import { Badge } from '@/components/ui/badge';
-import { AffiliateStatus } from '@/types/affiliate';
+
+type ReferralStatus = 'active' | 'inactive' | 'suspended';
 
 interface ReferralStatusBadgeProps {
-  status: AffiliateStatus;
+  status: ReferralStatus;
 }
 
 export function ReferralStatusBadge({ status }: ReferralStatusBadgeProps) {
