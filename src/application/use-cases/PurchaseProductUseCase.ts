@@ -156,8 +156,14 @@ export class PurchaseProductUseCase {
     if (!adminWallet) {
       console.warn('[PurchaseProductUseCase] Admin wallet not found. Creating admin user and wallet automatically...');
 
-      // Verificar si existe el usuario admin
+      // Verificar si existe el usuario admin (por ID o por email)
       let adminUser = await this.userRepository.findById(this.ADMIN_USER_ID);
+
+      if (!adminUser) {
+        // Buscar por email por si existe con otro ID
+        const adminEmail = Email.create('admin@streamsales.com');
+        adminUser = await this.userRepository.findByEmail(adminEmail);
+      }
 
       // Si no existe el usuario, crearlo
       if (!adminUser) {
@@ -174,10 +180,12 @@ export class PurchaseProductUseCase {
 
         await this.userRepository.save(adminUser);
         console.log('[PurchaseProductUseCase] Admin user created');
+      } else {
+        console.log('[PurchaseProductUseCase] Admin user already exists, creating wallet only');
       }
 
-      // Crear wallet para el admin
-      adminWallet = Wallet.create({ userId: this.ADMIN_USER_ID });
+      // Crear wallet para el admin (usar el ID del usuario encontrado o creado)
+      adminWallet = Wallet.create({ userId: adminUser.id });
       await this.walletRepository.save(adminWallet);
       console.log('[PurchaseProductUseCase] Admin wallet created successfully');
     }
