@@ -164,3 +164,62 @@ Si encuentras problemas, revisa:
 1. Los logs del script (muestra detalles de cada operación)
 2. La configuración de `.env`
 3. Los permisos de la base de datos
+
+---
+
+## migrate-purchases-to-completed.ts
+
+### Propósito
+Actualiza todas las compras con status 'pending' a 'completed' y establece la fecha de completado.
+
+### Cuándo usar este script
+- Después de actualizar el código que cambia cómo se guardan las compras
+- Si tienes compras antiguas que quedaron con status 'pending'
+- Para corregir compras que se completaron exitosamente pero quedaron marcadas como pendientes
+
+### Uso
+```bash
+npm run migrate:purchases-completed
+```
+
+### Qué hace el script
+1. ✅ Cuenta todas las compras con status 'pending'
+2. ✅ Actualiza el status a 'completed'
+3. ✅ Establece completedAt = fecha actual
+4. ✅ Verifica que no queden compras pendientes
+5. ✅ Muestra estadísticas finales por status
+6. ✅ Es idempotente - puede ejecutarse múltiples veces sin problemas
+
+### Salida esperada
+```
+🔄 Iniciando migración de compras pendientes...
+
+📊 Encontradas 3 compras con status 'pending'
+
+✅ Migración completada: 3 compras actualizadas
+
+✅ Verificación exitosa: No quedan compras pendientes
+
+📈 Estadísticas finales de compras por status:
+   - completed: 15 compras
+
+✅ Migración finalizada exitosamente
+```
+
+### Contexto técnico
+En versiones anteriores del código, las compras se guardaban con status 'pending' por defecto y nunca se actualizaban a 'completed'. Esto es técnicamente incorrecto porque:
+
+1. Una compra que llega al método `save()` del repository ya completó exitosamente todas las transacciones
+2. El status debería reflejar que la compra se completó (todas las wallets actualizadas, producto marcado como vendido)
+3. El status 'pending' debería reservarse solo para compras que están en proceso o esperando confirmación de pago
+
+### Por qué es seguro
+- Solo actualiza compras con status 'pending'
+- No modifica compras con status 'failed' o 'refunded'
+- Las compras son registros de auditoría, no afectan el balance de wallets (ya actualizados cuando se creó la compra)
+- Es idempotente - ejecutarlo múltiples veces no causa efectos secundarios
+
+### Notas importantes
+1. **No afecta balances**: Las wallets ya fueron actualizadas cuando se creó la compra originalmente
+2. **Solo cambio de status**: Este script solo actualiza metadatos (status y timestamp), no datos financieros
+3. **Después del fix**: Las nuevas compras se guardan automáticamente como 'completed', este script es solo para limpiar datos históricos

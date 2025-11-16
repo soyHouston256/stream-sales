@@ -13,6 +13,7 @@
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
     "migrate:encrypt-passwords": "tsx scripts/migrate-encrypt-passwords.ts",
+    "migrate:purchases-completed": "tsx scripts/migrate-purchases-to-completed.ts",
     "seed:admin": "tsx scripts/seed-admin.ts"
   },
   "dependencies": {
