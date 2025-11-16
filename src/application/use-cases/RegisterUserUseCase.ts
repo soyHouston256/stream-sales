@@ -10,6 +10,7 @@ export interface RegisterUserDTO {
   email: string;
   password: string;
   name?: string;
+  role?: string; // Optional, defaults to 'user' if not provided
 }
 
 export interface RegisterUserResponse {
@@ -49,7 +50,7 @@ export class RegisterUserUseCase {
       email,
       password,
       name: data.name,
-      role: 'user',
+      role: data.role || 'user', // Use provided role or default to 'user'
     });
 
     // Save user
