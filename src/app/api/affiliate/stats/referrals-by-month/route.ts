@@ -83,7 +83,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Count affiliations per month
-    affiliations.forEach((affiliation) => {
+    affiliations.forEach((affiliation: any) => {
       const date = new Date(affiliation.createdAt);
       const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
       if (monthlyData[monthKey] !== undefined) {

@@ -125,14 +125,14 @@ export async function GET(request: NextRequest) {
     // Note: In a real system, you would have a separate commissions table
     // For now, we're using the affiliation data
     const data = affiliations
-      .filter((aff) => {
+      .filter((aff: any) => {
         // Filter by type if specified
         if (type === 'registration') {
           return aff.commissionAmount !== null;
         }
         return true;
       })
-      .map((aff) => ({
+      .map((aff: any) => ({
         id: aff.id,
         affiliateId: aff.affiliateId,
         referralId: aff.id,

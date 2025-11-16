@@ -185,7 +185,7 @@ export async function PUT(request: NextRequest) {
     const { saleCommission, registrationCommission } = validationResult.data;
 
     // 4. Update commission configs in a transaction
-    await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx: any) => {
       // 4.1. Deactivate old sale commission config
       await tx.commissionConfig.updateMany({
         where: {

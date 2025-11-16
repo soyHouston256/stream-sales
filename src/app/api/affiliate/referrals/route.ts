@@ -131,14 +131,14 @@ export async function GET(request: NextRequest) {
 
     if (role) {
       filteredAffiliations = filteredAffiliations.filter(
-        (aff) => aff.referredUser.role === role
+        (aff: any) => aff.referredUser.role === role
       );
     }
 
     if (search) {
       const searchLower = search.toLowerCase();
       filteredAffiliations = filteredAffiliations.filter(
-        (aff) =>
+        (aff: any) =>
           aff.referredUser.name?.toLowerCase().includes(searchLower) ||
           aff.referredUser.email.toLowerCase().includes(searchLower)
       );
@@ -147,7 +147,7 @@ export async function GET(request: NextRequest) {
     // 8. For each referral, calculate total commission earned
     // In a real system, this would come from a commissions table
     // For now, we'll use the commissionAmount from the affiliation
-    const data = filteredAffiliations.map((aff) => ({
+    const data = filteredAffiliations.map((aff: any) => ({
       id: aff.id,
       affiliateId: aff.affiliateId,
       referredUserId: aff.referredUserId,

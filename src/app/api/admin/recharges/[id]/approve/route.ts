@@ -119,7 +119,7 @@ export async function PUT(
       .digest('hex');
 
     // 8. Process recharge in a transaction
-    const result = await prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(async (tx: any) => {
       // 8.1. Update wallet balance
       const updatedWallet = await tx.wallet.update({
         where: { id: recharge.walletId },

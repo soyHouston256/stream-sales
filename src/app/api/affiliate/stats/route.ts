@@ -66,20 +66,20 @@ export async function GET(request: NextRequest) {
     const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
     const thisMonthReferrals = affiliations.filter(
-      (aff) => aff.createdAt >= firstDayOfMonth
+      (aff: any) => aff.createdAt >= firstDayOfMonth
     ).length;
 
     // 5. Calculate active/inactive referrals
-    const activeReferrals = affiliations.filter((aff) => aff.status === 'active').length;
+    const activeReferrals = affiliations.filter((aff: any) => aff.status === 'active').length;
     const inactiveReferrals = affiliations.length - activeReferrals;
 
     // 6. Calculate this month's earnings
     const thisMonthAffiliations = affiliations.filter(
-      (aff) => aff.createdAt >= firstDayOfMonth && aff.commissionPaid
+      (aff: any) => aff.createdAt >= firstDayOfMonth && aff.commissionPaid
     );
 
     const thisMonthEarned = thisMonthAffiliations.reduce(
-      (sum, aff) => sum + (aff.commissionAmount ? parseFloat(aff.commissionAmount.toString()) : 0),
+      (sum: number, aff: any) => sum + (aff.commissionAmount ? parseFloat(aff.commissionAmount.toString()) : 0),
       0
     );
 

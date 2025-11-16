@@ -142,31 +142,31 @@ export async function GET(request: NextRequest) {
     // 7. Calculate overview statistics
     const totalAffiliates = allProfiles.length;
     const activeAffiliates = allProfiles.filter(
-      (p) => p.status === 'active' || p.status === 'approved'
+      (p: any) => p.status === 'active' || p.status === 'approved'
     ).length;
-    const pendingApplications = allProfiles.filter((p) => p.status === 'pending').length;
-    const rejectedApplications = allProfiles.filter((p) => p.status === 'rejected').length;
-    const suspendedAffiliates = allProfiles.filter((p) => p.status === 'suspended').length;
+    const pendingApplications = allProfiles.filter((p: any) => p.status === 'pending').length;
+    const rejectedApplications = allProfiles.filter((p: any) => p.status === 'rejected').length;
+    const suspendedAffiliates = allProfiles.filter((p: any) => p.status === 'suspended').length;
 
     // 8. Calculate earnings statistics
     const totalEarnings = allProfiles.reduce(
-      (sum, p) => sum + parseFloat(p.totalEarnings.toString()),
+      (sum: number, p: any) => sum + parseFloat(p.totalEarnings.toString()),
       0
     );
     const totalPaid = allProfiles.reduce(
-      (sum, p) => sum + parseFloat(p.paidBalance.toString()),
+      (sum: number, p: any) => sum + parseFloat(p.paidBalance.toString()),
       0
     );
     const totalPending = allProfiles.reduce(
-      (sum, p) => sum + parseFloat(p.pendingBalance.toString()),
+      (sum: number, p: any) => sum + parseFloat(p.pendingBalance.toString()),
       0
     );
     const averageEarningsPerAffiliate =
       totalAffiliates > 0 ? totalEarnings / totalAffiliates : 0;
 
     // 9. Calculate referral statistics
-    const totalReferrals = allProfiles.reduce((sum, p) => sum + p.totalReferrals, 0);
-    const activeReferrals = allProfiles.reduce((sum, p) => sum + p.activeReferrals, 0);
+    const totalReferrals = allProfiles.reduce((sum: number, p: any) => sum + p.totalReferrals, 0);
+    const activeReferrals = allProfiles.reduce((sum: number, p: any) => sum + p.activeReferrals, 0);
     const inactiveReferrals = totalReferrals - activeReferrals;
     const averageReferralsPerAffiliate =
       totalAffiliates > 0 ? totalReferrals / totalAffiliates : 0;
@@ -176,45 +176,45 @@ export async function GET(request: NextRequest) {
     // 10. Calculate tier distribution
     const tiers = {
       bronze: {
-        count: allProfiles.filter((p) => p.tier === 'bronze').length,
+        count: allProfiles.filter((p: any) => p.tier === 'bronze').length,
         totalEarnings: allProfiles
-          .filter((p) => p.tier === 'bronze')
-          .reduce((sum, p) => sum + parseFloat(p.totalEarnings.toString()), 0)
+          .filter((p: any) => p.tier === 'bronze')
+          .reduce((sum: number, p: any) => sum + parseFloat(p.totalEarnings.toString()), 0)
           .toFixed(2),
       },
       silver: {
-        count: allProfiles.filter((p) => p.tier === 'silver').length,
+        count: allProfiles.filter((p: any) => p.tier === 'silver').length,
         totalEarnings: allProfiles
-          .filter((p) => p.tier === 'silver')
-          .reduce((sum, p) => sum + parseFloat(p.totalEarnings.toString()), 0)
+          .filter((p: any) => p.tier === 'silver')
+          .reduce((sum: number, p: any) => sum + parseFloat(p.totalEarnings.toString()), 0)
           .toFixed(2),
       },
       gold: {
-        count: allProfiles.filter((p) => p.tier === 'gold').length,
+        count: allProfiles.filter((p: any) => p.tier === 'gold').length,
         totalEarnings: allProfiles
-          .filter((p) => p.tier === 'gold')
-          .reduce((sum, p) => sum + parseFloat(p.totalEarnings.toString()), 0)
+          .filter((p: any) => p.tier === 'gold')
+          .reduce((sum: number, p: any) => sum + parseFloat(p.totalEarnings.toString()), 0)
           .toFixed(2),
       },
       platinum: {
-        count: allProfiles.filter((p) => p.tier === 'platinum').length,
+        count: allProfiles.filter((p: any) => p.tier === 'platinum').length,
         totalEarnings: allProfiles
-          .filter((p) => p.tier === 'platinum')
-          .reduce((sum, p) => sum + parseFloat(p.totalEarnings.toString()), 0)
+          .filter((p: any) => p.tier === 'platinum')
+          .reduce((sum: number, p: any) => sum + parseFloat(p.totalEarnings.toString()), 0)
           .toFixed(2),
       },
     };
 
     // 11. Get top performing affiliates
     const topAffiliates = allProfiles
-      .filter((p) => p.status === 'active' || p.status === 'approved')
-      .sort((a, b) => {
+      .filter((p: any) => p.status === 'active' || p.status === 'approved')
+      .sort((a: any, b: any) => {
         const earningsA = parseFloat(a.totalEarnings.toString());
         const earningsB = parseFloat(b.totalEarnings.toString());
         return earningsB - earningsA;
       })
       .slice(0, 10)
-      .map((p) => ({
+      .map((p: any) => ({
         id: p.id,
         userId: p.userId,
         userName: p.user.name || 'Unknown',
@@ -229,7 +229,7 @@ export async function GET(request: NextRequest) {
     // 12. Calculate trends for this month
     const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     const newAffiliatesThisMonth = allProfiles.filter(
-      (p) => p.createdAt >= firstDayOfMonth
+      (p: any) => p.createdAt >= firstDayOfMonth
     ).length;
 
     // Get affiliations created this month
@@ -241,8 +241,8 @@ export async function GET(request: NextRequest) {
     const newReferralsThisMonth = affiliationsThisMonth.length;
 
     const earningsThisMonth = affiliationsThisMonth
-      .filter((aff) => aff.commissionAmount !== null)
-      .reduce((sum, aff) => sum + parseFloat(aff.commissionAmount!.toString()), 0);
+      .filter((aff: any) => aff.commissionAmount !== null)
+      .reduce((sum: number, aff: any) => sum + parseFloat(aff.commissionAmount!.toString()), 0);
 
     // Calculate growth rate (compare to previous month)
     const firstDayOfPrevMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
@@ -257,8 +257,8 @@ export async function GET(request: NextRequest) {
     });
 
     const earningsPrevMonth = affiliationsPrevMonth
-      .filter((aff) => aff.commissionAmount !== null)
-      .reduce((sum, aff) => sum + parseFloat(aff.commissionAmount!.toString()), 0);
+      .filter((aff: any) => aff.commissionAmount !== null)
+      .reduce((sum: number, aff: any) => sum + parseFloat(aff.commissionAmount!.toString()), 0);
 
     const growthRate =
       earningsPrevMonth > 0

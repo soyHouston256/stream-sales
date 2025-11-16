@@ -65,7 +65,7 @@ export async function GET(request: NextRequest) {
     // 4. Group configs by effectiveFrom to pair sale and registration configs
     const groupedConfigs = new Map<string, any>();
 
-    configs.forEach((config) => {
+    configs.forEach((config: any) => {
       const key = config.effectiveFrom.toISOString();
 
       if (!groupedConfigs.has(key)) {

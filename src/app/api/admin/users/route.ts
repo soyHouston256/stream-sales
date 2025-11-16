@@ -129,7 +129,7 @@ export async function GET(request: NextRequest) {
     });
 
     // 7. Transform to response format
-    const data = users.map((u) => ({
+    const data = users.map((u: any) => ({
       id: u.id,
       email: u.email,
       name: u.name,

@@ -67,7 +67,7 @@ export async function GET(request: NextRequest) {
     });
 
     const thisMonthEarned = affiliations.reduce(
-      (sum, aff) => sum + (aff.commissionAmount ? parseFloat(aff.commissionAmount.toString()) : 0),
+      (sum: number, aff: any) => sum + (aff.commissionAmount ? parseFloat(aff.commissionAmount.toString()) : 0),
       0
     );
 

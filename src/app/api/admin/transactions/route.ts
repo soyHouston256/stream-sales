@@ -143,7 +143,7 @@ export async function GET(request: NextRequest) {
     });
 
     // 7. Transform to response format
-    const data = transactions.map((tx) => ({
+    const data = transactions.map((tx: any) => ({
       id: tx.id,
       type: tx.type,
       amount: tx.amount.toString(),

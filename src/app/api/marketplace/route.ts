@@ -92,7 +92,7 @@ export async function GET(request: NextRequest) {
     });
 
     // 5. Transform to response format (hide sensitive data)
-    const data = products.map((product) => ({
+    const data = products.map((product: any) => ({
       id: product.id,
       providerId: product.providerId,
       providerName: product.provider.name || product.provider.email.split('@')[0],

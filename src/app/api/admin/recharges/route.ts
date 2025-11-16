@@ -154,11 +154,11 @@ export async function GET(request: NextRequest) {
     });
 
     const totalPendingAmount = pendingRecharges.reduce(
-      (sum, r) => sum + parseFloat(r.amount.toString()),
+      (sum: number, r: any) => sum + parseFloat(r.amount.toString()),
       0
     );
     const totalCompletedAmount = completedRecharges.reduce(
-      (sum, r) => sum + parseFloat(r.amount.toString()),
+      (sum: number, r: any) => sum + parseFloat(r.amount.toString()),
       0
     );
 
@@ -191,7 +191,7 @@ export async function GET(request: NextRequest) {
     if (search) {
       const searchLower = search.toLowerCase();
       recharges = recharges.filter(
-        (recharge) =>
+        (recharge: any) =>
           recharge.wallet.user.name?.toLowerCase().includes(searchLower) ||
           recharge.wallet.user.email.toLowerCase().includes(searchLower) ||
           recharge.walletId.toLowerCase().includes(searchLower) ||
@@ -200,7 +200,7 @@ export async function GET(request: NextRequest) {
     }
 
     // 11. Transform to response format
-    const data = recharges.map((recharge) => ({
+    const data = recharges.map((recharge: any) => ({
       id: recharge.id,
       walletId: recharge.walletId,
       wallet: {
