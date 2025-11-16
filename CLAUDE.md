@@ -31,6 +31,7 @@ npm run prisma:studio    # Open Prisma Studio GUI to view/edit data
 
 ### Maintenance Scripts
 ```bash
+npm run seed:admin                 # Create admin user with wallet (REQUIRED for purchases)
 npm run migrate:encrypt-passwords  # Re-encrypt product passwords (see scripts/README.md)
 ```
 
@@ -38,6 +39,8 @@ npm run migrate:encrypt-passwords  # Re-encrypt product passwords (see scripts/R
 1. Always backup your database first
 2. Review the script documentation in `scripts/README.md`
 3. Ensure environment variables are properly configured
+
+**First-time Setup**: Run `npm run seed:admin` before making any purchases in the system.
 
 ## Architecture
 
@@ -209,6 +212,26 @@ JWT_EXPIRES_IN="7d"  # Token expiration (e.g., 7d, 24h, 60m)
   - Logs warnings for unencrypted passwords
 - New products are always saved with encrypted passwords
 - Migration script is idempotent and safe to run multiple times
+
+### Issue: "Admin wallet not found" error when purchasing products
+**Cause**: The system requires an admin user with wallet to receive commission payments
+**Solution**:
+```bash
+npm run seed:admin
+```
+
+**Why this happens**:
+- When a seller purchases a product, the system splits the payment:
+  - 5% commission → Admin wallet
+  - 95% earnings → Provider wallet
+- Without an admin wallet, the transaction cannot complete
+
+**What the seed script does**:
+1. Creates admin user with email: `admin@streamsales.com`
+2. Creates wallet for admin with $0 initial balance
+3. Password: `admin123` (change after first login)
+
+**Important**: This is a **required** step for new installations before making any purchases.
 
 ## TypeScript Path Aliases
 

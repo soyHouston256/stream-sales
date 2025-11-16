@@ -2,6 +2,67 @@
 
 Este directorio contiene scripts de mantenimiento y migración para el proyecto stream-sales.
 
+## seed-admin.ts
+
+### Propósito
+Crea el usuario administrador con wallet necesario para el funcionamiento del sistema de comisiones.
+
+### Cuándo usar este script
+- **REQUERIDO**: Antes de realizar la primera compra en el sistema
+- Después de resetear la base de datos
+- Si el error "Admin wallet not found" aparece al intentar comprar productos
+- En nuevas instalaciones del sistema
+
+### Uso
+```bash
+npm run seed:admin
+```
+
+### Qué hace el script
+1. ✅ Verifica si existe un usuario con role 'admin'
+2. ✅ Si existe, verifica que tenga wallet
+3. ✅ Si no existe, crea usuario admin con email y password por defecto
+4. ✅ Crea wallet para el admin con balance inicial de $0
+5. ✅ Es idempotente - puede ejecutarse múltiples veces sin problemas
+
+### Credenciales por defecto
+```
+Email:    admin@streamsales.com
+Password: admin123
+```
+
+⚠️ **IMPORTANTE**: Cambiar el password después del primer login en producción.
+
+### Salida esperada
+```
+🌱 Iniciando seed de usuario admin...
+
+📝 No existe usuario admin. Creando...
+
+============================================================
+✅ USUARIO ADMIN CREADO EXITOSAMENTE
+============================================================
+Email:    admin@streamsales.com
+Password: admin123
+Role:     admin
+Wallet:   ckl8x9y2z000001l6h8j9k0m1 (Balance: $0)
+============================================================
+
+⚠️  IMPORTANTE: Cambia el password del admin después de iniciar sesión
+
+🎉 Seed completado
+```
+
+### Por qué es necesario
+El sistema de compras requiere una wallet de administrador para depositar las comisiones. Cuando un seller compra un producto:
+1. Se debita el monto total del seller
+2. Se acredita la comisión (5%) a la wallet del admin
+3. Se acredita el earnings (95%) a la wallet del provider
+
+Sin la wallet del admin, las compras fallarán con el error: "Admin wallet not found"
+
+---
+
 ## migrate-encrypt-passwords.ts
 
 ### Propósito
