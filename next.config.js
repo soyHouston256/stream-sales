@@ -2,7 +2,6 @@
 const nextConfig = {
   reactStrictMode: true,
   images: {
-    unoptimized: true, // Deshabilitar optimización de imágenes temporalmente
     domains: [
       'streams-laboratory.s3.sa-east-1.amazonaws.com',
       'vortex-streaming.com',
