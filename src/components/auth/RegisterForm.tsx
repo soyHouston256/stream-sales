@@ -102,10 +102,15 @@ export function RegisterForm() {
       });
 
       // After successful registration, redirect to appropriate dashboard based on user role
-      // The register function returns the AuthResponse which includes the user
+      // Using window.location.href for full page reload to ensure AuthContext initializes properly
       if (response && response.user) {
         const dashboardRoute = getDashboardRoute(response.user.role);
-        router.push(dashboardRoute);
+
+        // Give a brief moment for the token to be saved to localStorage
+        // then do a full page navigation (not client-side navigation)
+        setTimeout(() => {
+          window.location.href = dashboardRoute;
+        }, 200);
       }
     } catch (error) {
       console.error('Registration error:', error);

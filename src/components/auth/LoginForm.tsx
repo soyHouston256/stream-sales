@@ -55,6 +55,9 @@ export function LoginForm() {
 
     try {
       const response = await login(data);
+      console.log('🔍 Login response:', response);
+      console.log('🔍 User from response:', response?.user);
+      console.log('🔍 User role:', response?.user?.role);
 
       toast({
         title: 'Inicio de sesión exitoso',
@@ -62,11 +65,18 @@ export function LoginForm() {
       });
 
       // After successful login, redirect to appropriate dashboard based on user role
-      // The login function returns the AuthResponse which includes the user
-      // We can access it from the context or use the response directly
+      // Using window.location.href for full page reload to ensure AuthContext initializes properly
       if (response && response.user) {
         const dashboardRoute = getDashboardRoute(response.user.role);
-        router.push(dashboardRoute);
+        console.log('🚀 Redirecting to:', dashboardRoute);
+
+        // Give a brief moment for the token to be saved to localStorage
+        // then do a full page navigation (not client-side navigation)
+        setTimeout(() => {
+          window.location.href = dashboardRoute;
+        }, 200);
+      } else {
+        console.error('❌ No response or user in response');
       }
     } catch (error) {
       console.error('Login error:', error);
