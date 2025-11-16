@@ -151,7 +151,7 @@ export async function GET(request: NextRequest) {
     if (search) {
       const searchLower = search.toLowerCase();
       affiliateProfiles = affiliateProfiles.filter(
-        (profile) =>
+        (profile: any) =>
           profile.user.name?.toLowerCase().includes(searchLower) ||
           profile.user.email.toLowerCase().includes(searchLower) ||
           profile.referralCode.toLowerCase().includes(searchLower)
@@ -160,24 +160,24 @@ export async function GET(request: NextRequest) {
 
     // 9. Calculate summary statistics
     const allProfiles = await prisma.affiliateProfile.findMany();
-    const activeProfiles = allProfiles.filter((p) => p.status === 'active' || p.status === 'approved');
+    const activeProfiles = allProfiles.filter((p: any) => p.status === 'active' || p.status === 'approved');
 
     const totalEarningsPaid = allProfiles.reduce(
-      (sum, p) => sum + parseFloat(p.paidBalance.toString()),
+      (sum: number, p: any) => sum + parseFloat(p.paidBalance.toString()),
       0
     );
     const pendingPayments = allProfiles.reduce(
-      (sum, p) => sum + parseFloat(p.pendingBalance.toString()),
+      (sum: number, p: any) => sum + parseFloat(p.pendingBalance.toString()),
       0
     );
-    const totalReferrals = allProfiles.reduce((sum, p) => sum + p.totalReferrals, 0);
-    const activeReferrals = allProfiles.reduce((sum, p) => sum + p.activeReferrals, 0);
+    const totalReferrals = allProfiles.reduce((sum: number, p: any) => sum + p.totalReferrals, 0);
+    const activeReferrals = allProfiles.reduce((sum: number, p: any) => sum + p.activeReferrals, 0);
 
     // 10. Get base URL for referral links
     const baseUrl = request.headers.get('origin') || 'http://localhost:3000';
 
     // 11. Transform to response format with calculated metrics
-    const data = affiliateProfiles.map((profile) => {
+    const data = affiliateProfiles.map((profile: any) => {
       const conversionRate =
         profile.totalReferrals > 0
           ? ((profile.activeReferrals / profile.totalReferrals) * 100).toFixed(2)

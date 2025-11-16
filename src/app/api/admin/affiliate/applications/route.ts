@@ -145,7 +145,7 @@ export async function GET(request: NextRequest) {
     if (search) {
       const searchLower = search.toLowerCase();
       affiliateProfiles = affiliateProfiles.filter(
-        (profile) =>
+        (profile: any) =>
           profile.user.name?.toLowerCase().includes(searchLower) ||
           profile.user.email.toLowerCase().includes(searchLower) ||
           profile.referralCode.toLowerCase().includes(searchLower)
@@ -153,7 +153,7 @@ export async function GET(request: NextRequest) {
     }
 
     // 9. Transform to response format
-    const data = affiliateProfiles.map((profile) => ({
+    const data = affiliateProfiles.map((profile: any) => ({
       id: profile.id,
       userId: profile.userId,
       user: {
