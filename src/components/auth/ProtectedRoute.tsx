@@ -1,8 +1,7 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth/useAuth';
+import { redirect } from 'next/navigation';
 import type { UserRole } from '@/types/auth';
 
 interface ProtectedRouteProps {
@@ -21,39 +20,7 @@ export function ProtectedRoute({
   requiredRole,
   allowedRoles,
 }: ProtectedRouteProps) {
-  const router = useRouter();
   const { user, isLoading, isAuthenticated } = useAuth();
-  const hasChecked = useRef(false);
-
-  useEffect(() => {
-    // Wait for authentication check to complete
-    if (isLoading) return;
-
-    // Only check once to prevent infinite loops
-    if (hasChecked.current) return;
-    hasChecked.current = true;
-
-    // Redirect to login if not authenticated
-    if (!isAuthenticated) {
-      router.push('/login');
-      return;
-    }
-
-    // Check role-based access if specified
-    if (user) {
-      // Check if specific role is required
-      if (requiredRole && user.role !== requiredRole) {
-        router.push('/login');
-        return;
-      }
-
-      // Check if user's role is in allowed roles list
-      if (allowedRoles && !allowedRoles.includes(user.role)) {
-        router.push('/login');
-        return;
-      }
-    }
-  }, [user, isLoading, isAuthenticated, requiredRole, allowedRoles, router]);
 
   // Show loading state while checking authentication
   if (isLoading) {
@@ -67,18 +34,19 @@ export function ProtectedRoute({
     );
   }
 
-  // Don't render content if not authenticated
+  // Redirect to login if not authenticated
   if (!isAuthenticated || !user) {
-    return null;
+    redirect('/login');
   }
 
-  // Don't render if role check fails
+  // Check if specific role is required
   if (requiredRole && user.role !== requiredRole) {
-    return null;
+    redirect('/login');
   }
 
+  // Check if user's role is in allowed roles list
   if (allowedRoles && !allowedRoles.includes(user.role)) {
-    return null;
+    redirect('/login');
   }
 
   // Render protected content
