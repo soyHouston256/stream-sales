@@ -62,8 +62,9 @@ export class PrismaPurchaseRepository implements IPurchaseRepository {
       providerEarnings: purchase.providerEarnings.amount, // Decimal
       adminCommission: purchase.adminCommission.amount, // Decimal
       commissionRate: new Decimal(purchase.commissionRate * 100), // 0.05 -> 5.00
-      status: 'pending', // Inicial siempre pending
+      status: 'completed', // La compra se completa exitosamente al llegar aquí
       createdAt: purchase.createdAt,
+      completedAt: new Date(), // Timestamp de cuando se completó
     };
 
     const savedPurchase = await this.prisma.purchase.create({
