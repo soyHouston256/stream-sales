@@ -49,7 +49,8 @@ export function ProtectedRoute({
       router.replace('/login');
       return;
     }
-  }, [user, isLoading, isAuthenticated, requiredRole, allowedRoles, shouldRedirect, router]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, isLoading, isAuthenticated, requiredRole, allowedRoles, shouldRedirect]);
 
   // Show loading state while checking authentication
   if (isLoading) {

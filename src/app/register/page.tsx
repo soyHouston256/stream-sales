@@ -18,7 +18,8 @@ export default function RegisterPage() {
       const dashboardRoute = getDashboardRoute(user.role);
       router.replace(dashboardRoute);
     }
-  }, [user, isLoading, shouldRedirect, router]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, isLoading, shouldRedirect]);
 
   // Show loading state while checking authentication
   if (isLoading) {
