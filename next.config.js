@@ -5,7 +5,23 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: '**', // Allow all HTTPS domains
+        hostname: '**.amazonaws.com', // AWS S3 buckets
+      },
+      {
+        protocol: 'https',
+        hostname: 'vortex-streaming.com',
+      },
+      {
+        protocol: 'https',
+        hostname: '**.cloudinary.com', // Cloudinary CDN
+      },
+      {
+        protocol: 'https',
+        hostname: 'imgur.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'i.imgur.com',
       },
       {
         protocol: 'http',
