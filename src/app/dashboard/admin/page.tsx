@@ -1,7 +1,7 @@
 'use client';
 
 import { useAuth } from '@/lib/auth/useAuth';
-import { Users, DollarSign, AlertCircle, TrendingUp } from 'lucide-react';
+import { Users, DollarSign, AlertCircle, TrendingUp, Wallet } from 'lucide-react';
 import { StatsCard } from '@/components/admin/StatsCard';
 import { SalesChart } from '@/components/admin/SalesChart';
 import { useAdminStats, useSalesData } from '@/lib/hooks/useAdminStats';
@@ -81,6 +81,12 @@ export default function AdminDashboard() {
               <Button variant="outline" className="w-full justify-start">
                 <Users className="mr-2 h-4 w-4" />
                 Gestionar Usuarios
+              </Button>
+            </Link>
+            <Link href="/dashboard/admin/recharges" className="block">
+              <Button variant="outline" className="w-full justify-start">
+                <Wallet className="mr-2 h-4 w-4" />
+                Gestionar Recargas
               </Button>
             </Link>
             <Link href="/dashboard/admin/commissions" className="block">
