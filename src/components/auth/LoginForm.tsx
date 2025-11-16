@@ -54,40 +54,20 @@ export function LoginForm() {
     setIsLoading(true);
 
     try {
-      await login(data);
+      const response = await login(data);
 
       toast({
         title: 'Inicio de sesión exitoso',
         description: 'Bienvenido de vuelta',
       });
 
-      // After successful login, the AuthContext will update the user
-      // We need to wait a brief moment for the context to update before accessing user.role
-      // This is a more reliable approach than using window.location.reload()
-      setTimeout(() => {
-        // At this point, the context should have the updated user
-        // We'll use a small delay to ensure React has updated the state
-        const token = localStorage.getItem('token');
-        if (token) {
-          // Call the API to get current user and redirect based on role
-          fetch('/api/auth/me', {
-            headers: {
-              'Authorization': `Bearer ${token}`,
-            },
-          })
-            .then(res => res.json())
-            .then(data => {
-              if (data.user) {
-                const dashboardRoute = getDashboardRoute(data.user.role);
-                router.push(dashboardRoute);
-              }
-            })
-            .catch(() => {
-              // Fallback to default dashboard if API call fails
-              router.push('/dashboard/seller');
-            });
-        }
-      }, 100);
+      // After successful login, redirect to appropriate dashboard based on user role
+      // The login function returns the AuthResponse which includes the user
+      // We can access it from the context or use the response directly
+      if (response && response.user) {
+        const dashboardRoute = getDashboardRoute(response.user.role);
+        router.push(dashboardRoute);
+      }
     } catch (error) {
       console.error('Login error:', error);
 

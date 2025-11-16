@@ -94,20 +94,19 @@ export function RegisterForm() {
     setIsLoading(true);
 
     try {
-      await registerUser(data);
+      const response = await registerUser(data);
 
       toast({
         title: 'Registro exitoso',
         description: 'Tu cuenta ha sido creada correctamente',
       });
 
-      // Redirect to the appropriate dashboard based on selected role
-      const dashboardRoute = getDashboardRoute(data.role);
-
-      // Give a moment for the auth context to update, then redirect
-      setTimeout(() => {
+      // After successful registration, redirect to appropriate dashboard based on user role
+      // The register function returns the AuthResponse which includes the user
+      if (response && response.user) {
+        const dashboardRoute = getDashboardRoute(response.user.role);
         router.push(dashboardRoute);
-      }, 100);
+      }
     } catch (error) {
       console.error('Registration error:', error);
 

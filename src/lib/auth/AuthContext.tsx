@@ -87,6 +87,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const response = await authService.login(credentials);
       setUser(response.user);
       setToken(response.token);
+      return response; // Return the response so components can access user data immediately
     } catch (error) {
       console.error('Login failed:', error);
       throw error;
@@ -101,6 +102,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const response = await authService.register(data);
       setUser(response.user);
       setToken(response.token);
+      return response; // Return the response so components can access user data immediately
     } catch (error) {
       console.error('Registration failed:', error);
       throw error;
