@@ -98,17 +98,21 @@ export class PrismaProductRepository implements IProductRepository {
     // Encriptar password antes de guardar
     const encryptedPassword = this.encrypt(data.accountPassword);
 
+    // Generar name y description desde la categoría (domain entity no los tiene)
+    const name = data.category.charAt(0).toUpperCase() + data.category.slice(1) + ' Account';
+    const description = `${data.category.charAt(0).toUpperCase() + data.category.slice(1)} premium account - ${data.accountEmail}`;
+
     const savedProduct = await this.prisma.product.upsert({
       where: { id: data.id },
       update: {
-        name: data.name,
-        description: data.description,
+        name,
+        description,
         category: data.category,
         price: data.price,
-        imageUrl: data.imageUrl,
+        imageUrl: null, // Domain entity no tiene imageUrl
         accountEmail: data.accountEmail,
         accountPassword: encryptedPassword,
-        accountDetails: data.accountDetails,
+        accountDetails: null, // Domain entity no tiene accountDetails
         status: data.status,
         updatedAt: data.updatedAt,
         soldAt: data.soldAt,
@@ -116,14 +120,14 @@ export class PrismaProductRepository implements IProductRepository {
       create: {
         id: data.id,
         providerId: data.providerId,
-        name: data.name,
-        description: data.description,
+        name,
+        description,
         category: data.category,
         price: data.price,
-        imageUrl: data.imageUrl,
+        imageUrl: null,
         accountEmail: data.accountEmail,
         accountPassword: encryptedPassword,
-        accountDetails: data.accountDetails,
+        accountDetails: null,
         status: data.status,
         createdAt: data.createdAt,
         updatedAt: data.updatedAt,
