@@ -88,7 +88,7 @@ export async function GET(request: NextRequest) {
     });
 
     // 5. Transform to response format
-    const data = recharges.map((recharge) => ({
+    const data = recharges.map((recharge: any) => ({
       id: recharge.id,
       walletId: recharge.walletId,
       amount: recharge.amount.toString(),

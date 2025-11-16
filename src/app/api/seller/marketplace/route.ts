@@ -133,7 +133,7 @@ export async function GET(request: NextRequest) {
     });
 
     // 7. Transform to response format
-    const data = products.map((product) => ({
+    const data = products.map((product: any) => ({
       id: product.id,
       providerId: product.providerId,
       providerName: product.provider.name || product.provider.email,

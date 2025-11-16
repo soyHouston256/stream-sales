@@ -153,7 +153,7 @@ export async function GET(request: NextRequest) {
     });
 
     // 7. Transform to response format
-    const data = purchases.map((purchase) => ({
+    const data = purchases.map((purchase: any) => ({
       id: purchase.id,
       sellerId: purchase.sellerId,
       productId: purchase.productId,

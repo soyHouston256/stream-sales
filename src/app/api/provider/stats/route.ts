@@ -72,12 +72,12 @@ export async function GET(request: NextRequest) {
 
     const totalProducts = products.length;
     const availableProducts = products.filter(
-      (p) => p.status === 'available'
+      (p: any) => p.status === 'available'
     ).length;
     const reservedProducts = products.filter(
-      (p) => p.status === 'reserved'
+      (p: any) => p.status === 'reserved'
     ).length;
-    const soldProducts = products.filter((p) => p.status === 'sold').length;
+    const soldProducts = products.filter((p: any) => p.status === 'sold').length;
 
     // 4. Get sales statistics from purchases
     const purchases = await prisma.purchase.findMany({
@@ -93,7 +93,7 @@ export async function GET(request: NextRequest) {
 
     const totalSales = purchases.length;
     const totalEarnings = purchases
-      .reduce((sum, p) => sum + Number(p.providerEarnings), 0)
+      .reduce((sum: number, p: any) => sum + Number(p.providerEarnings), 0)
       .toFixed(2);
 
     // 5. Get this month's statistics
@@ -101,11 +101,11 @@ export async function GET(request: NextRequest) {
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
     const thisMonthPurchases = purchases.filter(
-      (p) => p.createdAt >= startOfMonth
+      (p: any) => p.createdAt >= startOfMonth
     );
     const thisMonthSales = thisMonthPurchases.length;
     const thisMonthEarnings = thisMonthPurchases
-      .reduce((sum, p) => sum + Number(p.providerEarnings), 0)
+      .reduce((sum: number, p: any) => sum + Number(p.providerEarnings), 0)
       .toFixed(2);
 
     // 6. Get wallet balance

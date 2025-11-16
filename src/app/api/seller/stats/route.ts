@@ -85,7 +85,7 @@ export async function GET(request: NextRequest) {
 
     const totalPurchases = purchases.length;
     const totalSpent = purchases
-      .reduce((sum, p) => sum + Number(p.amount), 0)
+      .reduce((sum: number, p: any) => sum + Number(p.amount), 0)
       .toFixed(2);
 
     // 5. Get this month's statistics
@@ -93,12 +93,12 @@ export async function GET(request: NextRequest) {
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
     const thisMonthPurchases = purchases.filter(
-      (p) => p.createdAt >= startOfMonth
+      (p: any) => p.createdAt >= startOfMonth
     ).length;
 
     const thisMonthSpent = purchases
-      .filter((p) => p.createdAt >= startOfMonth)
-      .reduce((sum, p) => sum + Number(p.amount), 0)
+      .filter((p: any) => p.createdAt >= startOfMonth)
+      .reduce((sum: number, p: any) => sum + Number(p.amount), 0)
       .toFixed(2);
 
     // 6. Get pending recharges statistics
@@ -114,7 +114,7 @@ export async function GET(request: NextRequest) {
 
     const pendingRechargesCount = pendingRecharges.length;
     const pendingRechargesAmount = pendingRecharges
-      .reduce((sum, r) => sum + Number(r.amount), 0)
+      .reduce((sum: number, r: any) => sum + Number(r.amount), 0)
       .toFixed(2);
 
     // 7. Return stats

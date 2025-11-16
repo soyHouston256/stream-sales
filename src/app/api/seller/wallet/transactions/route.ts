@@ -137,7 +137,7 @@ export async function GET(request: NextRequest) {
     });
 
     // 8. Transform to response format
-    const data = transactions.map((tx) => {
+    const data = transactions.map((tx: any) => {
       // Determine if this is a debit or credit for the seller
       const isDebit = tx.sourceWalletId === wallet.id;
       const amount = tx.amount.toString();
