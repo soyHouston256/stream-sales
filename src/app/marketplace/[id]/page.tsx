@@ -38,6 +38,7 @@ export default function ProductDetailsPage() {
   const [product, setProduct] = useState<ProductDetails | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [imageError, setImageError] = useState(false);
 
   useEffect(() => {
     fetchProductDetails();
@@ -149,22 +150,31 @@ export default function ProductDetailsPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Left Column - Product Image */}
           <div>
-            {product.imageUrl ? (
+            {product.imageUrl && !imageError ? (
               <div className="relative w-full aspect-square rounded-lg overflow-hidden shadow-lg bg-gradient-to-br from-gray-50 to-gray-100">
                 <Image
                   src={product.imageUrl}
                   alt={product.name}
                   fill
-                  className="object-contain p-4"
+                  className="object-contain p-8"
                   priority
                   sizes="(max-width: 1024px) 100vw, 50vw"
+                  onError={() => {
+                    console.error(`Failed to load image: ${product.imageUrl}`);
+                    setImageError(true);
+                  }}
                 />
               </div>
             ) : (
               <div className="w-full aspect-square bg-gradient-to-br from-purple-200 to-blue-200 rounded-lg shadow-lg flex items-center justify-center">
                 <div className="text-center text-gray-600">
                   <Package className="mx-auto h-24 w-24 text-gray-400" />
-                  <p className="mt-4 text-lg">No image available</p>
+                  <p className="mt-4 text-lg">{imageError ? 'Image failed to load' : 'No image available'}</p>
+                  {imageError && product.imageUrl && (
+                    <p className="mt-2 text-xs text-gray-500 max-w-xs break-all px-4">
+                      {product.imageUrl}
+                    </p>
+                  )}
                 </div>
               </div>
             )}

@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -25,17 +26,23 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product, onViewDetails }: ProductCardProps) {
+  const [imageError, setImageError] = useState(false);
+
   return (
     <Card className="flex flex-col h-full hover:shadow-lg transition-shadow overflow-hidden">
       {/* Product Image */}
-      {product.imageUrl ? (
-        <div className="relative w-full aspect-video overflow-hidden">
+      {product.imageUrl && !imageError ? (
+        <div className="relative w-full aspect-video overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100">
           <Image
             src={product.imageUrl}
             alt={product.name}
             fill
-            className="object-contain bg-gradient-to-br from-gray-50 to-gray-100"
+            className="object-contain p-2"
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            onError={() => {
+              console.error(`Failed to load image for product ${product.name}: ${product.imageUrl}`);
+              setImageError(true);
+            }}
           />
         </div>
       ) : (
@@ -55,7 +62,7 @@ export function ProductCard({ product, onViewDetails }: ProductCardProps) {
                 d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
               />
             </svg>
-            <p className="mt-2 text-sm">No image</p>
+            <p className="mt-2 text-sm">{imageError ? 'Image failed to load' : 'No image'}</p>
           </div>
         </div>
       )}
