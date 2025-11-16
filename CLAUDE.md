@@ -29,6 +29,16 @@ npm run prisma:migrate   # Create and apply migrations
 npm run prisma:studio    # Open Prisma Studio GUI to view/edit data
 ```
 
+### Maintenance Scripts
+```bash
+npm run migrate:encrypt-passwords  # Re-encrypt product passwords (see scripts/README.md)
+```
+
+**Important**: Before running maintenance scripts:
+1. Always backup your database first
+2. Review the script documentation in `scripts/README.md`
+3. Ensure environment variables are properly configured
+
 ## Architecture
 
 This project follows **Domain-Driven Design (DDD)** with strict separation of concerns:
@@ -179,6 +189,26 @@ JWT_EXPIRES_IN="7d"  # Token expiration (e.g., 7d, 24h, 60m)
 ### Issue: Database connection error
 **Cause**: PostgreSQL not running or wrong DATABASE_URL
 **Solution**: Ensure PostgreSQL is running and DATABASE_URL is correct
+
+### Issue: "Invalid encrypted format" error when purchasing products
+**Cause**: Products created before encryption system have passwords in plain text
+**Solution**:
+1. **Immediate fix**: Already implemented - `PrismaProductRepository.decrypt()` now handles both encrypted and plain text passwords
+2. **Long-term fix**: Run migration script to encrypt all passwords:
+   ```bash
+   npm run migrate:encrypt-passwords
+   ```
+3. **Details**: See `scripts/README.md` for complete migration guide
+
+**Technical Details**:
+- Product passwords are encrypted using AES-256-CBC
+- Format: `{iv_hex}:{encrypted_data_hex}`
+- The decrypt method now:
+  - Detects if password is already encrypted (contains `:`)
+  - Returns plain text passwords as-is (backward compatibility)
+  - Logs warnings for unencrypted passwords
+- New products are always saved with encrypted passwords
+- Migration script is idempotent and safe to run multiple times
 
 ## TypeScript Path Aliases
 
