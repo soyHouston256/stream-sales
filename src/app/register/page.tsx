@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { RegisterForm } from '@/components/auth/RegisterForm';
 import { useAuth } from '@/lib/auth/useAuth';
@@ -9,15 +9,16 @@ import { getDashboardRoute } from '@/lib/utils/roleRedirect';
 export default function RegisterPage() {
   const router = useRouter();
   const { user, isLoading } = useAuth();
+  const hasRedirected = useRef(false);
 
   // Redirect to dashboard if already authenticated
   useEffect(() => {
-    if (!isLoading && user) {
+    if (!isLoading && user && !hasRedirected.current) {
+      hasRedirected.current = true;
       const dashboardRoute = getDashboardRoute(user.role);
       router.push(dashboardRoute);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, isLoading]);
+  }, [user, isLoading, router]);
 
   // Show loading state while checking authentication
   if (isLoading) {

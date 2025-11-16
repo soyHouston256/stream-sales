@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth/useAuth';
 import type { UserRole } from '@/types/auth';
@@ -23,10 +23,15 @@ export function ProtectedRoute({
 }: ProtectedRouteProps) {
   const router = useRouter();
   const { user, isLoading, isAuthenticated } = useAuth();
+  const hasChecked = useRef(false);
 
   useEffect(() => {
     // Wait for authentication check to complete
     if (isLoading) return;
+
+    // Only check once to prevent infinite loops
+    if (hasChecked.current) return;
+    hasChecked.current = true;
 
     // Redirect to login if not authenticated
     if (!isAuthenticated) {
@@ -48,8 +53,7 @@ export function ProtectedRoute({
         return;
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, isLoading, isAuthenticated, requiredRole, allowedRoles]);
+  }, [user, isLoading, isAuthenticated, requiredRole, allowedRoles, router]);
 
   // Show loading state while checking authentication
   if (isLoading) {
