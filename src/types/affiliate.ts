@@ -10,9 +10,27 @@ export interface AffiliateInfo {
   userId: string;
   referralCode: string;
   referralLink: string; // Full URL
-  status: 'active' | 'inactive' | 'suspended';
+  status: 'pending' | 'approved' | 'active' | 'suspended' | 'rejected';
+  tier: 'bronze' | 'silver' | 'gold' | 'platinum';
+  totalEarnings: string;
+  pendingBalance: string;
+  paidBalance: string;
+  totalReferrals: number;
+  activeReferrals: number;
+  applicationNote?: string;
+  rejectionReason?: string;
+  approvedBy?: string;
+  approvedAt?: string;
   createdAt: string;
+  updatedAt: string;
 }
+
+export interface AffiliateApplication {
+  applicationNote: string;
+}
+
+export type AffiliateProfileStatus = 'pending' | 'approved' | 'active' | 'suspended' | 'rejected';
+export type AffiliateTier = 'bronze' | 'silver' | 'gold' | 'platinum';
 
 export interface Referral {
   id: string; // Affiliation ID
@@ -141,5 +159,5 @@ export interface ReferralDetails extends Referral {
 
 export type PaymentMethod = 'paypal' | 'bank_transfer' | 'crypto';
 export type CommissionType = 'registration' | 'sale' | 'bonus';
-export type AffiliateStatus = 'active' | 'inactive' | 'suspended';
+export type AffiliateStatus = 'pending' | 'approved' | 'active' | 'suspended' | 'rejected';
 export type CommissionStatus = 'pending' | 'paid' | 'rejected';

@@ -25,6 +25,7 @@ model User {
 
   // Relations
   wallet                Wallet?
+  affiliateProfile      AffiliateProfile?
   productsAsProvider    Product[]     @relation("ProviderProducts")
   purchasesAsSeller     Purchase[]    @relation("SellerPurchases")
   purchasesAsProvider   Purchase[]    @relation("ProviderPurchases")
@@ -206,6 +207,33 @@ model Affiliation {
   @@index([referredUserId])
   @@index([referralCode])
   @@map("affiliations")
+}
+
+model AffiliateProfile {
+  id                 String   @id @default(cuid())
+  userId             String   @unique
+  referralCode       String   @unique
+  status             String   @default("pending") // pending, approved, active, suspended, rejected
+  tier               String   @default("bronze") // bronze, silver, gold, platinum
+  totalEarnings      Decimal  @default(0) @db.Decimal(19, 4)
+  pendingBalance     Decimal  @default(0) @db.Decimal(19, 4)
+  paidBalance        Decimal  @default(0) @db.Decimal(19, 4)
+  totalReferrals     Int      @default(0)
+  activeReferrals    Int      @default(0)
+  applicationNote    String?  @db.Text // Nota del afiliado al aplicar
+  rejectionReason    String?  @db.Text // Razón de rechazo
+  approvedBy         String?  // Admin user ID que aprobó
+  approvedAt         DateTime?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([referralCode])
+  @@index([status])
+  @@map("affiliate_profiles")
 }
 
 // ============================================
