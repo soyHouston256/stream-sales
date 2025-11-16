@@ -39,6 +39,7 @@ export default function AffiliateDashboard() {
     limit: 5,
   });
 
+  // Handle different affiliate status states
   if (infoError) {
     return (
       <div className="space-y-6">
@@ -51,6 +52,75 @@ export default function AffiliateDashboard() {
             Failed to load affiliate information. You may not be enrolled in the affiliate program.
           </AlertDescription>
         </Alert>
+        <Card>
+          <CardHeader>
+            <CardTitle>Not an Affiliate Yet?</CardTitle>
+            <CardDescription>
+              Join our affiliate program and start earning commissions today
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Link href="/affiliate/apply">
+              <Button>
+                Apply to Affiliate Program
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Show pending status
+  if (affiliateInfo && (affiliateInfo.status === 'pending' || affiliateInfo.status === 'rejected')) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold">Affiliate Dashboard</h1>
+        </div>
+        {affiliateInfo.status === 'pending' && (
+          <Alert>
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              Your affiliate application is pending review. You'll be notified once an admin approves your application.
+            </AlertDescription>
+          </Alert>
+        )}
+        {affiliateInfo.status === 'rejected' && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              Your affiliate application was rejected.
+              {affiliateInfo.rejectionReason && (
+                <div className="mt-2">
+                  <strong>Reason:</strong> {affiliateInfo.rejectionReason}
+                </div>
+              )}
+            </AlertDescription>
+          </Alert>
+        )}
+        <Card>
+          <CardHeader>
+            <CardTitle>Application Status</CardTitle>
+            <CardDescription>
+              Your affiliate application details
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            <div>
+              <strong>Status:</strong> {affiliateInfo.status}
+            </div>
+            <div>
+              <strong>Applied:</strong> {format(new Date(affiliateInfo.createdAt), 'PPP')}
+            </div>
+            {affiliateInfo.applicationNote && (
+              <div>
+                <strong>Your Note:</strong>
+                <p className="text-sm text-muted-foreground mt-1">{affiliateInfo.applicationNote}</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
     );
   }
