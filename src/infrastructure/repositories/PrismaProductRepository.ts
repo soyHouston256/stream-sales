@@ -72,21 +72,34 @@ export class PrismaProductRepository implements IProductRepository {
 
   /**
    * Desencripta el password
+   *
+   * NOTA: Para compatibilidad con datos existentes, si el password no está
+   * en formato encriptado (iv:encrypted), se asume que es texto plano
+   * y se retorna tal cual. Esto permite migración gradual.
    */
   private decrypt(text: string): string {
     const parts = text.split(':');
+
+    // Si no tiene el formato esperado (iv:encrypted), asumir texto plano
     if (parts.length !== 2) {
-      throw new Error('Invalid encrypted format');
+      console.warn('Password not in encrypted format, returning as-is. Consider re-encrypting.');
+      return text;
     }
 
-    const iv = Buffer.from(parts[0], 'hex');
-    const encryptedText = parts[1];
+    try {
+      const iv = Buffer.from(parts[0], 'hex');
+      const encryptedText = parts[1];
 
-    const decipher = crypto.createDecipheriv(this.ALGORITHM, this.ENCRYPTION_KEY, iv);
-    let decrypted = decipher.update(encryptedText, 'hex', 'utf8');
-    decrypted += decipher.final('utf8');
+      const decipher = crypto.createDecipheriv(this.ALGORITHM, this.ENCRYPTION_KEY, iv);
+      let decrypted = decipher.update(encryptedText, 'hex', 'utf8');
+      decrypted += decipher.final('utf8');
 
-    return decrypted;
+      return decrypted;
+    } catch (error) {
+      // Si falla la desencriptación, asumir que es texto plano
+      console.warn('Failed to decrypt password, returning as-is:', error);
+      return text;
+    }
   }
 
   /**
