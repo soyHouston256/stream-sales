@@ -116,6 +116,7 @@ model Product {
   name            String
   description     String    @db.Text
   price           Decimal   @db.Decimal(19, 4)
+  imageUrl        String?   // URL de la imagen del producto
   accountEmail    String
   accountPassword String    // DEBE estar encriptado
   accountDetails  Json?     // Datos adicionales (plan, perfil, etc)

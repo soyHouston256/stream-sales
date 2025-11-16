@@ -20,6 +20,7 @@ export const createProductSchema = z.object({
     })
     .min(0.01, 'Price must be greater than 0')
     .max(10000, 'Price must not exceed $10,000'),
+  imageUrl: z.string().url('Must be a valid URL').optional().or(z.literal('')),
   accountEmail: z.string().email('Invalid email format'),
   accountPassword: z.string().min(6, 'Password must be at least 6 characters'),
   accountDetails: z.any().optional(),
@@ -43,6 +44,7 @@ export const updateProductSchema = z.object({
     .min(0.01, 'Price must be greater than 0')
     .max(10000, 'Price must not exceed $10,000')
     .optional(),
+  imageUrl: z.string().url('Must be a valid URL').optional().or(z.literal('')),
   accountEmail: z.string().email('Invalid email format').optional(),
   accountPassword: z.string().min(6, 'Password must be at least 6 characters').optional(),
   accountDetails: z.any().optional(),

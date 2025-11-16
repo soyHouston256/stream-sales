@@ -22,6 +22,7 @@ export interface Product {
   name: string;
   description: string;
   price: string; // Decimal as string
+  imageUrl?: string; // Product image URL
   accountEmail: string;
   accountPassword: string; // Encrypted in backend
   accountDetails?: any; // JSON
@@ -37,6 +38,7 @@ export interface CreateProductDTO {
   name: string;
   description: string;
   price: number;
+  imageUrl?: string;
   accountEmail: string;
   accountPassword: string;
   accountDetails?: any;
@@ -46,6 +48,7 @@ export interface UpdateProductDTO {
   name?: string;
   description?: string;
   price?: number;
+  imageUrl?: string;
   accountEmail?: string;
   accountPassword?: string;
   accountDetails?: any;

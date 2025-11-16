@@ -162,6 +162,22 @@ export function CreateProductDialog({ trigger }: CreateProductDialogProps) {
           </div>
 
           <div className="space-y-2">
+            <Label htmlFor="imageUrl">Product Image URL (Optional)</Label>
+            <Input
+              id="imageUrl"
+              type="url"
+              placeholder="https://example.com/product-image.jpg"
+              {...register('imageUrl')}
+            />
+            {errors.imageUrl && (
+              <p className="text-sm text-red-500">{errors.imageUrl.message}</p>
+            )}
+            <p className="text-xs text-muted-foreground">
+              URL of the product image. Recommended size: 800x600px.
+            </p>
+          </div>
+
+          <div className="space-y-2">
             <Label htmlFor="accountEmail">
               Account Email <span className="text-red-500">*</span>
             </Label>
