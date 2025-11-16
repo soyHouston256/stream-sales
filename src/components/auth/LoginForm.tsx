@@ -38,7 +38,7 @@ type LoginFormData = z.infer<typeof loginSchema>;
 
 export function LoginForm() {
   const router = useRouter();
-  const { login } = useAuth();
+  const { login, user } = useAuth();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -61,10 +61,32 @@ export function LoginForm() {
         description: 'Bienvenido de vuelta',
       });
 
-      // Wait for user to be set in context
+      // After successful login, the AuthContext will update the user
+      // We need to wait a brief moment for the context to update before accessing user.role
+      // This is a more reliable approach than using window.location.reload()
       setTimeout(() => {
-        // Redirect will happen in the login page component after user is set
-        window.location.reload();
+        // At this point, the context should have the updated user
+        // We'll use a small delay to ensure React has updated the state
+        const token = localStorage.getItem('token');
+        if (token) {
+          // Call the API to get current user and redirect based on role
+          fetch('/api/auth/me', {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+            },
+          })
+            .then(res => res.json())
+            .then(data => {
+              if (data.user) {
+                const dashboardRoute = getDashboardRoute(data.user.role);
+                router.push(dashboardRoute);
+              }
+            })
+            .catch(() => {
+              // Fallback to default dashboard if API call fails
+              router.push('/dashboard/seller');
+            });
+        }
       }, 100);
     } catch (error) {
       console.error('Login error:', error);

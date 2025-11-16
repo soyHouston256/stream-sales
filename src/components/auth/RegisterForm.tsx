@@ -101,9 +101,12 @@ export function RegisterForm() {
         description: 'Tu cuenta ha sido creada correctamente',
       });
 
-      // Wait for user to be set in context
+      // Redirect to the appropriate dashboard based on selected role
+      const dashboardRoute = getDashboardRoute(data.role);
+
+      // Give a moment for the auth context to update, then redirect
       setTimeout(() => {
-        window.location.reload();
+        router.push(dashboardRoute);
       }, 100);
     } catch (error) {
       console.error('Registration error:', error);
