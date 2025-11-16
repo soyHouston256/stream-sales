@@ -10,15 +10,16 @@ type PrismaProduct = {
   name: string;
   description: string;
   price: string;
-  currency: string;
   providerId: string;
   category: string;
   accountEmail: string;
   accountPassword: string;
-  downloadLink: string | null;
-  available: boolean;
+  accountDetails: any;
+  imageUrl: string | null;
+  status: string;
   createdAt: Date;
   updatedAt: Date;
+  soldAt: Date | null;
 };
 
 /**
@@ -100,29 +101,33 @@ export class PrismaProductRepository implements IProductRepository {
     const savedProduct = await this.prisma.product.upsert({
       where: { id: data.id },
       update: {
+        name: data.name,
+        description: data.description,
         category: data.category,
         price: data.price,
-        currency: data.currency,
+        imageUrl: data.imageUrl,
         accountEmail: data.accountEmail,
         accountPassword: encryptedPassword,
+        accountDetails: data.accountDetails,
         status: data.status,
         updatedAt: data.updatedAt,
         soldAt: data.soldAt,
-        soldToUserId: data.soldToUserId,
       },
       create: {
         id: data.id,
         providerId: data.providerId,
+        name: data.name,
+        description: data.description,
         category: data.category,
         price: data.price,
-        currency: data.currency,
+        imageUrl: data.imageUrl,
         accountEmail: data.accountEmail,
         accountPassword: encryptedPassword,
+        accountDetails: data.accountDetails,
         status: data.status,
         createdAt: data.createdAt,
         updatedAt: data.updatedAt,
         soldAt: data.soldAt,
-        soldToUserId: data.soldToUserId,
       },
     });
 
@@ -258,9 +263,11 @@ export class PrismaProductRepository implements IProductRepository {
    * Convierte modelo de Prisma a entidad de dominio
    *
    * CRÍTICO: Desencripta el accountPassword
+   * Nota: El sistema usa USD como moneda por defecto
    */
   private toDomain(prismaProduct: any): Product {
-    const price = Money.fromPersistence(prismaProduct.price, prismaProduct.currency);
+    // El sistema usa USD como moneda por defecto (ver Wallet schema)
+    const price = Money.fromPersistence(prismaProduct.price, 'USD');
     const status = ProductStatus.fromPersistence(prismaProduct.status);
 
     // Desencriptar password
@@ -277,7 +284,6 @@ export class PrismaProductRepository implements IProductRepository {
       createdAt: prismaProduct.createdAt,
       updatedAt: prismaProduct.updatedAt,
       soldAt: prismaProduct.soldAt,
-      soldToUserId: prismaProduct.soldToUserId,
     });
   }
 }
