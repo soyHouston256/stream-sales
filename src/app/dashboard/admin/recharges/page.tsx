@@ -14,7 +14,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { CheckCircle, XCircle, AlertCircle, Search, DollarSign } from 'lucide-react';
-import { tokenManager } from '@/lib/tokenManager';
+import { tokenManager } from '@/lib/utils/tokenManager';
 import { useToast } from '@/hooks/use-toast';
 
 interface User {

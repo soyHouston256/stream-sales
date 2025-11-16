@@ -13,7 +13,7 @@ import { tokenManager } from '@/lib/utils/tokenManager';
 
 export default function AffiliateApplicationPage() {
   const router = useRouter();
-  const { user, loading: authLoading } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const [applicationNote, setApplicationNote] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
