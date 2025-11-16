@@ -3,6 +3,7 @@ import { IProductRepository } from '../../domain/repositories/IProductRepository
 import { IPurchaseRepository } from '../../domain/repositories/IPurchaseRepository';
 import { Purchase } from '../../domain/entities/Purchase';
 import { Money } from '../../domain/value-objects/Money';
+import { Wallet } from '../../domain/entities/Wallet';
 
 /**
  * PurchaseProductUseCase
@@ -142,14 +143,16 @@ export class PurchaseProductUseCase {
     }
 
     // Admin wallet (recibe comisiones)
-    const adminWallet = await this.walletRepository.findByUserId(
+    let adminWallet = await this.walletRepository.findByUserId(
       this.ADMIN_USER_ID
     );
 
+    // Auto-crear wallet de admin si no existe (para facilitar desarrollo)
     if (!adminWallet) {
-      throw new Error(
-        'Admin wallet not found. Please create admin user with wallet first.'
-      );
+      console.warn('[PurchaseProductUseCase] Admin wallet not found. Creating automatically...');
+      adminWallet = Wallet.create({ userId: this.ADMIN_USER_ID });
+      await this.walletRepository.save(adminWallet);
+      console.log('[PurchaseProductUseCase] Admin wallet created successfully');
     }
 
     // ============================================
