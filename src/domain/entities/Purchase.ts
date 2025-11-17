@@ -4,6 +4,7 @@ export interface PurchaseProps {
   id: string;
   sellerId: string;
   productId: string;
+  providerId: string; // Denormalizado para queries y disputas
   amount: Money; // Precio del producto en el momento de compra
   adminCommission: Money; // Comisión calculada
   commissionRate: number; // Snapshot de la tasa en el momento de compra (ej: 0.05 = 5%)
@@ -111,6 +112,10 @@ export class Purchase {
 
   get productId(): string {
     return this.props.productId;
+  }
+
+  get providerId(): string {
+    return this.props.providerId;
   }
 
   get amount(): Money {

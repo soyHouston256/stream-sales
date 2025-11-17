@@ -199,6 +199,7 @@ export class PrismaPurchaseRepository implements IPurchaseRepository {
       id: prismaPurchase.id,
       sellerId: prismaPurchase.sellerId,
       productId: prismaPurchase.productId,
+      providerId: prismaPurchase.providerId, // Denormalizado desde Purchase table
       amount: Money.fromPersistence(
         prismaPurchase.amount,
         'USD' // TODO: Obtener currency de la compra
