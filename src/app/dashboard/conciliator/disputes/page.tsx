@@ -12,8 +12,10 @@ import { useDisputes } from '@/lib/hooks/useDisputes';
 import { DisputesTable } from '@/components/conciliator/DisputesTable';
 import { StatsCard } from '@/components/conciliator/StatsCard';
 import { DisputeStatus } from '@/types/conciliator';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function DisputesQueuePage() {
+  const { t } = useLanguage();
   const [page, setPage] = useState(1);
   const [status, setStatus] = useState<DisputeStatus | 'all'>('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -32,7 +34,7 @@ export default function DisputesQueuePage() {
         open: data.disputes.filter((d) => d.status === 'open').length,
         underReview: data.disputes.filter((d) => d.status === 'under_review').length,
         resolved: data.disputes.filter((d) => d.status === 'resolved').length,
-        total: data.pagination.total,
+        total: data.pagination?.total || 0,
       }
     : null;
 
@@ -52,9 +54,9 @@ export default function DisputesQueuePage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">All Disputes</h1>
+        <h1 className="text-3xl font-bold">{t('conciliator.disputes.title')}</h1>
         <p className="text-muted-foreground mt-2">
-          Manage and review all disputes in the system
+          {t('conciliator.disputes.subtitle')}
         </p>
       </div>
 
@@ -75,27 +77,27 @@ export default function DisputesQueuePage() {
       ) : quickStats ? (
         <div className="grid gap-4 md:grid-cols-4">
           <StatsCard
-            title="Total Open"
+            title={t('conciliator.disputes.totalOpen')}
             value={quickStats.open}
-            description="Awaiting assignment"
+            description={t('conciliator.disputes.awaitingAssignment')}
             icon={Inbox}
           />
           <StatsCard
-            title="Under Review"
+            title={t('conciliator.disputes.underReview')}
             value={quickStats.underReview}
-            description="Being reviewed"
+            description={t('conciliator.disputes.beingReviewed')}
             icon={Clock}
           />
           <StatsCard
-            title="Resolved"
+            title={t('conciliator.disputes.resolved')}
             value={quickStats.resolved}
-            description="This page"
+            description={t('conciliator.disputes.thisPage')}
             icon={CheckCircle}
           />
           <StatsCard
-            title="Total Disputes"
+            title={t('conciliator.disputes.totalDisputes')}
             value={quickStats.total}
-            description="All time"
+            description={t('conciliator.disputes.allTime')}
             icon={AlertCircle}
           />
         </div>
@@ -104,13 +106,13 @@ export default function DisputesQueuePage() {
       {/* Filters */}
       <Card>
         <CardHeader>
-          <CardTitle>Filters</CardTitle>
-          <CardDescription>Search and filter disputes</CardDescription>
+          <CardTitle>{t('conciliator.disputes.filters')}</CardTitle>
+          <CardDescription>{t('conciliator.disputes.searchAndFilter')}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-3">
             <div className="space-y-2">
-              <Label htmlFor="status">Status</Label>
+              <Label htmlFor="status">{t('conciliator.disputes.status')}</Label>
               <Select
                 value={status}
                 onValueChange={(value) => {
@@ -119,25 +121,25 @@ export default function DisputesQueuePage() {
                 }}
               >
                 <SelectTrigger id="status">
-                  <SelectValue placeholder="All statuses" />
+                  <SelectValue placeholder={t('conciliator.disputes.allStatuses')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Statuses</SelectItem>
-                  <SelectItem value="open">Open</SelectItem>
-                  <SelectItem value="under_review">Under Review</SelectItem>
-                  <SelectItem value="resolved">Resolved</SelectItem>
-                  <SelectItem value="closed">Closed</SelectItem>
+                  <SelectItem value="all">{t('conciliator.disputes.allStatuses')}</SelectItem>
+                  <SelectItem value="open">{t('conciliator.disputes.open')}</SelectItem>
+                  <SelectItem value="under_review">{t('conciliator.disputes.underReview')}</SelectItem>
+                  <SelectItem value="resolved">{t('conciliator.disputes.resolved')}</SelectItem>
+                  <SelectItem value="closed">{t('conciliator.disputes.closed')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className="space-y-2 md:col-span-2">
-              <Label htmlFor="search">Search</Label>
+              <Label htmlFor="search">{t('conciliator.disputes.search')}</Label>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   id="search"
-                  placeholder="Search by ID, seller, provider, or product..."
+                  placeholder={t('conciliator.disputes.searchPlaceholder')}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-10"
@@ -151,11 +153,11 @@ export default function DisputesQueuePage() {
       {/* Disputes Table */}
       <Card>
         <CardHeader>
-          <CardTitle>Disputes</CardTitle>
+          <CardTitle>{t('conciliator.disputes.disputesTable')}</CardTitle>
           <CardDescription>
             {data
-              ? `Showing ${(page - 1) * 10 + 1}-${Math.min(page * 10, data.pagination.total)} of ${data.pagination.total} disputes`
-              : 'Loading...'}
+              ? `${t('conciliator.disputes.showing')} ${(page - 1) * 10 + 1}-${Math.min(page * 10, data.pagination?.total || 0)} ${t('conciliator.disputes.of')} ${data.pagination?.total || 0} ${t('conciliator.disputes.disputesText')}`
+              : t('conciliator.disputes.loading')}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -173,31 +175,31 @@ export default function DisputesQueuePage() {
             />
           ) : (
             <p className="text-sm text-muted-foreground text-center py-8">
-              No disputes found matching your criteria
+              {t('conciliator.disputes.noDisputes')}
             </p>
           )}
         </CardContent>
       </Card>
 
       {/* Pagination */}
-      {data && data.pagination.totalPages > 1 && (
+      {data && data.pagination?.totalPages > 1 && (
         <div className="flex items-center justify-center gap-2">
           <Button
             variant="outline"
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page === 1}
           >
-            Previous
+            {t('conciliator.disputes.previous')}
           </Button>
           <span className="text-sm text-muted-foreground">
-            Page {page} of {data.pagination.totalPages}
+            {t('conciliator.disputes.page')} {page} {t('conciliator.disputes.of')} {data.pagination.totalPages}
           </span>
           <Button
             variant="outline"
-            onClick={() => setPage((p) => Math.min(data.pagination.totalPages, p + 1))}
-            disabled={page === data.pagination.totalPages}
+            onClick={() => setPage((p) => Math.min(data.pagination?.totalPages || 1, p + 1))}
+            disabled={page === data.pagination?.totalPages}
           >
-            Next
+            {t('conciliator.disputes.next')}
           </Button>
         </div>
       )}

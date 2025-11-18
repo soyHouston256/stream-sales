@@ -14,8 +14,10 @@ import { DisputeTimeline } from '@/components/conciliator/DisputeTimeline';
 import { DisputeMessageForm } from '@/components/conciliator/DisputeMessageForm';
 import { ResolveDisputeForm } from '@/components/conciliator/ResolveDisputeForm';
 import { ResolutionTypeBadge } from '@/components/conciliator/ResolutionTypeBadge';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function DisputeDetailsPage() {
+  const { t } = useLanguage();
   const params = useParams();
   const router = useRouter();
   const { user } = useAuth();
@@ -39,9 +41,9 @@ export default function DisputeDetailsPage() {
           <ArrowLeft className="h-4 w-4" />
         </Button>
         <div className="flex-1">
-          <h1 className="text-3xl font-bold">Dispute Details</h1>
+          <h1 className="text-3xl font-bold">{t('conciliator.details.title')}</h1>
           <p className="text-muted-foreground mt-1">
-            {disputeLoading ? 'Loading...' : `Dispute ID: ${disputeId.slice(0, 12)}...`}
+            {disputeLoading ? t('conciliator.details.loading') : `${t('conciliator.details.disputeId')}: ${disputeId.slice(0, 12)}...`}
           </p>
         </div>
       </div>
@@ -81,7 +83,7 @@ export default function DisputeDetailsPage() {
             <Card className="border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950/20">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-green-800 dark:text-green-400">
-                  Resolution
+                  {t('conciliator.details.resolution')}
                 </CardTitle>
                 <CardDescription className="flex items-center gap-2">
                   <ResolutionTypeBadge
@@ -105,9 +107,9 @@ export default function DisputeDetailsPage() {
             <div className="lg:col-span-2 space-y-6">
               <Card>
                 <CardHeader>
-                  <CardTitle>Timeline & Messages</CardTitle>
+                  <CardTitle>{t('conciliator.details.timelineMessages')}</CardTitle>
                   <CardDescription>
-                    All events and communications for this dispute
+                    {t('conciliator.details.timelineDescription')}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -139,29 +141,29 @@ export default function DisputeDetailsPage() {
               ) : isResolved ? (
                 <Card>
                   <CardHeader>
-                    <CardTitle>Dispute Resolved</CardTitle>
+                    <CardTitle>{t('conciliator.details.disputeResolved')}</CardTitle>
                     <CardDescription>
-                      This dispute has been resolved and is closed
+                      {t('conciliator.details.disputeResolvedDesc')}
                     </CardDescription>
                   </CardHeader>
                 </Card>
               ) : dispute.status === 'open' ? (
                 <Card>
                   <CardHeader>
-                    <CardTitle>Not Assigned</CardTitle>
+                    <CardTitle>{t('conciliator.details.notAssigned')}</CardTitle>
                     <CardDescription>
-                      This dispute has not been assigned to a conciliator yet
+                      {t('conciliator.details.notAssignedDesc')}
                     </CardDescription>
                   </CardHeader>
                 </Card>
               ) : (
                 <Card>
                   <CardHeader>
-                    <CardTitle>Assigned to Another Conciliator</CardTitle>
+                    <CardTitle>{t('conciliator.details.assignedToAnother')}</CardTitle>
                     <CardDescription>
                       {dispute.conciliator
-                        ? `This dispute is assigned to ${dispute.conciliator.name}`
-                        : 'This dispute is assigned to someone else'}
+                        ? `${t('conciliator.details.assignedToAnotherDesc')} ${dispute.conciliator.name}`
+                        : t('conciliator.details.assignedToSomeoneElse')}
                     </CardDescription>
                   </CardHeader>
                 </Card>
@@ -172,7 +174,7 @@ export default function DisputeDetailsPage() {
       ) : (
         <Card>
           <CardContent className="py-12 text-center">
-            <p className="text-muted-foreground">Dispute not found</p>
+            <p className="text-muted-foreground">{t('conciliator.details.disputeNotFound')}</p>
           </CardContent>
         </Card>
       )}

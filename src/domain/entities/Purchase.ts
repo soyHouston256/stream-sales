@@ -119,7 +119,7 @@ export class Purchase {
     return this.props.productId;
   }
 
-  get providerId(): string {
+  get providerId(): string | undefined {
     return this.props.providerId;
   }
 

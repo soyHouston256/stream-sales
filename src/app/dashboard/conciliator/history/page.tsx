@@ -14,8 +14,10 @@ import { StatsCard } from '@/components/conciliator/StatsCard';
 import { ResolutionStatsChart } from '@/components/conciliator/ResolutionStatsChart';
 import { ResolutionTypeBadge } from '@/components/conciliator/ResolutionTypeBadge';
 import { calculateResolutionTime, formatResolutionTime } from '@/lib/utils/conciliator';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function ConciliatorHistoryPage() {
+  const { t } = useLanguage();
   const [page, setPage] = useState(1);
 
   const { data: performance, isLoading: performanceLoading } = useConciliatorPerformance();
@@ -24,9 +26,9 @@ export default function ConciliatorHistoryPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">My History</h1>
+        <h1 className="text-3xl font-bold">{t('conciliator.history.title')}</h1>
         <p className="text-muted-foreground mt-2">
-          Your dispute resolution history and performance metrics
+          {t('conciliator.history.subtitle')}
         </p>
       </div>
 
@@ -48,27 +50,27 @@ export default function ConciliatorHistoryPage() {
       ) : performance ? (
         <div className="grid gap-4 md:grid-cols-4">
           <StatsCard
-            title="Total Resolved"
+            title={t('conciliator.history.totalResolved')}
             value={performance.totalResolved}
-            description="All time"
+            description={t('conciliator.history.allTime')}
             icon={CheckCircle}
           />
           <StatsCard
-            title="Avg Resolution Time"
+            title={t('conciliator.history.avgResolutionTime')}
             value={`${parseFloat(String(performance.averageResolutionTimeHours)).toFixed(1)}h`}
-            description="Average time to resolve"
+            description={t('conciliator.history.averageTime')}
             icon={Clock}
           />
           <StatsCard
-            title="Refund Rate"
+            title={t('conciliator.history.refundRate')}
             value={`${parseFloat(String(performance.refundRate)).toFixed(0)}%`}
-            description="Disputes resolved with refund"
+            description={t('conciliator.history.refundRateDesc')}
             icon={TrendingUp}
           />
           <StatsCard
-            title="This Week"
+            title={t('conciliator.history.thisWeek')}
             value={performance.thisWeekResolved}
-            description="Resolved this week"
+            description={t('conciliator.history.resolvedThisWeek')}
             icon={CheckCircle}
           />
         </div>
@@ -91,11 +93,11 @@ export default function ConciliatorHistoryPage() {
       {/* History Table */}
       <Card>
         <CardHeader>
-          <CardTitle>Resolved Disputes</CardTitle>
+          <CardTitle>{t('conciliator.history.resolvedDisputes')}</CardTitle>
           <CardDescription>
             {history
-              ? `Showing ${(page - 1) * 10 + 1}-${Math.min(page * 10, history.pagination.total)} of ${history.pagination.total} disputes`
-              : 'Loading...'}
+              ? `${t('conciliator.history.showing')} ${(page - 1) * 10 + 1}-${Math.min(page * 10, history.pagination.total)} ${t('conciliator.history.of')} ${history.pagination.total} ${t('conciliator.history.disputesText')}`
+              : t('conciliator.history.loading')}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -110,13 +112,13 @@ export default function ConciliatorHistoryPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Dispute ID</TableHead>
-                    <TableHead>Product</TableHead>
-                    <TableHead>Seller / Provider</TableHead>
-                    <TableHead>Resolution Type</TableHead>
-                    <TableHead>Resolution Time</TableHead>
-                    <TableHead>Resolved At</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    <TableHead>{t('conciliator.history.disputeId')}</TableHead>
+                    <TableHead>{t('conciliator.history.product')}</TableHead>
+                    <TableHead>{t('conciliator.history.sellerProvider')}</TableHead>
+                    <TableHead>{t('conciliator.history.resolutionType')}</TableHead>
+                    <TableHead>{t('conciliator.history.resolutionTime')}</TableHead>
+                    <TableHead>{t('conciliator.history.resolvedAt')}</TableHead>
+                    <TableHead className="text-right">{t('conciliator.history.actions')}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -138,10 +140,10 @@ export default function ConciliatorHistoryPage() {
                         <TableCell>
                           <div className="space-y-1">
                             <p className="text-sm">
-                              <span className="font-medium">Seller:</span> {dispute.seller.name}
+                              <span className="font-medium">{t('conciliator.history.seller')}:</span> {dispute.seller.name}
                             </p>
                             <p className="text-sm">
-                              <span className="font-medium">Provider:</span> {dispute.provider.name}
+                              <span className="font-medium">{t('conciliator.history.provider')}:</span> {dispute.provider.name}
                             </p>
                           </div>
                         </TableCell>
@@ -178,7 +180,7 @@ export default function ConciliatorHistoryPage() {
                           <Button size="sm" variant="outline" asChild>
                             <Link href={`/dashboard/conciliator/disputes/${dispute.id}`}>
                               <Eye className="mr-1 h-3 w-3" />
-                              View
+                              {t('conciliator.history.view')}
                             </Link>
                           </Button>
                         </TableCell>
@@ -190,7 +192,7 @@ export default function ConciliatorHistoryPage() {
             </div>
           ) : (
             <p className="text-sm text-muted-foreground text-center py-8">
-              No resolved disputes yet
+              {t('conciliator.history.noResolvedDisputes')}
             </p>
           )}
         </CardContent>
@@ -204,17 +206,17 @@ export default function ConciliatorHistoryPage() {
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page === 1}
           >
-            Previous
+            {t('conciliator.history.previous')}
           </Button>
           <span className="text-sm text-muted-foreground">
-            Page {page} of {history.pagination.totalPages}
+            {t('conciliator.history.page')} {page} {t('conciliator.history.of')} {history.pagination.totalPages}
           </span>
           <Button
             variant="outline"
             onClick={() => setPage((p) => Math.min(history.pagination.totalPages, p + 1))}
             disabled={page === history.pagination.totalPages}
           >
-            Next
+            {t('conciliator.history.next')}
           </Button>
         </div>
       )}

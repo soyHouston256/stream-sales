@@ -256,7 +256,7 @@ export default function CommissionsPage() {
               </div>
 
               {/* Pagination */}
-              {commissions.pagination.totalPages > 1 && (
+              {commissions?.pagination?.totalPages > 1 && (
                 <div className="flex items-center justify-between mt-4">
                   <p className="text-sm text-muted-foreground">
                     {t('affiliate.commissions.page')} {commissions.pagination.page} {t('affiliate.commissions.of')} {commissions.pagination.totalPages}
@@ -274,7 +274,7 @@ export default function CommissionsPage() {
                       variant="outline"
                       size="sm"
                       onClick={() => handlePageChange(filters.page! + 1)}
-                      disabled={filters.page === commissions.pagination.totalPages}
+                      disabled={filters.page === commissions?.pagination?.totalPages}
                     >
                       {t('affiliate.commissions.next')}
                     </Button>

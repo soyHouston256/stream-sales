@@ -263,7 +263,7 @@ export default function ReferralsPage() {
               </div>
 
               {/* Pagination */}
-              {data.pagination.totalPages > 1 && (
+              {data?.pagination?.totalPages > 1 && (
                 <div className="flex items-center justify-between">
                   <p className="text-sm text-muted-foreground">
                     {t('affiliate.referrals.page')} {data.pagination.page} {t('affiliate.referrals.of')} {data.pagination.totalPages}
@@ -281,7 +281,7 @@ export default function ReferralsPage() {
                       variant="outline"
                       size="sm"
                       onClick={() => handlePageChange(filters.page! + 1)}
-                      disabled={filters.page === data.pagination.totalPages}
+                      disabled={filters.page === data?.pagination?.totalPages}
                     >
                       {t('affiliate.referrals.next')}
                     </Button>

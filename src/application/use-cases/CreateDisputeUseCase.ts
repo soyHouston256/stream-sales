@@ -70,6 +70,11 @@ export class CreateDisputeUseCase {
     // 4. Determinar quién abre la disputa (seller o provider)
     const openedBy: 'seller' | 'provider' = isSeller ? 'seller' : 'provider';
 
+    // 4.1 Verificar que existe providerId
+    if (!purchase.providerId) {
+      throw new Error('Purchase does not have a provider ID');
+    }
+
     // 5. Crear la disputa
     const dispute = Dispute.create({
       purchaseId: data.purchaseId,

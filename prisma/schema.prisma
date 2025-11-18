@@ -241,19 +241,20 @@ model AffiliateProfile {
 // ============================================
 
 model Dispute {
-  id             String    @id @default(cuid())
-  purchaseId     String    @unique
-  sellerId       String    // Denormalizado
-  providerId     String    // Denormalizado
-  conciliatorId  String?
-  openedBy       String    // seller, provider
-  reason         String    @db.Text
-  status         String    @default("open") // open, under_review, resolved, closed
-  resolution     String?   @db.Text
-  resolutionType String?   // refund_seller, favor_provider, partial_refund, no_action
-  createdAt      DateTime  @default(now())
-  assignedAt     DateTime?
-  resolvedAt     DateTime?
+  id                      String    @id @default(cuid())
+  purchaseId              String    @unique
+  sellerId                String    // Denormalizado
+  providerId              String    // Denormalizado
+  conciliatorId           String?
+  openedBy                String    // seller, provider
+  reason                  String    @db.Text
+  status                  String    @default("open") // open, under_review, resolved, closed
+  resolution              String?   @db.Text
+  resolutionType          String?   // refund_seller, favor_provider, partial_refund, no_action
+  partialRefundPercentage Decimal?  @db.Decimal(5, 2) // 0-100, solo para partial_refund
+  createdAt               DateTime  @default(now())
+  assignedAt              DateTime?
+  resolvedAt              DateTime?
 
   // Relations
   purchase    Purchase         @relation(fields: [purchaseId], references: [id])
