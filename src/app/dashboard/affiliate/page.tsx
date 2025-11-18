@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { format } from 'date-fns';
 import { useAuth } from '@/lib/auth/useAuth';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Table,
@@ -31,6 +32,7 @@ import { formatCommissionAmount } from '@/lib/utils/affiliate';
 
 export default function AffiliateDashboard() {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const { data: affiliateInfo, isLoading: infoLoading, error: infoError } = useAffiliateInfo();
   const { data: stats, isLoading: statsLoading } = useAffiliateStats();
   const { data: chartData, isLoading: chartLoading } = useReferralsByMonth(6);
@@ -44,25 +46,25 @@ export default function AffiliateDashboard() {
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold">Affiliate Dashboard</h1>
+          <h1 className="text-3xl font-bold">{t('affiliate.title')}</h1>
         </div>
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
-            Failed to load affiliate information. You may not be enrolled in the affiliate program.
+            {t('affiliate.notEnrolled')}
           </AlertDescription>
         </Alert>
         <Card>
           <CardHeader>
-            <CardTitle>Not an Affiliate Yet?</CardTitle>
+            <CardTitle>{t('affiliate.notAffiliateYet')}</CardTitle>
             <CardDescription>
-              Join our affiliate program and start earning commissions today
+              {t('affiliate.joinProgram')}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Link href="/affiliate/apply">
               <Button>
-                Apply to Affiliate Program
+                {t('affiliate.applyToProgram')}
               </Button>
             </Link>
           </CardContent>
@@ -76,13 +78,13 @@ export default function AffiliateDashboard() {
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold">Affiliate Dashboard</h1>
+          <h1 className="text-3xl font-bold">{t('affiliate.title')}</h1>
         </div>
         {affiliateInfo.status === 'pending' && (
           <Alert>
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
-              Your affiliate application is pending review. You'll be notified once an admin approves your application.
+              {t('affiliate.pendingApplication')}
             </AlertDescription>
           </Alert>
         )}
@@ -90,10 +92,10 @@ export default function AffiliateDashboard() {
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
-              Your affiliate application was rejected.
+              {t('affiliate.rejectedApplication')}
               {affiliateInfo.rejectionReason && (
                 <div className="mt-2">
-                  <strong>Reason:</strong> {affiliateInfo.rejectionReason}
+                  <strong>{t('affiliate.reason')}:</strong> {affiliateInfo.rejectionReason}
                 </div>
               )}
             </AlertDescription>
@@ -101,21 +103,21 @@ export default function AffiliateDashboard() {
         )}
         <Card>
           <CardHeader>
-            <CardTitle>Application Status</CardTitle>
+            <CardTitle>{t('affiliate.applicationStatus')}</CardTitle>
             <CardDescription>
-              Your affiliate application details
+              {t('affiliate.applicationDetails')}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-2">
             <div>
-              <strong>Status:</strong> {affiliateInfo.status}
+              <strong>{t('affiliate.status')}:</strong> {affiliateInfo.status}
             </div>
             <div>
-              <strong>Applied:</strong> {format(new Date(affiliateInfo.createdAt), 'PPP')}
+              <strong>{t('affiliate.applied')}:</strong> {format(new Date(affiliateInfo.createdAt), 'PPP')}
             </div>
             {affiliateInfo.applicationNote && (
               <div>
-                <strong>Your Note:</strong>
+                <strong>{t('affiliate.yourNote')}:</strong>
                 <p className="text-sm text-muted-foreground mt-1">{affiliateInfo.applicationNote}</p>
               </div>
             )}
@@ -129,9 +131,9 @@ export default function AffiliateDashboard() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold">Affiliate Dashboard</h1>
+        <h1 className="text-3xl font-bold">{t('affiliate.title')}</h1>
         <p className="text-muted-foreground mt-2">
-          Welcome back, {user?.name || user?.email}
+          {t('dashboard.welcome')}, {user?.name || user?.email}
         </p>
       </div>
 
@@ -149,7 +151,7 @@ export default function AffiliateDashboard() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Referrals</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('affiliate.totalReferrals')}</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -159,7 +161,7 @@ export default function AffiliateDashboard() {
               <>
                 <div className="text-2xl font-bold">{stats?.totalReferrals || 0}</div>
                 <p className="text-xs text-muted-foreground">
-                  {stats?.activeReferrals || 0} active
+                  {stats?.activeReferrals || 0} {t('affiliate.active')}
                 </p>
               </>
             )}
@@ -168,7 +170,7 @@ export default function AffiliateDashboard() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Referrals</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('affiliate.activeReferrals')}</CardTitle>
             <Users className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
@@ -180,7 +182,7 @@ export default function AffiliateDashboard() {
                   {stats?.activeReferrals || 0}
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  {stats?.thisMonthReferrals || 0} this month
+                  {stats?.thisMonthReferrals || 0} {t('affiliate.thisMonth')}
                 </p>
               </>
             )}
@@ -189,7 +191,7 @@ export default function AffiliateDashboard() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Earned</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('affiliate.totalEarned')}</CardTitle>
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -200,7 +202,7 @@ export default function AffiliateDashboard() {
                 <div className="text-2xl font-bold">
                   {formatCommissionAmount(stats?.totalCommissionEarned || '0')}
                 </div>
-                <p className="text-xs text-muted-foreground">All time</p>
+                <p className="text-xs text-muted-foreground">{t('affiliate.allTime')}</p>
               </>
             )}
           </CardContent>
@@ -208,7 +210,7 @@ export default function AffiliateDashboard() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Available Balance</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('affiliate.availableBalance')}</CardTitle>
             <TrendingUp className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
@@ -220,7 +222,7 @@ export default function AffiliateDashboard() {
                   {formatCommissionAmount(stats?.availableBalance || '0')}
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  {formatCommissionAmount(stats?.thisMonthEarned || '0')} this month
+                  {formatCommissionAmount(stats?.thisMonthEarned || '0')} {t('affiliate.thisMonth')}
                 </p>
               </>
             )}
@@ -236,12 +238,12 @@ export default function AffiliateDashboard() {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle>Recent Referrals</CardTitle>
-              <CardDescription>Your most recent referrals</CardDescription>
+              <CardTitle>{t('affiliate.recentReferrals')}</CardTitle>
+              <CardDescription>{t('affiliate.mostRecentReferrals')}</CardDescription>
             </div>
             <Button variant="outline" size="sm" asChild>
               <Link href="/dashboard/affiliate/referrals">
-                View All
+                {t('affiliate.viewAll')}
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
@@ -259,11 +261,11 @@ export default function AffiliateDashboard() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>User</TableHead>
-                    <TableHead>Role</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Registered</TableHead>
-                    <TableHead className="text-right">Commission</TableHead>
+                    <TableHead>{t('affiliate.user')}</TableHead>
+                    <TableHead>{t('affiliate.role')}</TableHead>
+                    <TableHead>{t('affiliate.status')}</TableHead>
+                    <TableHead>{t('affiliate.registered')}</TableHead>
+                    <TableHead className="text-right">{t('affiliate.commission')}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -296,7 +298,7 @@ export default function AffiliateDashboard() {
             </div>
           ) : (
             <div className="py-8 text-center text-muted-foreground">
-              No referrals yet. Start sharing your referral code to earn commissions!
+              {t('affiliate.noReferrals')}
             </div>
           )}
         </CardContent>

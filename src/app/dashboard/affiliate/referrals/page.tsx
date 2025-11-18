@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { format } from 'date-fns';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Table,
@@ -31,6 +32,7 @@ import {
 import { formatCommissionAmount } from '@/lib/utils/affiliate';
 
 export default function ReferralsPage() {
+  const { t } = useLanguage();
   const [filters, setFilters] = useState<ReferralFilters>({
     page: 1,
     limit: 10,
@@ -77,9 +79,9 @@ export default function ReferralsPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold">Referrals Management</h1>
+        <h1 className="text-3xl font-bold">{t('affiliate.referrals.title')}</h1>
         <p className="text-muted-foreground mt-2">
-          Manage and track all your referrals
+          {t('affiliate.referrals.subtitle')}
         </p>
       </div>
 
@@ -87,7 +89,7 @@ export default function ReferralsPage() {
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Referrals</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('affiliate.referrals.totalReferrals')}</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -101,7 +103,7 @@ export default function ReferralsPage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('affiliate.referrals.active')}</CardTitle>
             <Users className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
@@ -115,7 +117,7 @@ export default function ReferralsPage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Inactive</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('affiliate.referrals.inactive')}</CardTitle>
             <Users className="h-4 w-4 text-gray-500" />
           </CardHeader>
           <CardContent>
@@ -129,7 +131,7 @@ export default function ReferralsPage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">This Month</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('affiliate.referrals.thisMonth')}</CardTitle>
             <Users className="h-4 w-4 text-blue-600" />
           </CardHeader>
           <CardContent>
@@ -154,8 +156,8 @@ export default function ReferralsPage() {
       {/* Filters and Table */}
       <Card>
         <CardHeader>
-          <CardTitle>All Referrals</CardTitle>
-          <CardDescription>Complete list of users you have referred</CardDescription>
+          <CardTitle>{t('affiliate.referrals.allReferrals')}</CardTitle>
+          <CardDescription>{t('affiliate.referrals.completeList')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {/* Filters */}
@@ -163,7 +165,7 @@ export default function ReferralsPage() {
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
-                placeholder="Search by name or email..."
+                placeholder={t('affiliate.referrals.searchPlaceholder')}
                 className="pl-10"
                 onChange={(e) => handleSearch(e.target.value)}
               />
@@ -174,13 +176,13 @@ export default function ReferralsPage() {
             >
               <SelectTrigger className="w-full md:w-[180px]">
                 <Filter className="mr-2 h-4 w-4" />
-                <SelectValue placeholder="Status" />
+                <SelectValue placeholder={t('affiliate.status')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="inactive">Inactive</SelectItem>
-                <SelectItem value="suspended">Suspended</SelectItem>
+                <SelectItem value="all">{t('affiliate.referrals.allStatus')}</SelectItem>
+                <SelectItem value="active">{t('affiliate.referrals.active')}</SelectItem>
+                <SelectItem value="inactive">{t('affiliate.referrals.inactive')}</SelectItem>
+                <SelectItem value="suspended">{t('affiliate.referrals.suspended')}</SelectItem>
               </SelectContent>
             </Select>
             <Select
@@ -188,15 +190,15 @@ export default function ReferralsPage() {
               onValueChange={handleRoleFilter}
             >
               <SelectTrigger className="w-full md:w-[180px]">
-                <SelectValue placeholder="Role" />
+                <SelectValue placeholder={t('affiliate.role')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Roles</SelectItem>
-                <SelectItem value="admin">Admin</SelectItem>
-                <SelectItem value="provider">Provider</SelectItem>
-                <SelectItem value="seller">Seller</SelectItem>
-                <SelectItem value="affiliate">Affiliate</SelectItem>
-                <SelectItem value="conciliator">Conciliator</SelectItem>
+                <SelectItem value="all">{t('affiliate.referrals.allRoles')}</SelectItem>
+                <SelectItem value="admin">{t('affiliate.referrals.admin')}</SelectItem>
+                <SelectItem value="provider">{t('affiliate.referrals.provider')}</SelectItem>
+                <SelectItem value="seller">{t('affiliate.referrals.seller')}</SelectItem>
+                <SelectItem value="affiliate">{t('affiliate.referrals.affiliate')}</SelectItem>
+                <SelectItem value="conciliator">{t('affiliate.referrals.conciliator')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -214,12 +216,12 @@ export default function ReferralsPage() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>User</TableHead>
-                      <TableHead>Role</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Registered</TableHead>
-                      <TableHead className="text-right">Commission Earned</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
+                      <TableHead>{t('affiliate.referrals.user')}</TableHead>
+                      <TableHead>{t('affiliate.referrals.role')}</TableHead>
+                      <TableHead>{t('affiliate.referrals.status')}</TableHead>
+                      <TableHead>{t('affiliate.referrals.registered')}</TableHead>
+                      <TableHead className="text-right">{t('affiliate.referrals.commissionEarned')}</TableHead>
+                      <TableHead className="text-right">{t('affiliate.referrals.actions')}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -264,7 +266,7 @@ export default function ReferralsPage() {
               {data.pagination.totalPages > 1 && (
                 <div className="flex items-center justify-between">
                   <p className="text-sm text-muted-foreground">
-                    Page {data.pagination.page} of {data.pagination.totalPages}
+                    {t('affiliate.referrals.page')} {data.pagination.page} {t('affiliate.referrals.of')} {data.pagination.totalPages}
                   </p>
                   <div className="flex gap-2">
                     <Button
@@ -273,7 +275,7 @@ export default function ReferralsPage() {
                       onClick={() => handlePageChange(filters.page! - 1)}
                       disabled={filters.page === 1}
                     >
-                      Previous
+                      {t('affiliate.referrals.previous')}
                     </Button>
                     <Button
                       variant="outline"
@@ -281,7 +283,7 @@ export default function ReferralsPage() {
                       onClick={() => handlePageChange(filters.page! + 1)}
                       disabled={filters.page === data.pagination.totalPages}
                     >
-                      Next
+                      {t('affiliate.referrals.next')}
                     </Button>
                   </div>
                 </div>
@@ -289,7 +291,7 @@ export default function ReferralsPage() {
             </>
           ) : (
             <div className="py-8 text-center text-muted-foreground">
-              No referrals found. Try adjusting your filters.
+              {t('affiliate.referrals.noReferrals')}
             </div>
           )}
         </CardContent>

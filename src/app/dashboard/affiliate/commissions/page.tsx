@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { format } from 'date-fns';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Table,
@@ -34,6 +35,7 @@ import {
 import { formatCommissionAmount, getBalanceColorClass } from '@/lib/utils/affiliate';
 
 export default function CommissionsPage() {
+  const { t } = useLanguage();
   const [filters, setFilters] = useState<CommissionFilters>({
     page: 1,
     limit: 10,
@@ -74,9 +76,9 @@ export default function CommissionsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Commissions</h1>
+          <h1 className="text-3xl font-bold">{t('affiliate.commissions.title')}</h1>
           <p className="text-muted-foreground mt-2">
-            Track your earnings and request payments
+            {t('affiliate.commissions.subtitle')}
           </p>
         </div>
         <Button
@@ -85,7 +87,7 @@ export default function CommissionsPage() {
           disabled={!balance || parseFloat(balance.availableBalance) < 50}
         >
           <ArrowUpRight className="mr-2 h-4 w-4" />
-          Request Payment
+          {t('affiliate.commissions.requestPayment')}
         </Button>
       </div>
 
@@ -93,7 +95,7 @@ export default function CommissionsPage() {
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Available Balance</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('affiliate.availableBalance')}</CardTitle>
             <DollarSign className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
@@ -104,7 +106,7 @@ export default function CommissionsPage() {
                 <div className={`text-2xl font-bold ${getBalanceColorClass(balance?.availableBalance || '0')}`}>
                   {formatCommissionAmount(balance?.availableBalance || '0')}
                 </div>
-                <p className="text-xs text-muted-foreground">Ready to withdraw</p>
+                <p className="text-xs text-muted-foreground">{t('affiliate.commissions.readyToWithdraw')}</p>
               </>
             )}
           </CardContent>
@@ -112,7 +114,7 @@ export default function CommissionsPage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Earned</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('affiliate.totalEarned')}</CardTitle>
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -123,7 +125,7 @@ export default function CommissionsPage() {
                 <div className="text-2xl font-bold">
                   {formatCommissionAmount(balance?.totalEarned || '0')}
                 </div>
-                <p className="text-xs text-muted-foreground">Lifetime earnings</p>
+                <p className="text-xs text-muted-foreground">{t('affiliate.commissions.lifetimeEarnings')}</p>
               </>
             )}
           </CardContent>
@@ -131,7 +133,7 @@ export default function CommissionsPage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">This Month</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('affiliate.thisMonth')}</CardTitle>
             <DollarSign className="h-4 w-4 text-blue-600" />
           </CardHeader>
           <CardContent>
@@ -142,7 +144,7 @@ export default function CommissionsPage() {
                 <div className="text-2xl font-bold text-blue-600">
                   {formatCommissionAmount(balance?.thisMonthEarned || '0')}
                 </div>
-                <p className="text-xs text-muted-foreground">Current month</p>
+                <p className="text-xs text-muted-foreground">{t('affiliate.commissions.currentMonth')}</p>
               </>
             )}
           </CardContent>
@@ -150,7 +152,7 @@ export default function CommissionsPage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pending Payments</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('affiliate.commissions.pendingPayments')}</CardTitle>
             <Clock className="h-4 w-4 text-yellow-600" />
           </CardHeader>
           <CardContent>
@@ -175,8 +177,8 @@ export default function CommissionsPage() {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle>Commission History</CardTitle>
-              <CardDescription>All commissions you have earned</CardDescription>
+              <CardTitle>{t('affiliate.commissions.commissionHistory')}</CardTitle>
+              <CardDescription>{t('affiliate.commissions.allCommissions')}</CardDescription>
             </div>
             <Select
               defaultValue="all"
@@ -184,13 +186,13 @@ export default function CommissionsPage() {
             >
               <SelectTrigger className="w-[180px]">
                 <Filter className="mr-2 h-4 w-4" />
-                <SelectValue placeholder="Filter by type" />
+                <SelectValue placeholder={t('affiliate.commissions.filterByType')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Types</SelectItem>
-                <SelectItem value="registration">Registration</SelectItem>
-                <SelectItem value="sale">Sale</SelectItem>
-                <SelectItem value="bonus">Bonus</SelectItem>
+                <SelectItem value="all">{t('affiliate.commissions.allTypes')}</SelectItem>
+                <SelectItem value="registration">{t('affiliate.commissions.registration')}</SelectItem>
+                <SelectItem value="sale">{t('affiliate.commissions.sale')}</SelectItem>
+                <SelectItem value="bonus">{t('affiliate.commissions.bonus')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -208,11 +210,11 @@ export default function CommissionsPage() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Type</TableHead>
-                      <TableHead>Referral User</TableHead>
-                      <TableHead>Amount</TableHead>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Status</TableHead>
+                      <TableHead>{t('affiliate.commissions.type')}</TableHead>
+                      <TableHead>{t('affiliate.commissions.referralUser')}</TableHead>
+                      <TableHead>{t('affiliate.commissions.amount')}</TableHead>
+                      <TableHead>{t('affiliate.commissions.date')}</TableHead>
+                      <TableHead>{t('affiliate.status')}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -239,7 +241,7 @@ export default function CommissionsPage() {
                             <div>{format(new Date(commission.createdAt), 'PP')}</div>
                             {commission.paidAt && (
                               <div className="text-xs text-muted-foreground">
-                                Paid: {format(new Date(commission.paidAt), 'PP')}
+                                {t('affiliate.commissions.paid')}: {format(new Date(commission.paidAt), 'PP')}
                               </div>
                             )}
                           </div>
@@ -257,7 +259,7 @@ export default function CommissionsPage() {
               {commissions.pagination.totalPages > 1 && (
                 <div className="flex items-center justify-between mt-4">
                   <p className="text-sm text-muted-foreground">
-                    Page {commissions.pagination.page} of {commissions.pagination.totalPages}
+                    {t('affiliate.commissions.page')} {commissions.pagination.page} {t('affiliate.commissions.of')} {commissions.pagination.totalPages}
                   </p>
                   <div className="flex gap-2">
                     <Button
@@ -266,7 +268,7 @@ export default function CommissionsPage() {
                       onClick={() => handlePageChange(filters.page! - 1)}
                       disabled={filters.page === 1}
                     >
-                      Previous
+                      {t('affiliate.commissions.previous')}
                     </Button>
                     <Button
                       variant="outline"
@@ -274,7 +276,7 @@ export default function CommissionsPage() {
                       onClick={() => handlePageChange(filters.page! + 1)}
                       disabled={filters.page === commissions.pagination.totalPages}
                     >
-                      Next
+                      {t('affiliate.commissions.next')}
                     </Button>
                   </div>
                 </div>
@@ -282,7 +284,7 @@ export default function CommissionsPage() {
             </>
           ) : (
             <div className="py-8 text-center text-muted-foreground">
-              No commissions found. Start referring users to earn commissions!
+              {t('affiliate.commissions.noCommissions')}
             </div>
           )}
         </CardContent>

@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { copyReferralCode, copyReferralLink, shareReferralLink, isShareSupported } from '@/lib/utils/affiliate';
 import { toast } from '@/lib/hooks';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface ReferralCodeCardProps {
   code: string;
@@ -13,6 +14,7 @@ interface ReferralCodeCardProps {
 }
 
 export function ReferralCodeCard({ code, link }: ReferralCodeCardProps) {
+  const { t } = useLanguage();
   const [codeCopied, setCodeCopied] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
 
@@ -20,10 +22,10 @@ export function ReferralCodeCard({ code, link }: ReferralCodeCardProps) {
     const success = await copyReferralCode(code);
     if (success) {
       setCodeCopied(true);
-      toast({ title: 'Copied!', description: 'Referral code copied to clipboard' });
+      toast({ title: t('affiliate.referralCard.copied'), description: t('affiliate.referralCard.codeCopied') });
       setTimeout(() => setCodeCopied(false), 2000);
     } else {
-      toast({ title: 'Error', description: 'Failed to copy code', variant: 'destructive' });
+      toast({ title: t('affiliate.referralCard.error'), description: t('affiliate.referralCard.failedCopyCode'), variant: 'destructive' });
     }
   };
 
@@ -31,10 +33,10 @@ export function ReferralCodeCard({ code, link }: ReferralCodeCardProps) {
     const success = await copyReferralLink(link);
     if (success) {
       setLinkCopied(true);
-      toast({ title: 'Copied!', description: 'Referral link copied to clipboard' });
+      toast({ title: t('affiliate.referralCard.copied'), description: t('affiliate.referralCard.linkCopied') });
       setTimeout(() => setLinkCopied(false), 2000);
     } else {
-      toast({ title: 'Error', description: 'Failed to copy link', variant: 'destructive' });
+      toast({ title: t('affiliate.referralCard.error'), description: t('affiliate.referralCard.failedCopyLink'), variant: 'destructive' });
     }
   };
 

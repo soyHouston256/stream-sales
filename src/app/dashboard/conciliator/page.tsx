@@ -1,6 +1,7 @@
 'use client';
 
 import { useAuth } from '@/lib/auth/useAuth';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { AlertCircle, CheckCircle, Clock, Inbox } from 'lucide-react';
 import { useConciliatorStats, useResolutionsByDay } from '@/lib/hooks/useConciliatorStats';
@@ -12,6 +13,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 export default function ConciliatorDashboard() {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const { data: stats, isLoading: statsLoading } = useConciliatorStats();
   const { data: resolutionsData, isLoading: resolutionsLoading } = useResolutionsByDay(30);
   const { data: pendingDisputes, isLoading: pendingLoading } = useDisputes({
@@ -26,9 +28,9 @@ export default function ConciliatorDashboard() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Conciliator Dashboard</h1>
+        <h1 className="text-3xl font-bold">{t('conciliator.title')}</h1>
         <p className="text-muted-foreground mt-2">
-          Welcome, {user?.name || user?.email}
+          {t('conciliator.welcome')}, {user?.name || user?.email}
         </p>
       </div>
 
@@ -51,27 +53,27 @@ export default function ConciliatorDashboard() {
         ) : stats ? (
           <>
             <StatsCard
-              title="Pending Disputes"
+              title={t('conciliator.pendingDisputes')}
               value={stats.pendingDisputes}
-              description="Awaiting assignment"
+              description={t('conciliator.awaitingAssignment')}
               icon={Inbox}
             />
             <StatsCard
-              title="My Assigned"
+              title={t('conciliator.myAssigned')}
               value={stats.myAssigned}
-              description="Under review"
+              description={t('conciliator.underReview')}
               icon={Clock}
             />
             <StatsCard
-              title="Resolved Today"
+              title={t('conciliator.resolvedToday')}
               value={stats.resolvedToday}
-              description="Completed today"
+              description={t('conciliator.completedToday')}
               icon={CheckCircle}
             />
             <StatsCard
-              title="Total Resolved"
+              title={t('conciliator.totalResolved')}
               value={stats.totalResolved}
-              description="Lifetime"
+              description={t('conciliator.lifetime')}
               icon={CheckCircle}
             />
           </>
@@ -84,10 +86,10 @@ export default function ConciliatorDashboard() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-red-800 dark:text-red-400">
               <AlertCircle className="h-5 w-5" />
-              Overdue Disputes
+              {t('conciliator.overdueDisputes')}
             </CardTitle>
             <CardDescription className="text-red-700 dark:text-red-400">
-              {stats.overdueDisputes} dispute{stats.overdueDisputes > 1 ? 's have' : ' has'} exceeded the SLA deadline
+              {stats.overdueDisputes} {stats.overdueDisputes > 1 ? t('conciliator.overdueMessagePlural') : t('conciliator.overdueMessage')}
             </CardDescription>
           </CardHeader>
         </Card>
@@ -112,9 +114,9 @@ export default function ConciliatorDashboard() {
       {/* Pending Assignment */}
       <Card>
         <CardHeader>
-          <CardTitle>Pending Assignment</CardTitle>
+          <CardTitle>{t('conciliator.pendingAssignment')}</CardTitle>
           <CardDescription>
-            Disputes waiting to be assigned (showing latest 5)
+            {t('conciliator.pendingDescription')}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -132,7 +134,7 @@ export default function ConciliatorDashboard() {
             />
           ) : (
             <p className="text-sm text-muted-foreground text-center py-8">
-              No pending disputes. Great job!
+              {t('conciliator.noPendingDisputes')}
             </p>
           )}
         </CardContent>
@@ -141,9 +143,9 @@ export default function ConciliatorDashboard() {
       {/* My Assigned Disputes */}
       <Card>
         <CardHeader>
-          <CardTitle>My Assigned Disputes</CardTitle>
+          <CardTitle>{t('conciliator.myAssignedDisputes')}</CardTitle>
           <CardDescription>
-            Disputes assigned to you for review (showing latest 5)
+            {t('conciliator.assignedDescription')}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -161,7 +163,7 @@ export default function ConciliatorDashboard() {
             />
           ) : (
             <p className="text-sm text-muted-foreground text-center py-8">
-              No assigned disputes at the moment
+              {t('conciliator.noAssignedDisputes')}
             </p>
           )}
         </CardContent>

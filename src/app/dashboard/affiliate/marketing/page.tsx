@@ -1,5 +1,6 @@
 'use client';
 
+import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -17,6 +18,7 @@ import {
 import { calculateConversionRate } from '@/lib/utils/affiliate';
 
 export default function MarketingPage() {
+  const { t } = useLanguage();
   const { data: affiliateInfo, isLoading: infoLoading } = useAffiliateInfo();
   const { data: templates, isLoading: templatesLoading } = useMarketingTemplates();
   const { data: stats, isLoading: statsLoading } = useMarketingStats();
@@ -34,9 +36,9 @@ export default function MarketingPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold">Marketing Materials</h1>
+        <h1 className="text-3xl font-bold">{t('affiliate.marketing.title')}</h1>
         <p className="text-muted-foreground mt-2">
-          Tools and resources to promote your referral link
+          {t('affiliate.marketing.subtitle')}
         </p>
       </div>
 
@@ -53,8 +55,8 @@ export default function MarketingPage() {
       {/* Conversion Stats */}
       <Card>
         <CardHeader>
-          <CardTitle>Conversion Statistics</CardTitle>
-          <CardDescription>Track how your marketing efforts are performing</CardDescription>
+          <CardTitle>{t('affiliate.marketing.conversionStats')}</CardTitle>
+          <CardDescription>{t('affiliate.marketing.trackPerformance')}</CardDescription>
         </CardHeader>
         <CardContent>
           {statsLoading ? (
@@ -69,21 +71,21 @@ export default function MarketingPage() {
                 <div className="rounded-lg border p-4">
                   <div className="flex items-center gap-2 text-muted-foreground mb-2">
                     <Eye className="h-4 w-4" />
-                    <span className="text-sm">Link Views</span>
+                    <span className="text-sm">{t('affiliate.marketing.linkViews')}</span>
                   </div>
                   <div className="text-3xl font-bold">{stats.linkViews}</div>
                 </div>
                 <div className="rounded-lg border p-4">
                   <div className="flex items-center gap-2 text-muted-foreground mb-2">
                     <UserPlus className="h-4 w-4" />
-                    <span className="text-sm">Registrations</span>
+                    <span className="text-sm">{t('affiliate.marketing.registrations')}</span>
                   </div>
                   <div className="text-3xl font-bold text-green-600">{stats.registrations}</div>
                 </div>
                 <div className="rounded-lg border p-4">
                   <div className="flex items-center gap-2 text-muted-foreground mb-2">
                     <TrendingUp className="h-4 w-4" />
-                    <span className="text-sm">Conversion Rate</span>
+                    <span className="text-sm">{t('affiliate.marketing.conversionRate')}</span>
                   </div>
                   <div className="text-3xl font-bold text-blue-600">{conversionRate}%</div>
                 </div>
@@ -91,7 +93,7 @@ export default function MarketingPage() {
 
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Conversion Progress</span>
+                  <span className="text-muted-foreground">{t('affiliate.marketing.conversionProgress')}</span>
                   <span className="font-medium">{stats.registrations} / {stats.linkViews}</span>
                 </div>
                 <Progress value={conversionRate} className="h-2" />
@@ -99,7 +101,7 @@ export default function MarketingPage() {
             </div>
           ) : (
             <div className="py-8 text-center text-muted-foreground">
-              No statistics available yet
+              {t('affiliate.marketing.noStats')}
             </div>
           )}
         </CardContent>
@@ -110,7 +112,7 @@ export default function MarketingPage() {
         <div className="space-y-4">
           <div className="flex items-center gap-2">
             <Mail className="h-5 w-5 text-primary" />
-            <h2 className="text-xl font-semibold">Email Templates</h2>
+            <h2 className="text-xl font-semibold">{t('affiliate.marketing.emailTemplates')}</h2>
           </div>
           <div className="grid gap-4 md:grid-cols-2">
             {emailTemplates.map((template) => (
@@ -133,7 +135,7 @@ export default function MarketingPage() {
         <div className="space-y-4">
           <div className="flex items-center gap-2">
             <Share2 className="h-5 w-5 text-primary" />
-            <h2 className="text-xl font-semibold">Social Media Templates</h2>
+            <h2 className="text-xl font-semibold">{t('affiliate.marketing.socialTemplates')}</h2>
           </div>
           <div className="grid gap-4 md:grid-cols-2">
             {socialTemplates.map((template) => (
@@ -156,7 +158,7 @@ export default function MarketingPage() {
         <div className="space-y-4">
           <div className="flex items-center gap-2">
             <MessageSquare className="h-5 w-5 text-primary" />
-            <h2 className="text-xl font-semibold">Direct Message Templates</h2>
+            <h2 className="text-xl font-semibold">{t('affiliate.marketing.messageTemplates')}</h2>
           </div>
           <div className="grid gap-4 md:grid-cols-2">
             {messageTemplates.map((template) => (
@@ -190,40 +192,40 @@ export default function MarketingPage() {
         <CardHeader>
           <div className="flex items-center gap-2">
             <Lightbulb className="h-5 w-5 text-yellow-600" />
-            <CardTitle>Best Practices for Referrals</CardTitle>
+            <CardTitle>{t('affiliate.marketing.bestPractices')}</CardTitle>
           </div>
-          <CardDescription>Tips to maximize your referral success</CardDescription>
+          <CardDescription>{t('affiliate.marketing.tipsToMaximize')}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
             <div className="rounded-lg bg-muted/50 p-4">
-              <h4 className="font-semibold mb-2">Be Authentic</h4>
+              <h4 className="font-semibold mb-2">{t('affiliate.marketing.beAuthentic')}</h4>
               <p className="text-sm text-muted-foreground">
-                Share your genuine experience with Stream Sales. Personal stories resonate better than generic marketing copy.
+                {t('affiliate.marketing.beAuthenticDesc')}
               </p>
             </div>
             <div className="rounded-lg bg-muted/50 p-4">
-              <h4 className="font-semibold mb-2">Target the Right Audience</h4>
+              <h4 className="font-semibold mb-2">{t('affiliate.marketing.targetAudience')}</h4>
               <p className="text-sm text-muted-foreground">
-                Focus on people who would genuinely benefit from digital products - content creators, educators, and entrepreneurs.
+                {t('affiliate.marketing.targetAudienceDesc')}
               </p>
             </div>
             <div className="rounded-lg bg-muted/50 p-4">
-              <h4 className="font-semibold mb-2">Use Multiple Channels</h4>
+              <h4 className="font-semibold mb-2">{t('affiliate.marketing.useMultipleChannels')}</h4>
               <p className="text-sm text-muted-foreground">
-                Share your referral link on social media, email, blogs, and direct messages. Different platforms reach different audiences.
+                {t('affiliate.marketing.useMultipleChannelsDesc')}
               </p>
             </div>
             <div className="rounded-lg bg-muted/50 p-4">
-              <h4 className="font-semibold mb-2">Provide Value First</h4>
+              <h4 className="font-semibold mb-2">{t('affiliate.marketing.provideValue')}</h4>
               <p className="text-sm text-muted-foreground">
-                Don't just drop your link. Explain what Stream Sales offers and how it can help. Add a call-to-action that motivates sign-ups.
+                {t('affiliate.marketing.provideValueDesc')}
               </p>
             </div>
             <div className="rounded-lg bg-muted/50 p-4">
-              <h4 className="font-semibold mb-2">Follow Up</h4>
+              <h4 className="font-semibold mb-2">{t('affiliate.marketing.followUp')}</h4>
               <p className="text-sm text-muted-foreground">
-                Check in with people who showed interest. Answer questions and provide support to help them get started.
+                {t('affiliate.marketing.followUpDesc')}
               </p>
             </div>
           </div>
@@ -233,32 +235,32 @@ export default function MarketingPage() {
       {/* FAQ */}
       <Card>
         <CardHeader>
-          <CardTitle>Frequently Asked Questions</CardTitle>
+          <CardTitle>{t('affiliate.marketing.faq')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
             <div>
-              <h4 className="font-semibold mb-1">How much commission do I earn per referral?</h4>
+              <h4 className="font-semibold mb-1">{t('affiliate.marketing.faqQ1')}</h4>
               <p className="text-sm text-muted-foreground">
-                You earn commission on both registrations and sales made by your referrals. Check the Commissions page for specific rates.
+                {t('affiliate.marketing.faqA1')}
               </p>
             </div>
             <div>
-              <h4 className="font-semibold mb-1">When can I request a payment?</h4>
+              <h4 className="font-semibold mb-1">{t('affiliate.marketing.faqQ2')}</h4>
               <p className="text-sm text-muted-foreground">
-                You can request payment once your available balance reaches $50 or more. Payments are typically processed within 5-7 business days.
+                {t('affiliate.marketing.faqA2')}
               </p>
             </div>
             <div>
-              <h4 className="font-semibold mb-1">Can I track individual referral performance?</h4>
+              <h4 className="font-semibold mb-1">{t('affiliate.marketing.faqQ3')}</h4>
               <p className="text-sm text-muted-foreground">
-                Yes! Go to the Referrals page to see detailed information about each person you've referred, including their activity and commissions generated.
+                {t('affiliate.marketing.faqA3')}
               </p>
             </div>
             <div>
-              <h4 className="font-semibold mb-1">Are there any restrictions on promotion?</h4>
+              <h4 className="font-semibold mb-1">{t('affiliate.marketing.faqQ4')}</h4>
               <p className="text-sm text-muted-foreground">
-                Please promote ethically and honestly. Avoid spam, misleading claims, or paid advertising without disclosure. Quality over quantity!
+                {t('affiliate.marketing.faqA4')}
               </p>
             </div>
           </div>
@@ -270,7 +272,7 @@ export default function MarketingPage() {
         <AlertDescription className="flex items-center gap-2">
           <TrendingUp className="h-4 w-4" />
           <span>
-            Start sharing your referral link today and earn commission on every successful referral!
+            {t('affiliate.marketing.ctaMessage')}
           </span>
         </AlertDescription>
       </Alert>
