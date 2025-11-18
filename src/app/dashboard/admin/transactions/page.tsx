@@ -87,7 +87,8 @@ export default function TransactionsPage() {
         <div className="flex items-center gap-2">
           <div className="text-sm">
             <div className="font-medium">
-              {tx.sourceUser?.email || tx.sourceWalletId.slice(0, 8)}
+              {tx.sourceUser?.email ||
+                (tx.sourceWalletId ? tx.sourceWalletId.slice(0, 8) : 'Sistema')}
             </div>
             {tx.sourceUser?.name && (
               <div className="text-muted-foreground text-xs">
@@ -101,7 +102,7 @@ export default function TransactionsPage() {
               <div className="text-sm">
                 <div className="font-medium">
                   {tx.destinationUser?.email ||
-                    tx.destinationWalletId.slice(0, 8)}
+                    (tx.destinationWalletId ? tx.destinationWalletId.slice(0, 8) : 'Sistema')}
                 </div>
                 {tx.destinationUser?.name && (
                   <div className="text-muted-foreground text-xs">

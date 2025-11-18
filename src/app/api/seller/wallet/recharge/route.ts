@@ -118,7 +118,7 @@ export async function POST(request: NextRequest) {
         paymentMethod,
         paymentGateway: 'manual', // For now, all recharges are manual/admin-approved
         status: 'pending',
-        metadata: paymentDetails ? { paymentDetails } : null,
+        metadata: paymentDetails ? { paymentDetails } : undefined,
       },
     });
 

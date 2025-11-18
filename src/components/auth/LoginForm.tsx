@@ -8,6 +8,7 @@ import * as z from 'zod';
 import Link from 'next/link';
 
 import { useAuth } from '@/lib/auth/useAuth';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { getDashboardRoute } from '@/lib/utils/roleRedirect';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -39,6 +40,7 @@ type LoginFormData = z.infer<typeof loginSchema>;
 export function LoginForm() {
   const router = useRouter();
   const { login, user } = useAuth();
+  const { t } = useLanguage();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -60,8 +62,8 @@ export function LoginForm() {
       console.log('🔍 User role:', response?.user?.role);
 
       toast({
-        title: 'Inicio de sesión exitoso',
-        description: 'Bienvenido de vuelta',
+        title: t('auth.loginSuccess'),
+        description: t('auth.welcomeBack'),
       });
 
       // After successful login, redirect to appropriate dashboard based on user role
@@ -94,7 +96,7 @@ export function LoginForm() {
       }
 
       toast({
-        title: 'Error al iniciar sesión',
+        title: t('auth.loginError'),
         description: errorMessage,
         variant: 'destructive',
       });
@@ -107,16 +109,16 @@ export function LoginForm() {
     <Card className="w-full max-w-md">
       <CardHeader className="space-y-1">
         <CardTitle className="text-2xl font-bold text-center">
-          Iniciar Sesión
+          {t('auth.login')}
         </CardTitle>
         <CardDescription className="text-center">
-          Ingresa tu email y contraseña para acceder
+          {t('auth.welcomeBack')}
         </CardDescription>
       </CardHeader>
       <form onSubmit={handleSubmit(onSubmit)}>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">{t('auth.email')}</Label>
             <Input
               id="email"
               type="email"
@@ -139,7 +141,7 @@ export function LoginForm() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="password">Contraseña</Label>
+            <Label htmlFor="password">{t('auth.password')}</Label>
             <Input
               id="password"
               type="password"
@@ -168,16 +170,16 @@ export function LoginForm() {
             className="w-full"
             disabled={isLoading}
           >
-            {isLoading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
+            {isLoading ? `${t('common.loading')}...` : t('auth.login')}
           </Button>
 
           <p className="text-sm text-center text-muted-foreground">
-            ¿No tienes una cuenta?{' '}
+            {t('auth.dontHaveAccount')}{' '}
             <Link
               href="/register"
               className="font-medium text-primary hover:underline"
             >
-              Regístrate aquí
+              {t('auth.register')}
             </Link>
           </p>
         </CardFooter>

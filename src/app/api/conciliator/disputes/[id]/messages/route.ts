@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { verifyJWT } from '@/infrastructure/auth/jwt';
-import prisma from '@/infrastructure/database/prisma';
+import { prisma } from '@/infrastructure/database/prisma';
 import { PrismaDisputeMessageRepository } from '@/infrastructure/repositories/PrismaDisputeMessageRepository';
 import { PrismaDisputeRepository } from '@/infrastructure/repositories/PrismaDisputeRepository';
 import { AddDisputeMessageUseCase } from '@/application/use-cases/AddDisputeMessageUseCase';

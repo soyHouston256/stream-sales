@@ -7,35 +7,35 @@ import {
 } from 'lucide-react';
 import type { NavItem } from '../Sidebar';
 
-export const providerNavItems: NavItem[] = [
+export const getProviderNavItems = (t: (key: string) => string): NavItem[] => [
   {
-    title: 'Dashboard',
+    title: t('navigation.dashboard'),
     href: '/dashboard/provider',
     icon: LayoutDashboard,
-    description: 'Overview and statistics',
+    description: t('navigation.overviewStats'),
   },
   {
-    title: 'Products',
+    title: t('navigation.products'),
     href: '/dashboard/provider/products',
     icon: Package,
-    description: 'Manage your products',
+    description: t('navigation.manageProducts'),
   },
   {
-    title: 'Sales',
+    title: t('navigation.sales'),
     href: '/dashboard/provider/sales',
     icon: ShoppingCart,
-    description: 'Sales history',
+    description: t('navigation.salesHistory'),
   },
   {
-    title: 'Earnings',
+    title: t('navigation.earnings'),
     href: '/dashboard/provider/earnings',
     icon: DollarSign,
-    description: 'Balance and withdrawals',
+    description: t('navigation.balanceWithdrawals'),
   },
   {
-    title: 'Settings',
+    title: t('navigation.settings'),
     href: '/dashboard/provider/settings',
     icon: Settings,
-    description: 'Account settings',
+    description: t('navigation.accountSettings'),
   },
 ];

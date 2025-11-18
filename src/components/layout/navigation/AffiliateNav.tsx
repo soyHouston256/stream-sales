@@ -6,29 +6,29 @@ import {
 } from 'lucide-react';
 import type { NavItem } from '../Sidebar';
 
-export const affiliateNavItems: NavItem[] = [
+export const getAffiliateNavItems = (t: (key: string) => string): NavItem[] => [
   {
-    title: 'Dashboard',
+    title: t('navigation.dashboard'),
     href: '/dashboard/affiliate',
     icon: LayoutDashboard,
-    description: 'Vista general',
+    description: t('navigation.overviewStats'),
   },
   {
-    title: 'Referrals',
+    title: t('navigation.referrals'),
     href: '/dashboard/affiliate/referrals',
     icon: Users,
-    description: 'Usuarios referidos',
+    description: t('navigation.referredUsers'),
   },
   {
-    title: 'Commissions',
+    title: t('navigation.commissions'),
     href: '/dashboard/affiliate/commissions',
     icon: DollarSign,
-    description: 'Comisiones ganadas',
+    description: t('navigation.earnedCommissions'),
   },
   {
-    title: 'Marketing',
+    title: t('navigation.marketing'),
     href: '/dashboard/affiliate/marketing',
     icon: Megaphone,
-    description: 'Material de marketing',
+    description: t('navigation.marketingMaterial'),
   },
 ];

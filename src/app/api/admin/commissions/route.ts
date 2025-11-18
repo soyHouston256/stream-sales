@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/infrastructure/database/prisma';
 import { verifyJWT } from '@/infrastructure/auth/jwt';
 import { z } from 'zod';
+import { PrismaCommissionConfigRepository } from '@/infrastructure/repositories/PrismaCommissionConfigRepository';
+import { GetActiveCommissionConfigUseCase } from '@/application/use-cases/GetActiveCommissionConfigUseCase';
+import { UpdateCommissionConfigUseCase } from '@/application/use-cases/UpdateCommissionConfigUseCase';
 
 /**
  * GET /api/admin/commissions
@@ -52,47 +55,36 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // 3. Get active commission configs
-    const [saleConfig, registrationConfig] = await Promise.all([
-      prisma.commissionConfig.findFirst({
-        where: {
-          type: 'sale',
-          isActive: true,
-        },
-        orderBy: { createdAt: 'desc' },
-      }),
-      prisma.commissionConfig.findFirst({
-        where: {
-          type: 'registration',
-          isActive: true,
-        },
-        orderBy: { createdAt: 'desc' },
-      }),
+    // 3. Get active commission configs using use cases
+    const commissionConfigRepository = new PrismaCommissionConfigRepository(prisma);
+    const getActiveCommissionUseCase = new GetActiveCommissionConfigUseCase(
+      commissionConfigRepository
+    );
+
+    const [saleResult, registrationResult] = await Promise.all([
+      getActiveCommissionUseCase.execute({ type: 'sale' }),
+      getActiveCommissionUseCase.execute({ type: 'registration' }),
     ]);
 
-    // 4. Get the admin user who last updated (from the most recent config)
-    let updatedBy = null;
+    // 4. Get the most recent update timestamp
     let updatedAt = null;
 
-    const mostRecentConfig =
-      saleConfig && registrationConfig
-        ? saleConfig.updatedAt > registrationConfig.updatedAt
-          ? saleConfig
-          : registrationConfig
-        : saleConfig || registrationConfig;
-
-    if (mostRecentConfig) {
-      updatedAt = mostRecentConfig.updatedAt;
-      // Note: We don't have updatedBy in the schema, so we'll just show the timestamp
+    if (saleResult.config && registrationResult.config) {
+      updatedAt =
+        saleResult.config.updatedAt > registrationResult.config.updatedAt
+          ? saleResult.config.updatedAt
+          : registrationResult.config.updatedAt;
+    } else {
+      updatedAt = saleResult.config?.updatedAt || registrationResult.config?.updatedAt;
     }
 
     // 5. Return commission configuration
     return NextResponse.json({
-      saleCommission: saleConfig
-        ? parseFloat(saleConfig.rate.toString())
+      saleCommission: saleResult.config
+        ? parseFloat(saleResult.config.rate.toString())
         : 0,
-      registrationCommission: registrationConfig
-        ? parseFloat(registrationConfig.rate.toString())
+      registrationCommission: registrationResult.config
+        ? parseFloat(registrationResult.config.rate.toString())
         : 0,
       updatedBy: user.email, // Current admin viewing
       updatedAt: updatedAt?.toISOString() || new Date().toISOString(),
@@ -184,50 +176,25 @@ export async function PUT(request: NextRequest) {
 
     const { saleCommission, registrationCommission } = validationResult.data;
 
-    // 4. Update commission configs in a transaction
-    await prisma.$transaction(async (tx: any) => {
-      // 4.1. Deactivate old sale commission config
-      await tx.commissionConfig.updateMany({
-        where: {
-          type: 'sale',
-          isActive: true,
-        },
-        data: {
-          isActive: false,
-        },
-      });
+    // 4. Update commission configs using use cases
+    const commissionConfigRepository = new PrismaCommissionConfigRepository(prisma);
+    const updateCommissionUseCase = new UpdateCommissionConfigUseCase(
+      commissionConfigRepository
+    );
 
-      // 4.2. Create new sale commission config
-      await tx.commissionConfig.create({
-        data: {
-          type: 'sale',
-          rate: saleCommission,
-          isActive: true,
-          effectiveFrom: new Date(),
-        },
-      });
-
-      // 4.3. Deactivate old registration commission config
-      await tx.commissionConfig.updateMany({
-        where: {
-          type: 'registration',
-          isActive: true,
-        },
-        data: {
-          isActive: false,
-        },
-      });
-
-      // 4.4. Create new registration commission config
-      await tx.commissionConfig.create({
-        data: {
-          type: 'registration',
-          rate: registrationCommission,
-          isActive: true,
-          effectiveFrom: new Date(),
-        },
-      });
-    });
+    // Update both configs
+    await Promise.all([
+      updateCommissionUseCase.execute({
+        type: 'sale',
+        rate: saleCommission,
+        effectiveFrom: new Date(),
+      }),
+      updateCommissionUseCase.execute({
+        type: 'registration',
+        rate: registrationCommission,
+        effectiveFrom: new Date(),
+      }),
+    ]);
 
     // 5. Return success response
     return NextResponse.json({

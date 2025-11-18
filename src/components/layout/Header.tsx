@@ -1,12 +1,15 @@
 'use client';
 
 import { useAuth } from '@/lib/auth/useAuth';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
+import { LanguageSelector } from '@/components/LanguageSelector';
 import { LogOut, User } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 export function Header() {
   const { user, logout } = useAuth();
+  const { t } = useLanguage();
   const router = useRouter();
 
   const handleLogout = () => {
@@ -22,7 +25,9 @@ export function Header() {
             <h1 className="text-xl font-bold">Stream Sales</h1>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <LanguageSelector />
+
             {user && (
               <>
                 <div className="flex items-center gap-2 text-sm">
@@ -40,7 +45,7 @@ export function Header() {
                   className="flex items-center gap-2"
                 >
                   <LogOut className="h-4 w-4" />
-                  <span className="hidden sm:inline-block">Salir</span>
+                  <span className="hidden sm:inline-block">{t('auth.logout')}</span>
                 </Button>
               </>
             )}

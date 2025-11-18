@@ -2,6 +2,7 @@ import { IWalletRepository } from '../../domain/repositories/IWalletRepository';
 import { IProductRepository } from '../../domain/repositories/IProductRepository';
 import { IPurchaseRepository } from '../../domain/repositories/IPurchaseRepository';
 import { IUserRepository } from '../../domain/repositories/IUserRepository';
+import { ICommissionConfigRepository } from '../../domain/repositories/ICommissionConfigRepository';
 import { Purchase } from '../../domain/entities/Purchase';
 import { Money } from '../../domain/value-objects/Money';
 import { Wallet } from '../../domain/entities/Wallet';
@@ -84,14 +85,15 @@ export class PurchaseProductUseCase {
   // Admin user ID (en producción vendría de configuración)
   private readonly ADMIN_USER_ID = 'admin';
 
-  // Commission rate (en producción vendría de CommissionConfig)
-  private readonly COMMISSION_RATE = 0.05; // 5%
+  // Default commission rate if no config is found
+  private readonly DEFAULT_COMMISSION_RATE = 0.05; // 5%
 
   constructor(
     private walletRepository: IWalletRepository,
     private productRepository: IProductRepository,
     private purchaseRepository: IPurchaseRepository,
-    private userRepository: IUserRepository
+    private userRepository: IUserRepository,
+    private commissionConfigRepository: ICommissionConfigRepository
   ) {}
 
   async execute(data: PurchaseProductDTO): Promise<PurchaseProductResponse> {
@@ -168,7 +170,6 @@ export class PurchaseProductUseCase {
       const adminPassword = await Password.create('admin123'); // Password temporal
 
       adminUser = User.create({
-        id: this.ADMIN_USER_ID,
         email: adminEmail,
         password: adminPassword,
         name: 'Administrator',
@@ -194,18 +195,36 @@ export class PurchaseProductUseCase {
     }
 
     // ============================================
-    // 3. CREAR PURCHASE
+    // 3. OBTENER COMMISSION RATE DESDE CONFIGURACIÓN
+    // ============================================
+
+    // Obtener la configuración activa de comisión de venta
+    const commissionConfig = await this.commissionConfigRepository.findActiveByType('sale');
+
+    // Si no hay configuración activa, usar el valor por defecto
+    const commissionRate = commissionConfig
+      ? commissionConfig.rateAsDecimal.toNumber()
+      : this.DEFAULT_COMMISSION_RATE;
+
+    console.log(`[PurchaseProductUseCase] Using commission rate: ${(commissionRate * 100).toFixed(2)}%`);
+    if (!commissionConfig) {
+      console.warn('[PurchaseProductUseCase] No active commission config found. Using default rate.');
+    }
+
+    // ============================================
+    // 4. CREAR PURCHASE
     // ============================================
 
     const purchase = Purchase.create({
       sellerId: data.sellerId,
       productId: data.productId,
+      providerId: product.providerId,
       amount: product.price,
-      commissionRate: this.COMMISSION_RATE,
+      commissionRate: commissionRate,
     });
 
     // ============================================
-    // 4. EJECUTAR TRANSACCIONES DE DINERO
+    // 5. EJECUTAR TRANSACCIONES DE DINERO
     // ============================================
 
     // Debit de Seller (paga el precio completo)
@@ -218,7 +237,7 @@ export class PurchaseProductUseCase {
     providerWallet.credit(purchase.providerEarnings);
 
     // ============================================
-    // 5. ACTUALIZAR ESTADO DEL PRODUCTO
+    // 6. ACTUALIZAR ESTADO DEL PRODUCTO
     // ============================================
 
     // Primero reservar
@@ -228,7 +247,7 @@ export class PurchaseProductUseCase {
     product.markAsSold(data.sellerId);
 
     // ============================================
-    // 6. PERSISTIR TODO (IDEALMENTE EN TRANSACCIÓN DB)
+    // 7. PERSISTIR TODO (IDEALMENTE EN TRANSACCIÓN DB)
     // ============================================
 
     // TODO: Envolver en transacción de base de datos cuando esté disponible

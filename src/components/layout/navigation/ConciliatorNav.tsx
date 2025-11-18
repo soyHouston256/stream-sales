@@ -6,29 +6,29 @@ import {
 } from 'lucide-react';
 import type { NavItem } from '../Sidebar';
 
-export const conciliatorNavItems: NavItem[] = [
+export const getConciliatorNavItems = (t: (key: string) => string): NavItem[] => [
   {
-    title: 'Dashboard',
+    title: t('navigation.dashboard'),
     href: '/dashboard/conciliator',
     icon: LayoutDashboard,
-    description: 'Overview and quick stats',
+    description: t('navigation.quickStats'),
   },
   {
-    title: 'All Disputes',
+    title: t('navigation.allDisputes'),
     href: '/dashboard/conciliator/disputes',
     icon: Inbox,
-    description: 'Manage all disputes',
+    description: t('navigation.manageDisputes'),
   },
   {
-    title: 'My History',
+    title: t('navigation.myHistory'),
     href: '/dashboard/conciliator/history',
     icon: History,
-    description: 'Your resolution history',
+    description: t('navigation.resolutionHistory'),
   },
   {
-    title: 'Settings',
+    title: t('navigation.settings'),
     href: '/dashboard/conciliator/settings',
     icon: Settings,
-    description: 'Account settings',
+    description: t('navigation.accountSettings'),
   },
 ];

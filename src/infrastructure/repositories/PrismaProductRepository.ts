@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Prisma } from '@prisma/client';
 import { Product } from '../../domain/entities/Product';
 import { Money } from '../../domain/value-objects/Money';
 import { ProductStatus } from '../../domain/value-objects/ProductStatus';
@@ -9,7 +9,7 @@ type PrismaProduct = {
   id: string;
   name: string;
   description: string;
-  price: string;
+  price: Prisma.Decimal;
   providerId: string;
   category: string;
   accountEmail: string;
@@ -122,10 +122,10 @@ export class PrismaProductRepository implements IProductRepository {
         description,
         category: data.category,
         price: data.price,
-        imageUrl: null, // Domain entity no tiene imageUrl
+        imageUrl: undefined, // Domain entity no tiene imageUrl
         accountEmail: data.accountEmail,
         accountPassword: encryptedPassword,
-        accountDetails: null, // Domain entity no tiene accountDetails
+        accountDetails: undefined, // Domain entity no tiene accountDetails
         status: data.status,
         updatedAt: data.updatedAt,
         soldAt: data.soldAt,
@@ -137,10 +137,10 @@ export class PrismaProductRepository implements IProductRepository {
         description,
         category: data.category,
         price: data.price,
-        imageUrl: null,
+        imageUrl: undefined,
         accountEmail: data.accountEmail,
         accountPassword: encryptedPassword,
-        accountDetails: null,
+        accountDetails: undefined,
         status: data.status,
         createdAt: data.createdAt,
         updatedAt: data.updatedAt,

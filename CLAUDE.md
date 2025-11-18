@@ -31,8 +31,9 @@ npm run prisma:studio    # Open Prisma Studio GUI to view/edit data
 
 ### Maintenance Scripts
 ```bash
-npm run seed:admin                 # Create admin user with wallet (REQUIRED for purchases)
-npm run migrate:encrypt-passwords  # Re-encrypt product passwords (see scripts/README.md)
+npm run seed:admin                  # Create admin user with wallet (REQUIRED for purchases)
+npm run seed:commission-config      # Initialize commission configuration (5% sale, 0% registration)
+npm run migrate:encrypt-passwords   # Re-encrypt product passwords (see scripts/README.md)
 ```
 
 **Important**: Before running maintenance scripts:
@@ -40,7 +41,9 @@ npm run migrate:encrypt-passwords  # Re-encrypt product passwords (see scripts/R
 2. Review the script documentation in `scripts/README.md`
 3. Ensure environment variables are properly configured
 
-**First-time Setup**: Run `npm run seed:admin` before making any purchases in the system.
+**First-time Setup**:
+1. Run `npm run seed:admin` before making any purchases in the system
+2. Run `npm run seed:commission-config` to initialize commission rates (optional, defaults to 5%)
 
 ## Architecture
 
@@ -232,6 +235,71 @@ npm run seed:admin
 3. Password: `admin123` (change after first login)
 
 **Important**: This is a **required** step for new installations before making any purchases.
+
+## Commission System
+
+The application uses a **dynamic commission configuration** system that allows admins to adjust commission rates without code changes.
+
+### How It Works
+
+**Commission Flow** (example with 5% commission on $15.99 purchase):
+```
+Seller pays: $15.99 (full price)
+    ↓
+Admin receives: $0.80 (5% commission)
+Provider receives: $15.19 (95% earnings)
+```
+
+**Key Components**:
+- **CommissionConfig Entity** (`src/domain/entities/CommissionConfig.ts`): Domain model for commission configuration
+- **CommissionConfigRepository** (`src/infrastructure/repositories/PrismaCommissionConfigRepository.ts`): Data access layer
+- **Use Cases**:
+  - `GetActiveCommissionConfigUseCase`: Retrieves current active commission rate
+  - `UpdateCommissionConfigUseCase`: Updates commission configuration with audit trail
+- **PurchaseProductUseCase** (`src/application/use-cases/PurchaseProductUseCase.ts:203`): Now reads commission rate from database instead of hardcoded value
+
+### Commission Types
+
+1. **Sale Commission** (default: 5%): Applied when a seller purchases a product
+2. **Registration Commission** (default: 0%): Applied when new users register via affiliate referral
+
+### Admin Configuration
+
+Admins can configure commissions via:
+- **Dashboard**: `/dashboard/admin/commissions`
+- **API Endpoints**:
+  - `GET /api/admin/commissions` - Get current configuration
+  - `PUT /api/admin/commissions` - Update rates (0-100%)
+  - `GET /api/admin/commissions/history` - View all changes
+
+### Database Schema
+
+**CommissionConfig Table**:
+```prisma
+- id: String (cuid)
+- type: 'sale' | 'registration'
+- rate: Decimal (0-100, e.g., 5.50 = 5.5%)
+- isActive: Boolean
+- effectiveFrom: DateTime
+- createdAt: DateTime
+- updatedAt: DateTime
+```
+
+**Important Features**:
+- **Audit Trail**: Every commission change creates a new record, old configs are deactivated (not deleted)
+- **Snapshot on Purchase**: Commission rate is captured at purchase time, never changes retroactively
+- **Fallback**: If no active config exists, defaults to 5% (see `PurchaseProductUseCase.ts:89`)
+
+### Initialization
+
+Run this after first installation:
+```bash
+npm run seed:commission-config
+```
+
+This creates default configurations:
+- Sale commission: 5.00%
+- Registration commission: 0.00%
 
 ## TypeScript Path Aliases
 

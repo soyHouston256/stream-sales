@@ -4,7 +4,7 @@ export interface PurchaseProps {
   id: string;
   sellerId: string;
   productId: string;
-  providerId: string; // Denormalizado para queries y disputas
+  providerId?: string; // Denormalizado para queries y disputas (opcional en memoria)
   amount: Money; // Precio del producto en el momento de compra
   adminCommission: Money; // Comisión calculada
   commissionRate: number; // Snapshot de la tasa en el momento de compra (ej: 0.05 = 5%)
@@ -51,12 +51,14 @@ export class Purchase {
    *
    * @param sellerId - ID del usuario que compra
    * @param productId - ID del producto comprado
+   * @param providerId - ID del proveedor del producto
    * @param amount - Precio del producto
    * @param commissionRate - Tasa de comisión (ej: 0.05 para 5%)
    */
   static create(data: {
     sellerId: string;
     productId: string;
+    providerId?: string;
     amount: Money;
     commissionRate: number;
   }): Purchase {
@@ -68,6 +70,8 @@ export class Purchase {
     if (!data.productId || data.productId.trim().length === 0) {
       throw new Error('Product ID is required');
     }
+
+    // providerId is optional for in-memory creation (tests/mocks). Persistence layer should ensure denormalized providerId when needed.
 
     if (!data.amount.isPositive()) {
       throw new Error('Purchase amount must be positive');
@@ -84,6 +88,7 @@ export class Purchase {
       id: crypto.randomUUID(),
       sellerId: data.sellerId,
       productId: data.productId,
+      providerId: data.providerId ?? '',
       amount: data.amount,
       adminCommission,
       commissionRate: data.commissionRate,

@@ -8,35 +8,35 @@ import {
 } from 'lucide-react';
 import type { NavItem } from '../Sidebar';
 
-export const adminNavItems: NavItem[] = [
+export const getAdminNavItems = (t: (key: string) => string): NavItem[] => [
   {
-    title: 'Dashboard',
+    title: t('navigation.dashboard'),
     href: '/dashboard/admin',
     icon: LayoutDashboard,
-    description: 'Vista general del sistema',
+    description: t('navigation.systemOverview'),
   },
   {
-    title: 'Usuarios',
+    title: t('navigation.users'),
     href: '/dashboard/admin/users',
     icon: Users,
-    description: 'Gestión de usuarios',
+    description: t('navigation.userManagement'),
   },
   {
-    title: 'Recargas',
+    title: t('navigation.recharges'),
     href: '/dashboard/admin/recharges',
     icon: Wallet,
-    description: 'Gestión de recargas de saldo',
+    description: t('navigation.rechargeManagement'),
   },
   {
-    title: 'Comisiones',
+    title: t('navigation.commissions'),
     href: '/dashboard/admin/commissions',
     icon: Settings,
-    description: 'Configuración de comisiones',
+    description: t('navigation.commissionConfig'),
   },
   {
-    title: 'Transacciones',
+    title: t('navigation.transactions'),
     href: '/dashboard/admin/transactions',
     icon: ArrowLeftRight,
-    description: 'Monitoreo de transacciones',
+    description: t('navigation.transactionMonitoring'),
   },
 ];

@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Prisma } from '@prisma/client';
 import { Purchase } from '../../domain/entities/Purchase';
 import { IPurchaseRepository } from '../../domain/repositories/IPurchaseRepository';
 import { Money } from '../../domain/value-objects/Money';
@@ -6,14 +6,18 @@ import { Decimal } from 'decimal.js';
 
 type PrismaPurchase = {
   id: string;
-  userId: string;
+  sellerId: string;
   productId: string;
-  amount: any;
-  currency: string;
+  providerId: string;
+  amount: Prisma.Decimal;
+  providerEarnings: Prisma.Decimal;
+  adminCommission: Prisma.Decimal;
+  commissionRate: Prisma.Decimal;
   status: string;
+  transactionIds: Prisma.JsonValue | null;
   createdAt: Date;
-  updatedAt: Date;
   completedAt: Date | null;
+  refundedAt: Date | null;
 };
 
 /**

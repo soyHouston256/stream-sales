@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { verifyJWT } from '@/infrastructure/auth/jwt';
-import prisma from '@/infrastructure/database/prisma';
+import { prisma } from '@/infrastructure/database/prisma';
 import { PrismaDisputeRepository } from '@/infrastructure/repositories/PrismaDisputeRepository';
 import { PrismaWalletRepository } from '@/infrastructure/repositories/PrismaWalletRepository';
 import { PrismaPurchaseRepository } from '@/infrastructure/repositories/PrismaPurchaseRepository';

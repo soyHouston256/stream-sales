@@ -5,6 +5,7 @@ import { PrismaWalletRepository } from '../../../../infrastructure/repositories/
 import { PrismaProductRepository } from '../../../../infrastructure/repositories/PrismaProductRepository';
 import { PrismaPurchaseRepository } from '../../../../infrastructure/repositories/PrismaPurchaseRepository';
 import { PrismaUserRepository } from '../../../../infrastructure/repositories/PrismaUserRepository';
+import { PrismaCommissionConfigRepository } from '../../../../infrastructure/repositories/PrismaCommissionConfigRepository';
 import { PurchaseProductUseCase } from '../../../../application/use-cases/PurchaseProductUseCase';
 import { ListMyPurchasesUseCase } from '../../../../application/use-cases/ListMyPurchasesUseCase';
 import { verifyJWT } from '../../../../infrastructure/auth/jwt';
@@ -106,13 +107,15 @@ export async function POST(request: NextRequest) {
     const walletRepository = new PrismaWalletRepository(prisma);
     const productRepository = new PrismaProductRepository(prisma);
     const purchaseRepository = new PrismaPurchaseRepository(prisma);
-    const userRepository = new PrismaUserRepository(prisma);
+    const userRepository = new PrismaUserRepository();
+    const commissionConfigRepository = new PrismaCommissionConfigRepository(prisma);
 
     const purchaseProductUseCase = new PurchaseProductUseCase(
       walletRepository,
       productRepository,
       purchaseRepository,
-      userRepository
+      userRepository,
+      commissionConfigRepository
     );
 
     const result = await purchaseProductUseCase.execute({
