@@ -51,13 +51,13 @@ export function ReferralCodeCard({ code, link }: ReferralCodeCardProps) {
   return (
     <Card className="border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10 dark:from-primary/10 dark:to-primary/20">
       <CardHeader>
-        <CardTitle className="text-2xl">Your Referral Code</CardTitle>
-        <CardDescription>Share this code to earn commissions</CardDescription>
+        <CardTitle className="text-2xl">{t('affiliate.referralCard.title')}</CardTitle>
+        <CardDescription>{t('affiliate.referralCard.subtitle')}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Referral Code */}
         <div className="space-y-2">
-          <label className="text-sm font-medium text-muted-foreground">Code</label>
+          <label className="text-sm font-medium text-muted-foreground">{t('affiliate.referralCard.code')}</label>
           <div className="flex items-center gap-2">
             <div className="flex-1 rounded-lg border-2 border-primary bg-background/50 p-4 text-center">
               <span className="text-3xl font-bold tracking-wider text-primary">{code}</span>
@@ -79,7 +79,7 @@ export function ReferralCodeCard({ code, link }: ReferralCodeCardProps) {
 
         {/* Referral Link */}
         <div className="space-y-2">
-          <label className="text-sm font-medium text-muted-foreground">Link</label>
+          <label className="text-sm font-medium text-muted-foreground">{t('affiliate.referralCard.link')}</label>
           <div className="flex items-center gap-2">
             <div className="flex-1 rounded-lg border bg-background/50 p-3">
               <p className="truncate text-sm text-muted-foreground">{link}</p>
@@ -112,7 +112,7 @@ export function ReferralCodeCard({ code, link }: ReferralCodeCardProps) {
         {/* Help Text */}
         <div className="rounded-lg bg-muted/50 p-3">
           <p className="text-xs text-muted-foreground">
-            Share your referral code or link with friends and earn commissions when they sign up and make purchases!
+            {t('affiliate.referralCard.helpText')}
           </p>
         </div>
       </CardContent>
