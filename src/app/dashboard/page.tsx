@@ -19,17 +19,9 @@ export default function DashboardPage() {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const token = localStorage.getItem('token');
-
-        if (!token) {
-          router.push('/login');
-          return;
-        }
-
+        // SECURITY: Token is in httpOnly cookie, sent automatically
         const response = await fetch('/api/auth/me', {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          credentials: 'include', // Include cookies in request
         });
 
         if (!response.ok) {
@@ -40,7 +32,6 @@ export default function DashboardPage() {
         setUser(data.user);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred');
-        localStorage.removeItem('token');
         router.push('/login');
       } finally {
         setLoading(false);
@@ -50,9 +41,17 @@ export default function DashboardPage() {
     fetchUser();
   }, [router]);
 
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+  const handleLogout = async () => {
+    try {
+      // SECURITY: Call logout endpoint to revoke token server-side
+      await fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include',
+      });
+    } catch (err) {
+      // Ignore errors, still redirect to login
+    }
+
     router.push('/login');
   };
 

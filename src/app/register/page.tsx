@@ -31,9 +31,7 @@ export default function RegisterPage() {
         throw new Error(data.error || 'Registration failed');
       }
 
-      // Store token in localStorage for API calls
-      localStorage.setItem('token', data.token);
-
+      // SECURITY: Token is in httpOnly cookie, no localStorage needed
       // Cookie is set by the server automatically
 
       // Redirect to dashboard
@@ -90,7 +88,8 @@ export default function RegisterPage() {
               onChange={(e) => setPassword(e.target.value)}
               required
               style={styles.input}
-              placeholder="Enter your password (min 6 characters)"
+              placeholder="Enter your password (min 8 chars, uppercase, lowercase, number, special char)"
+              title="Password must be at least 8 characters with uppercase, lowercase, number, and special character"
             />
           </div>
 
