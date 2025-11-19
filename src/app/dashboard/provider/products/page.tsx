@@ -21,8 +21,10 @@ import { useProducts, useDeleteProduct } from '@/lib/hooks/useProducts';
 import { Product, ProductCategory, ProductStatus } from '@/types/provider';
 import { Edit, Trash2, Search } from 'lucide-react';
 import { format } from 'date-fns';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function ProductsPage() {
+  const { t } = useLanguage();
   const [page, setPage] = useState(1);
   const [category, setCategory] = useState<ProductCategory | 'all'>('all');
   const [status, setStatus] = useState<ProductStatus | 'all'>('all');
@@ -42,7 +44,7 @@ export default function ProductsPage() {
   const handleDelete = async (id: string, productName: string) => {
     if (
       window.confirm(
-        `Are you sure you want to delete "${productName}"? This action cannot be undone.`
+        t('provider.products.confirmDelete').replace('{name}', productName)
       )
     ) {
       await deleteProduct.mutateAsync(id);
@@ -52,12 +54,12 @@ export default function ProductsPage() {
   const columns: Column<Product>[] = [
     {
       key: 'category',
-      label: 'Category',
+      label: t('provider.category'),
       render: (product) => <CategoryBadge category={product.category} />,
     },
     {
       key: 'name',
-      label: 'Product Name',
+      label: t('provider.products.productName'),
       render: (product) => (
         <div>
           <p className="font-medium">{product.name}</p>
@@ -69,24 +71,24 @@ export default function ProductsPage() {
     },
     {
       key: 'price',
-      label: 'Price',
+      label: t('products.price'),
       render: (product) => (
         <span className="font-medium">${parseFloat(product.price).toFixed(2)}</span>
       ),
     },
     {
       key: 'status',
-      label: 'Status',
+      label: t('products.status'),
       render: (product) => <ProductStatusBadge status={product.status} />,
     },
     {
       key: 'createdAt',
-      label: 'Created',
+      label: t('provider.products.created'),
       render: (product) => format(new Date(product.createdAt), 'MMM dd, yyyy'),
     },
     {
       key: 'actions',
-      label: 'Actions',
+      label: t('provider.products.actions'),
       render: (product) => (
         <div className="flex gap-2">
           <Button
@@ -96,8 +98,8 @@ export default function ProductsPage() {
             disabled={product.status !== 'available'}
             title={
               product.status !== 'available'
-                ? 'Only available products can be edited'
-                : 'Edit product'
+                ? t('provider.products.onlyAvailableEdit')
+                : t('provider.products.editProduct')
             }
           >
             <Edit className="h-4 w-4" />
@@ -109,8 +111,8 @@ export default function ProductsPage() {
             disabled={product.status === 'sold'}
             title={
               product.status === 'sold'
-                ? 'Sold products cannot be deleted'
-                : 'Delete product'
+                ? t('provider.products.soldCannotDelete')
+                : t('provider.products.deleteProduct')
             }
           >
             <Trash2 className="h-4 w-4 text-red-500" />
@@ -124,9 +126,9 @@ export default function ProductsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Products</h1>
+          <h1 className="text-3xl font-bold">{t('provider.products.title')}</h1>
           <p className="text-muted-foreground mt-2">
-            Manage your digital product catalog
+            {t('provider.products.subtitle')}
           </p>
         </div>
         <CreateProductDialog />
@@ -134,18 +136,18 @@ export default function ProductsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Filters</CardTitle>
-          <CardDescription>Filter products by category, status, or search</CardDescription>
+          <CardTitle>{t('provider.products.filters')}</CardTitle>
+          <CardDescription>{t('provider.products.filtersDescription')}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-4">
             <div className="space-y-2">
-              <Label htmlFor="search">Search</Label>
+              <Label htmlFor="search">{t('common.search')}</Label>
               <div className="relative">
                 <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="search"
-                  placeholder="Search products..."
+                  placeholder={t('provider.products.searchPlaceholder')}
                   value={search}
                   onChange={(e) => {
                     setSearch(e.target.value);
@@ -157,7 +159,7 @@ export default function ProductsPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="category">Category</Label>
+              <Label htmlFor="category">{t('products.category')}</Label>
               <Select
                 value={category}
                 onValueChange={(value) => {
@@ -166,10 +168,10 @@ export default function ProductsPage() {
                 }}
               >
                 <SelectTrigger id="category">
-                  <SelectValue placeholder="All categories" />
+                  <SelectValue placeholder={t('provider.products.allCategories')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All categories</SelectItem>
+                  <SelectItem value="all">{t('provider.products.allCategories')}</SelectItem>
                   <SelectItem value="netflix">Netflix</SelectItem>
                   <SelectItem value="spotify">Spotify</SelectItem>
                   <SelectItem value="hbo">HBO</SelectItem>
@@ -182,7 +184,7 @@ export default function ProductsPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="status">Status</Label>
+              <Label htmlFor="status">{t('products.status')}</Label>
               <Select
                 value={status}
                 onValueChange={(value) => {
@@ -191,13 +193,13 @@ export default function ProductsPage() {
                 }}
               >
                 <SelectTrigger id="status">
-                  <SelectValue placeholder="All statuses" />
+                  <SelectValue placeholder={t('provider.products.allStatuses')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All statuses</SelectItem>
-                  <SelectItem value="available">Available</SelectItem>
-                  <SelectItem value="reserved">Reserved</SelectItem>
-                  <SelectItem value="sold">Sold</SelectItem>
+                  <SelectItem value="all">{t('provider.products.allStatuses')}</SelectItem>
+                  <SelectItem value="available">{t('products.available')}</SelectItem>
+                  <SelectItem value="reserved">{t('products.reserved')}</SelectItem>
+                  <SelectItem value="sold">{t('products.sold')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -214,7 +216,7 @@ export default function ProductsPage() {
                 }}
                 className="w-full"
               >
-                Clear Filters
+                {t('provider.products.clearFilters')}
               </Button>
             </div>
           </div>
@@ -234,7 +236,7 @@ export default function ProductsPage() {
               }
             : undefined
         }
-        emptyMessage="No products found. Create your first product to get started!"
+        emptyMessage={t('provider.products.noProducts')}
       />
 
       {editingProduct && (
