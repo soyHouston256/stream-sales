@@ -1,0 +1,34 @@
+{
+  "name": "stream-sales-cdk",
+  "version": "1.0.0",
+  "description": "AWS CDK infrastructure for Stream Sales marketplace",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "cdk": "cdk",
+    "deploy:dev": "cdk deploy StreamSalesStack-dev",
+    "deploy:staging": "cdk deploy StreamSalesStack-staging --context environment=staging",
+    "deploy:prod": "cdk deploy StreamSalesStack-production --context environment=production --context deletionProtection=true --require-approval broadening",
+    "diff:dev": "cdk diff StreamSalesStack-dev",
+    "diff:staging": "cdk diff StreamSalesStack-staging --context environment=staging",
+    "diff:prod": "cdk diff StreamSalesStack-production --context environment=production",
+    "synth:dev": "cdk synth StreamSalesStack-dev",
+    "synth:staging": "cdk synth StreamSalesStack-staging --context environment=staging",
+    "synth:prod": "cdk synth StreamSalesStack-production --context environment=production",
+    "destroy:dev": "cdk destroy StreamSalesStack-dev",
+    "bootstrap": "cdk bootstrap",
+    "list": "cdk list"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "aws-cdk": "^2.115.0",
+    "source-map-support": "^0.5.21",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "aws-cdk-lib": "^2.115.0",
+    "constructs": "^10.3.0",
+    "open-next": "^3.0.0"
+  }
+}

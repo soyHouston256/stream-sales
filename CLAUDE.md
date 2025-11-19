@@ -20,6 +20,7 @@ npm run lint             # Run ESLint
 ```bash
 npm test                 # Run all tests with Jest
 npm run test:watch       # Run tests in watch mode
+npm run test:db          # Test database connection (local or AWS)
 ```
 
 ### Database (Prisma)
@@ -27,7 +28,24 @@ npm run test:watch       # Run tests in watch mode
 npm run prisma:generate  # Generate Prisma Client (run after schema changes)
 npm run prisma:migrate   # Create and apply migrations
 npm run prisma:studio    # Open Prisma Studio GUI to view/edit data
+npm run test:db          # Test database connection with comprehensive suite
 ```
+
+### Maintenance Scripts
+```bash
+npm run seed:admin                  # Create admin user with wallet (REQUIRED for purchases)
+npm run seed:commission-config      # Initialize commission configuration (5% sale, 0% registration)
+npm run migrate:encrypt-passwords   # Re-encrypt product passwords (see scripts/README.md)
+```
+
+**Important**: Before running maintenance scripts:
+1. Always backup your database first
+2. Review the script documentation in `scripts/README.md`
+3. Ensure environment variables are properly configured
+
+**First-time Setup**:
+1. Run `npm run seed:admin` before making any purchases in the system
+2. Run `npm run seed:commission-config` to initialize commission rates (optional, defaults to 5%)
 
 ## Architecture
 
@@ -110,14 +128,56 @@ To protect a new route:
 ## Database
 
 - **Provider**: PostgreSQL (configured in `prisma/schema.prisma`)
-- **Connection**: `DATABASE_URL` environment variable
-- **Schema**: Single `User` table with:
-  - `id` (String, cuid)
-  - `email` (String, unique)
-  - `password` (String, bcrypt hashed)
-  - `name` (String?, optional)
-  - `role` (String, default "user")
-  - `createdAt`, `updatedAt` (DateTime)
+- **Connection**: Environment-aware (see Database Infrastructure below)
+- **ORM**: Prisma Client with AWS Secrets Manager integration
+
+### Database Infrastructure
+
+The Prisma client initialization supports both local development and production AWS deployments:
+
+**Development Mode** (default):
+- Uses `DATABASE_URL` from `.env` file
+- Direct PostgreSQL connection
+- Query logging enabled
+
+**Production Mode** (AWS):
+- Retrieves credentials from AWS Secrets Manager
+- Automatic retry logic with exponential backoff
+- Connection pooling optimized for serverless (5 connections)
+- SSL/TLS encryption enforced
+
+**Configuration:**
+```env
+# Development
+DATABASE_URL="postgresql://user:pass@localhost:5432/streams?schema=public"
+
+# Production
+NODE_ENV=production
+AWS_SECRET_NAME="stream-sales/database/credentials"
+AWS_REGION="us-east-1"
+```
+
+**Testing Database Connection:**
+```bash
+# Test local connection
+npm run test:db
+
+# Test AWS Secrets Manager integration
+NODE_ENV=production AWS_SECRET_NAME=your-secret npm run test:db
+```
+
+**Key Features:**
+- Singleton pattern prevents connection leaks during Next.js hot reload
+- Graceful shutdown with automatic connection cleanup
+- Connection retry logic (3 attempts with exponential backoff)
+- Comprehensive error handling and logging
+- Type-safe configuration with TypeScript interfaces
+
+**Documentation:**
+- Implementation: `src/infrastructure/database/prisma.ts`
+- Type definitions: `src/infrastructure/database/types.ts`
+- Usage guide: `src/infrastructure/database/README.md`
+- CDK integration: `src/infrastructure/database/CDK_INTEGRATION.md`
 
 ### Database Workflow
 
@@ -125,6 +185,7 @@ To protect a new route:
 2. Run `npm run prisma:migrate` to create migration
 3. Run `npm run prisma:generate` to update Prisma Client types
 4. Update domain entities and repositories as needed
+5. Test connection: `npm run test:db`
 
 ## Testing
 
@@ -155,11 +216,41 @@ npm test -- --coverage          # Run with coverage report
 
 ## Environment Variables
 
-Required in `.env`:
-```
-DATABASE_URL="postgresql://user:password@localhost:5432/dbname?schema=public"
+### Development (.env)
+```env
+# Database
+DATABASE_URL="postgresql://user:password@localhost:5432/streams?schema=public"
+
+# JWT Authentication
 JWT_SECRET="your-secret-key-change-this-in-production"
 JWT_EXPIRES_IN="7d"  # Token expiration (e.g., 7d, 24h, 60m)
+
+# Environment
+NODE_ENV="development"
+```
+
+### Production (AWS Lambda/ECS)
+```env
+# Database (AWS Secrets Manager)
+NODE_ENV=production
+AWS_SECRET_NAME="stream-sales/database/credentials"
+AWS_REGION="us-east-1"
+
+# JWT Authentication (store in separate secret)
+JWT_SECRET="your-production-secret"
+JWT_EXPIRES_IN="7d"
+```
+
+**AWS Secrets Manager Secret Format:**
+```json
+{
+  "host": "stream-sales-db.abc123.us-east-1.rds.amazonaws.com",
+  "port": "5432",
+  "username": "dbadmin",
+  "password": "SecurePassword123!",
+  "dbname": "streams",
+  "engine": "postgres"
+}
 ```
 
 ## Common Issues & Solutions
@@ -179,6 +270,111 @@ JWT_EXPIRES_IN="7d"  # Token expiration (e.g., 7d, 24h, 60m)
 ### Issue: Database connection error
 **Cause**: PostgreSQL not running or wrong DATABASE_URL
 **Solution**: Ensure PostgreSQL is running and DATABASE_URL is correct
+
+### Issue: "Invalid encrypted format" error when purchasing products
+**Cause**: Products created before encryption system have passwords in plain text
+**Solution**:
+1. **Immediate fix**: Already implemented - `PrismaProductRepository.decrypt()` now handles both encrypted and plain text passwords
+2. **Long-term fix**: Run migration script to encrypt all passwords:
+   ```bash
+   npm run migrate:encrypt-passwords
+   ```
+3. **Details**: See `scripts/README.md` for complete migration guide
+
+**Technical Details**:
+- Product passwords are encrypted using AES-256-CBC
+- Format: `{iv_hex}:{encrypted_data_hex}`
+- The decrypt method now:
+  - Detects if password is already encrypted (contains `:`)
+  - Returns plain text passwords as-is (backward compatibility)
+  - Logs warnings for unencrypted passwords
+- New products are always saved with encrypted passwords
+- Migration script is idempotent and safe to run multiple times
+
+### Issue: "Admin wallet not found" error when purchasing products
+**Cause**: The system requires an admin user with wallet to receive commission payments
+**Solution**:
+```bash
+npm run seed:admin
+```
+
+**Why this happens**:
+- When a seller purchases a product, the system splits the payment:
+  - 5% commission → Admin wallet
+  - 95% earnings → Provider wallet
+- Without an admin wallet, the transaction cannot complete
+
+**What the seed script does**:
+1. Creates admin user with email: `admin@streamsales.com`
+2. Creates wallet for admin with $0 initial balance
+3. Password: `admin123` (change after first login)
+
+**Important**: This is a **required** step for new installations before making any purchases.
+
+## Commission System
+
+The application uses a **dynamic commission configuration** system that allows admins to adjust commission rates without code changes.
+
+### How It Works
+
+**Commission Flow** (example with 5% commission on $15.99 purchase):
+```
+Seller pays: $15.99 (full price)
+    ↓
+Admin receives: $0.80 (5% commission)
+Provider receives: $15.19 (95% earnings)
+```
+
+**Key Components**:
+- **CommissionConfig Entity** (`src/domain/entities/CommissionConfig.ts`): Domain model for commission configuration
+- **CommissionConfigRepository** (`src/infrastructure/repositories/PrismaCommissionConfigRepository.ts`): Data access layer
+- **Use Cases**:
+  - `GetActiveCommissionConfigUseCase`: Retrieves current active commission rate
+  - `UpdateCommissionConfigUseCase`: Updates commission configuration with audit trail
+- **PurchaseProductUseCase** (`src/application/use-cases/PurchaseProductUseCase.ts:203`): Now reads commission rate from database instead of hardcoded value
+
+### Commission Types
+
+1. **Sale Commission** (default: 5%): Applied when a seller purchases a product
+2. **Registration Commission** (default: 0%): Applied when new users register via affiliate referral
+
+### Admin Configuration
+
+Admins can configure commissions via:
+- **Dashboard**: `/dashboard/admin/commissions`
+- **API Endpoints**:
+  - `GET /api/admin/commissions` - Get current configuration
+  - `PUT /api/admin/commissions` - Update rates (0-100%)
+  - `GET /api/admin/commissions/history` - View all changes
+
+### Database Schema
+
+**CommissionConfig Table**:
+```prisma
+- id: String (cuid)
+- type: 'sale' | 'registration'
+- rate: Decimal (0-100, e.g., 5.50 = 5.5%)
+- isActive: Boolean
+- effectiveFrom: DateTime
+- createdAt: DateTime
+- updatedAt: DateTime
+```
+
+**Important Features**:
+- **Audit Trail**: Every commission change creates a new record, old configs are deactivated (not deleted)
+- **Snapshot on Purchase**: Commission rate is captured at purchase time, never changes retroactively
+- **Fallback**: If no active config exists, defaults to 5% (see `PurchaseProductUseCase.ts:89`)
+
+### Initialization
+
+Run this after first installation:
+```bash
+npm run seed:commission-config
+```
+
+This creates default configurations:
+- Sale commission: 5.00%
+- Registration commission: 0.00%
 
 ## TypeScript Path Aliases
 

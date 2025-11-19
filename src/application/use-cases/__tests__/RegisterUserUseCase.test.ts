@@ -1,6 +1,8 @@
 import { RegisterUserUseCase } from '../RegisterUserUseCase';
 import { IUserRepository } from '@/domain/repositories/IUserRepository';
+import { IWalletRepository } from '@/domain/repositories/IWalletRepository';
 import { User } from '@/domain/entities/User';
+import { Wallet } from '@/domain/entities/Wallet';
 import { Email } from '@/domain/value-objects/Email';
 import { UserAlreadyExistsException } from '@/domain/exceptions/DomainException';
 
@@ -25,13 +27,50 @@ class MockUserRepository implements IUserRepository {
   }
 }
 
+class MockWalletRepository implements IWalletRepository {
+  private wallets: Map<string, Wallet> = new Map();
+
+  async save(wallet: Wallet): Promise<Wallet> {
+    this.wallets.set(wallet.id, wallet);
+    return wallet;
+  }
+
+  async findById(id: string): Promise<Wallet | null> {
+    return this.wallets.get(id) || null;
+  }
+
+  async findByUserId(userId: string): Promise<Wallet | null> {
+    for (const wallet of this.wallets.values()) {
+      if (wallet.userId === userId) {
+        return wallet;
+      }
+    }
+    return null;
+  }
+
+  async existsByUserId(userId: string): Promise<boolean> {
+    for (const wallet of this.wallets.values()) {
+      if (wallet.userId === userId) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  async delete(id: string): Promise<boolean> {
+    return this.wallets.delete(id);
+  }
+}
+
 describe('RegisterUserUseCase', () => {
   let userRepository: MockUserRepository;
+  let walletRepository: MockWalletRepository;
   let registerUserUseCase: RegisterUserUseCase;
 
   beforeEach(() => {
     userRepository = new MockUserRepository();
-    registerUserUseCase = new RegisterUserUseCase(userRepository);
+    walletRepository = new MockWalletRepository();
+    registerUserUseCase = new RegisterUserUseCase(userRepository, walletRepository);
   });
 
   it('should register a new user successfully', async () => {
@@ -46,6 +85,20 @@ describe('RegisterUserUseCase', () => {
     expect(result.user.name).toBe('Test User');
     expect(result.user.role).toBe('user');
     expect(result.user.id).toBeDefined();
+  });
+
+  it('should create a wallet for new user', async () => {
+    const result = await registerUserUseCase.execute({
+      email: 'test@example.com',
+      password: 'password123',
+      name: 'Test User',
+    });
+
+    expect(result.wallet).toBeDefined();
+    expect(result.wallet.id).toBeDefined();
+    expect(result.wallet.balance).toBe('0.0000');
+    expect(result.wallet.currency).toBe('USD');
+    expect(result.wallet.status).toBe('active');
   });
 
   it('should register user without name', async () => {
