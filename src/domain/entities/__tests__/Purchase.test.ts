@@ -7,6 +7,7 @@ describe('Purchase Entity', () => {
       const purchase = Purchase.create({
         sellerId: 'seller123',
         productId: 'product456',
+        providerId: 'provider789',
         amount: Money.create(15.99),
         commissionRate: 0.05, // 5%
       });
@@ -22,6 +23,7 @@ describe('Purchase Entity', () => {
       const purchase = Purchase.create({
         sellerId: 'seller123',
         productId: 'product456',
+        providerId: 'provider789',
         amount: Money.create(100),
         commissionRate: 0.05, // 5%
       });
@@ -33,6 +35,7 @@ describe('Purchase Entity', () => {
       const purchase = Purchase.create({
         sellerId: 'seller123',
         productId: 'product456',
+        providerId: 'provider789',
         amount: Money.create(100),
         commissionRate: 0.05, // 5%
       });
@@ -44,6 +47,7 @@ describe('Purchase Entity', () => {
       const purchase = Purchase.create({
         sellerId: 'seller123',
         productId: 'product456',
+        providerId: 'provider789',
         amount: Money.create(15.99),
         commissionRate: 0.05, // 5%
       });
@@ -56,6 +60,7 @@ describe('Purchase Entity', () => {
       const purchase = Purchase.create({
         sellerId: 'seller123',
         productId: 'product456',
+        providerId: 'provider789',
         amount: Money.create(15.99),
         commissionRate: 0.05,
       });
@@ -68,6 +73,7 @@ describe('Purchase Entity', () => {
         Purchase.create({
           sellerId: '',
           productId: 'product456',
+        providerId: 'provider789',
           amount: Money.create(15.99),
           commissionRate: 0.05,
         })
@@ -79,6 +85,7 @@ describe('Purchase Entity', () => {
         Purchase.create({
           sellerId: 'seller123',
           productId: '',
+          providerId: 'provider789',
           amount: Money.create(15.99),
           commissionRate: 0.05,
         })
@@ -90,6 +97,7 @@ describe('Purchase Entity', () => {
         Purchase.create({
           sellerId: 'seller123',
           productId: 'product456',
+        providerId: 'provider789',
           amount: Money.create(0),
           commissionRate: 0.05,
         })
@@ -101,6 +109,7 @@ describe('Purchase Entity', () => {
         Purchase.create({
           sellerId: 'seller123',
           productId: 'product456',
+        providerId: 'provider789',
           amount: Money.create(15.99),
           commissionRate: -0.05,
         })
@@ -112,6 +121,7 @@ describe('Purchase Entity', () => {
         Purchase.create({
           sellerId: 'seller123',
           productId: 'product456',
+        providerId: 'provider789',
           amount: Money.create(15.99),
           commissionRate: 1.5,
         })
@@ -122,6 +132,7 @@ describe('Purchase Entity', () => {
       const purchase = Purchase.create({
         sellerId: 'seller123',
         productId: 'product456',
+        providerId: 'provider789',
         amount: Money.create(15.99),
         commissionRate: 0,
       });
@@ -134,6 +145,7 @@ describe('Purchase Entity', () => {
       const purchase = Purchase.create({
         sellerId: 'seller123',
         productId: 'product456',
+        providerId: 'provider789',
         amount: Money.create(15.99),
         commissionRate: 1, // 100%
       });
@@ -152,6 +164,7 @@ describe('Purchase Entity', () => {
         id: 'purchase123',
         sellerId: 'seller123',
         productId: 'product456',
+        providerId: 'provider789',
         amount,
         adminCommission,
         commissionRate: 0.05,
@@ -171,6 +184,7 @@ describe('Purchase Entity', () => {
       const purchase = Purchase.create({
         sellerId: 'seller123',
         productId: 'product456',
+        providerId: 'provider789',
         amount: Money.create(15.99),
         commissionRate: 0.05,
       });
@@ -182,6 +196,7 @@ describe('Purchase Entity', () => {
       const purchase = Purchase.create({
         sellerId: 'seller123',
         productId: 'product456',
+        providerId: 'provider789',
         amount: Money.create(15.99),
         commissionRate: 0.075,
       });
@@ -193,6 +208,7 @@ describe('Purchase Entity', () => {
       const purchase = Purchase.create({
         sellerId: 'seller123',
         productId: 'product456',
+        providerId: 'provider789',
         amount: Money.create(15.99),
         commissionRate: 0,
       });
@@ -206,6 +222,7 @@ describe('Purchase Entity', () => {
       const purchase = Purchase.create({
         sellerId: 'seller123',
         productId: 'product456',
+        providerId: 'provider789',
         amount: Money.create(15.99),
         commissionRate: 0.05,
       });
@@ -217,6 +234,7 @@ describe('Purchase Entity', () => {
       const purchase = Purchase.create({
         sellerId: 'seller123',
         productId: 'product456',
+        providerId: 'provider789',
         amount: Money.create(15.99),
         commissionRate: 0.05,
       });
@@ -230,6 +248,7 @@ describe('Purchase Entity', () => {
       const purchase = Purchase.create({
         sellerId: 'seller123',
         productId: 'product456',
+        providerId: 'provider789',
         amount: Money.create(15.99),
         commissionRate: 0.05,
       });
@@ -241,6 +260,7 @@ describe('Purchase Entity', () => {
       const purchase = Purchase.create({
         sellerId: 'seller123',
         productId: 'product456',
+        providerId: 'provider789',
         amount: Money.create(15.99),
         commissionRate: 0.05,
       });
@@ -254,6 +274,7 @@ describe('Purchase Entity', () => {
       const purchase = Purchase.create({
         sellerId: 'seller123',
         productId: 'product456',
+        providerId: 'provider789',
         amount: Money.create(15.99),
         commissionRate: 0.05,
       });
@@ -278,6 +299,7 @@ describe('Purchase Entity', () => {
       const purchase = Purchase.create({
         sellerId: 'seller123',
         productId: 'product456',
+        providerId: 'provider789',
         amount: Money.create(100),
         commissionRate: 0.10, // 10%
       });
@@ -297,6 +319,7 @@ describe('Purchase Entity', () => {
       const purchase = Purchase.create({
         sellerId: 'seller123',
         productId: 'product456',
+        providerId: 'provider789',
         amount: Money.create(15.99),
         commissionRate: 0.05,
       });
@@ -318,6 +341,7 @@ describe('Purchase Entity', () => {
       const purchase = Purchase.create({
         sellerId: 'seller123',
         productId: 'product456',
+        providerId: 'provider789',
         amount: Money.create(15.99),
         commissionRate: 0.05,
       });
@@ -332,6 +356,7 @@ describe('Purchase Entity', () => {
       const purchase = Purchase.create({
         sellerId: 'seller123',
         productId: 'product456',
+        providerId: 'provider789',
         amount: Money.create(15.99),
         commissionRate: 0.05,
       });
@@ -350,6 +375,7 @@ describe('Purchase Entity', () => {
       const purchase = Purchase.create({
         sellerId: 'seller123',
         productId: 'product456',
+        providerId: 'provider789',
         amount: Money.create(999.99),
         commissionRate: 0.03, // 3%
       });
@@ -362,6 +388,7 @@ describe('Purchase Entity', () => {
       const purchase = Purchase.create({
         sellerId: 'seller123',
         productId: 'product456',
+        providerId: 'provider789',
         amount: Money.create(50),
         commissionRate: 0.01, // 1%
       });
@@ -374,6 +401,7 @@ describe('Purchase Entity', () => {
       const purchase = Purchase.create({
         sellerId: 'seller123',
         productId: 'product456',
+        providerId: 'provider789',
         amount: Money.create(50),
         commissionRate: 0.20, // 20%
       });

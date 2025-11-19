@@ -74,21 +74,21 @@ export default function PurchasesPage() {
   const columns: Column<Purchase>[] = [
     {
       key: 'id',
-      label: 'Purchase ID',
+      label: t('purchases.page.purchaseId'),
       render: (purchase) => (
         <span className="font-mono text-xs">{purchase.id.slice(0, 8)}...</span>
       ),
     },
     {
       key: 'product',
-      label: 'Product',
+      label: t('purchases.page.productLabel'),
       render: (purchase) => (
         <div className="flex items-center gap-2">
           <CategoryBadge category={purchase.product.category} />
           <div>
             <p className="font-medium">{purchase.product.name}</p>
             <p className="text-xs text-muted-foreground">
-              by {purchase.provider.name}
+              {t('purchases.page.by')} {purchase.provider.name}
             </p>
           </div>
         </div>
@@ -96,21 +96,21 @@ export default function PurchasesPage() {
     },
     {
       key: 'amount',
-      label: 'Price',
+      label: t('purchases.page.price'),
       render: (purchase) => (
         <span className="font-medium">{formatCurrency(purchase.amount)}</span>
       ),
     },
     {
       key: 'createdAt',
-      label: 'Purchase Date',
+      label: t('purchases.purchaseDate'),
       render: (purchase) => (
         <span className="text-sm">{format(new Date(purchase.createdAt), 'PPp')}</span>
       ),
     },
     {
       key: 'status',
-      label: 'Status',
+      label: t('purchases.page.status'),
       render: (purchase) => {
         const variant = getEffectiveStatusBadgeVariant(purchase.effectiveStatus);
         const label = getEffectiveStatusLabel(purchase.effectiveStatus, t);
@@ -129,7 +129,7 @@ export default function PurchasesPage() {
     },
     {
       key: 'actions',
-      label: 'Actions',
+      label: t('purchases.page.actions'),
       render: (purchase) => (
         <Button
           size="sm"
@@ -137,7 +137,7 @@ export default function PurchasesPage() {
           onClick={() => handleViewDetails(purchase)}
         >
           <Eye className="h-4 w-4 mr-2" />
-          View Details
+          {t('purchases.viewDetails')}
         </Button>
       ),
     },
@@ -146,32 +146,32 @@ export default function PurchasesPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">My Purchases</h1>
+        <h1 className="text-3xl font-bold">{t('purchases.page.title')}</h1>
         <p className="text-muted-foreground mt-2">
-          View your purchase history and access product credentials
+          {t('purchases.page.subtitle')}
         </p>
       </div>
 
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-3">
         <StatsCard
-          title="Total Purchases"
+          title={t('purchases.page.totalPurchases')}
           value={stats.totalPurchases}
-          description="All-time purchases"
+          description={t('purchases.page.allTimePurchases')}
           icon={ShoppingBag}
           isLoading={isLoading && purchases.length === 0}
         />
         <StatsCard
-          title="Total Spent"
+          title={t('purchases.page.totalSpent')}
           value={formatCurrency(stats.totalSpent)}
-          description="Total amount spent"
+          description={t('purchases.page.totalAmountSpent')}
           icon={DollarSign}
           isLoading={isLoading && purchases.length === 0}
         />
         <StatsCard
-          title="Average Price"
+          title={t('purchases.page.averagePrice')}
           value={formatCurrency(stats.averagePrice)}
-          description="Average purchase price"
+          description={t('purchases.page.averagePurchasePrice')}
           icon={TrendingDown}
           isLoading={isLoading && purchases.length === 0}
         />
@@ -180,13 +180,13 @@ export default function PurchasesPage() {
       {/* Filters */}
       <Card>
         <CardHeader>
-          <CardTitle>Filter Purchases</CardTitle>
+          <CardTitle>{t('purchases.page.filterPurchases')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-3">
             {/* Category Filter */}
             <div className="space-y-2">
-              <label className="text-sm font-medium">Category</label>
+              <label className="text-sm font-medium">{t('purchases.page.category')}</label>
               <Select
                 value={filters.category || 'all'}
                 onValueChange={(value) =>
@@ -198,10 +198,10 @@ export default function PurchasesPage() {
                 }
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="All Categories" />
+                  <SelectValue placeholder={t('purchases.page.allCategories')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Categories</SelectItem>
+                  <SelectItem value="all">{t('purchases.page.allCategories')}</SelectItem>
                   <SelectItem value="netflix">Netflix</SelectItem>
                   <SelectItem value="spotify">Spotify</SelectItem>
                   <SelectItem value="hbo">HBO</SelectItem>
@@ -215,7 +215,7 @@ export default function PurchasesPage() {
 
             {/* Status Filter */}
             <div className="space-y-2">
-              <label className="text-sm font-medium">Status</label>
+              <label className="text-sm font-medium">{t('purchases.page.status')}</label>
               <Select
                 value={filters.status || 'all'}
                 onValueChange={(value) =>
@@ -227,21 +227,21 @@ export default function PurchasesPage() {
                 }
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="All Statuses" />
+                  <SelectValue placeholder={t('purchases.page.allStatuses')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Statuses</SelectItem>
-                  <SelectItem value="pending">Pending</SelectItem>
-                  <SelectItem value="completed">Completed</SelectItem>
-                  <SelectItem value="failed">Failed</SelectItem>
-                  <SelectItem value="refunded">Refunded</SelectItem>
+                  <SelectItem value="all">{t('purchases.page.allStatuses')}</SelectItem>
+                  <SelectItem value="pending">{t('purchases.page.pending')}</SelectItem>
+                  <SelectItem value="completed">{t('purchases.page.completed')}</SelectItem>
+                  <SelectItem value="failed">{t('purchases.page.failed')}</SelectItem>
+                  <SelectItem value="refunded">{t('purchases.page.refunded')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             {/* Items per page */}
             <div className="space-y-2">
-              <label className="text-sm font-medium">Items per page</label>
+              <label className="text-sm font-medium">{t('purchases.page.itemsPerPage')}</label>
               <Select
                 value={filters.limit?.toString() || '10'}
                 onValueChange={(value) =>
@@ -270,11 +270,11 @@ export default function PurchasesPage() {
       {/* Purchases Table */}
       <Card>
         <CardHeader>
-          <CardTitle>Purchase History</CardTitle>
+          <CardTitle>{t('purchases.page.purchaseHistory')}</CardTitle>
           <CardDescription>
             {pagination
-              ? `Showing ${purchases.length} of ${pagination.total} purchases`
-              : 'Loading...'}
+              ? `${t('purchases.page.showing')} ${purchases.length} ${t('purchases.page.of')} ${pagination.total} ${t('purchases.page.purchasesText')}`
+              : t('purchases.page.loading')}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -282,7 +282,7 @@ export default function PurchasesPage() {
             data={purchases}
             columns={columns}
             isLoading={isLoading}
-            emptyMessage="No purchases found. Start shopping in the marketplace!"
+            emptyMessage={t('purchases.page.noPurchasesFound')}
           />
 
           {/* Pagination */}
@@ -295,10 +295,10 @@ export default function PurchasesPage() {
                 }
                 disabled={filters.page === 1}
               >
-                Previous
+                {t('purchases.page.previous')}
               </Button>
               <span className="text-sm text-muted-foreground">
-                Page {filters.page} of {pagination.totalPages}
+                {t('purchases.page.page')} {filters.page} {t('purchases.page.of')} {pagination.totalPages}
               </span>
               <Button
                 variant="outline"
@@ -307,7 +307,7 @@ export default function PurchasesPage() {
                 }
                 disabled={filters.page === pagination.totalPages}
               >
-                Next
+                {t('purchases.page.next')}
               </Button>
             </div>
           )}

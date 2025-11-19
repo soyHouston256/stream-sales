@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useLanguage } from '@/contexts/LanguageContext';
 import {
   Dialog,
   DialogContent,
@@ -34,6 +35,7 @@ interface RechargeDialogProps {
 }
 
 export function RechargeDialog({ currentBalance, trigger }: RechargeDialogProps) {
+  const { t } = useLanguage();
   const [open, setOpen] = useState(false);
   const createRecharge = useCreateRecharge();
 
@@ -70,15 +72,15 @@ export function RechargeDialog({ currentBalance, trigger }: RechargeDialogProps)
         {trigger || (
           <Button>
             <Plus className="h-4 w-4 mr-2" />
-            Add Funds
+            {t('seller.recharge.addFunds')}
           </Button>
         )}
       </DialogTrigger>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Add Funds to Wallet</DialogTitle>
+          <DialogTitle>{t('seller.recharge.title')}</DialogTitle>
           <DialogDescription>
-            Request a recharge to add funds to your wallet
+            {t('seller.recharge.subtitle')}
           </DialogDescription>
         </DialogHeader>
 
@@ -87,7 +89,7 @@ export function RechargeDialog({ currentBalance, trigger }: RechargeDialogProps)
             <div className="bg-muted/50 p-3 rounded-md flex items-center justify-between">
               <span className="text-sm font-medium flex items-center gap-2">
                 <Wallet className="h-4 w-4" />
-                Current Balance:
+                {t('seller.recharge.currentBalance')}:
               </span>
               <span className="text-sm font-bold">
                 {formatCurrency(currentBalance)}
@@ -97,7 +99,7 @@ export function RechargeDialog({ currentBalance, trigger }: RechargeDialogProps)
 
           <div className="space-y-2">
             <Label htmlFor="amount">
-              Amount (USD) <span className="text-red-500">*</span>
+              {t('seller.recharge.amountLabel')} <span className="text-red-500">*</span>
             </Label>
             <Input
               id="amount"
@@ -105,20 +107,20 @@ export function RechargeDialog({ currentBalance, trigger }: RechargeDialogProps)
               step="0.01"
               min="10"
               max="10000"
-              placeholder="100.00"
+              placeholder={t('seller.recharge.amountPlaceholder')}
               {...register('amount', { valueAsNumber: true })}
             />
             {errors.amount && (
               <p className="text-sm text-red-500">{errors.amount.message}</p>
             )}
             <p className="text-xs text-muted-foreground">
-              Minimum: $10.00 | Maximum: $10,000.00
+              {t('seller.recharge.amountHelp')}
             </p>
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="paymentMethod">
-              Payment Method <span className="text-red-500">*</span>
+              {t('seller.recharge.paymentMethodLabel')} <span className="text-red-500">*</span>
             </Label>
             <Select
               value={paymentMethod}
@@ -127,14 +129,14 @@ export function RechargeDialog({ currentBalance, trigger }: RechargeDialogProps)
               }
             >
               <SelectTrigger id="paymentMethod">
-                <SelectValue placeholder="Select payment method" />
+                <SelectValue placeholder={t('seller.recharge.paymentMethodPlaceholder')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="mock">Mock Payment (Development)</SelectItem>
-                <SelectItem value="credit_card">Credit Card</SelectItem>
-                <SelectItem value="paypal">PayPal</SelectItem>
-                <SelectItem value="bank_transfer">Bank Transfer</SelectItem>
-                <SelectItem value="crypto">Cryptocurrency</SelectItem>
+                <SelectItem value="mock">{t('seller.recharge.mockPayment')}</SelectItem>
+                <SelectItem value="credit_card">{t('seller.recharge.creditCard')}</SelectItem>
+                <SelectItem value="paypal">{t('seller.recharge.paypal')}</SelectItem>
+                <SelectItem value="bank_transfer">{t('seller.recharge.bankTransfer')}</SelectItem>
+                <SelectItem value="crypto">{t('seller.recharge.crypto')}</SelectItem>
               </SelectContent>
             </Select>
             {errors.paymentMethod && (
@@ -144,23 +146,23 @@ export function RechargeDialog({ currentBalance, trigger }: RechargeDialogProps)
 
           <div className="space-y-2">
             <Label htmlFor="paymentDetails">
-              Payment Details (Optional)
+              {t('seller.recharge.paymentDetailsLabel')}
             </Label>
             <Textarea
               id="paymentDetails"
-              placeholder="Enter email, account number, wallet address, or any relevant payment information..."
+              placeholder={t('seller.recharge.paymentDetailsPlaceholder')}
               rows={3}
               {...register('paymentDetails')}
             />
             <p className="text-xs text-muted-foreground">
-              Provide any additional information needed to process your payment
+              {t('seller.recharge.paymentDetailsHelp')}
             </p>
           </div>
 
           {amount && amount >= 10 && (
             <div className="bg-primary/5 p-3 rounded-md border border-primary/20">
               <div className="flex justify-between items-center">
-                <span className="text-sm font-medium">You will receive:</span>
+                <span className="text-sm font-medium">{t('seller.recharge.youWillReceive')}</span>
                 <span className="text-lg font-bold text-primary">
                   {formatCurrency(amount)}
                 </span>
@@ -174,10 +176,10 @@ export function RechargeDialog({ currentBalance, trigger }: RechargeDialogProps)
               variant="outline"
               onClick={() => setOpen(false)}
             >
-              Cancel
+              {t('seller.recharge.cancel')}
             </Button>
             <Button type="submit" disabled={createRecharge.isPending}>
-              {createRecharge.isPending ? 'Requesting...' : 'Request Recharge'}
+              {createRecharge.isPending ? t('seller.recharge.requesting') : t('seller.recharge.requestRecharge')}
             </Button>
           </DialogFooter>
         </form>

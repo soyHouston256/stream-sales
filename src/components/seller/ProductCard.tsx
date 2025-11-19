@@ -4,6 +4,7 @@ import { MarketplaceProduct } from '@/types/seller';
 import { CategoryBadge } from '@/components/provider/CategoryBadge';
 import { ShoppingCart } from 'lucide-react';
 import { truncateText, formatCurrency } from '@/lib/utils/seller';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface ProductCardProps {
   product: MarketplaceProduct;
@@ -11,6 +12,8 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product, onBuyClick }: ProductCardProps) {
+  const { t } = useLanguage();
+
   return (
     <Card className="h-full flex flex-col hover:shadow-lg transition-shadow duration-200">
       <CardHeader>
@@ -24,7 +27,7 @@ export function ProductCard({ product, onBuyClick }: ProductCardProps) {
         </div>
         <CardTitle className="mt-2">{product.name}</CardTitle>
         <CardDescription className="text-xs text-muted-foreground">
-          by {product.providerName}
+          {t('seller.marketplace.by')} {product.providerName}
         </CardDescription>
       </CardHeader>
       <CardContent className="flex-grow">
@@ -38,7 +41,7 @@ export function ProductCard({ product, onBuyClick }: ProductCardProps) {
           onClick={() => onBuyClick(product)}
         >
           <ShoppingCart className="h-4 w-4 mr-2" />
-          Buy Now
+          {t('seller.marketplace.buyNow')}
         </Button>
       </CardFooter>
     </Card>

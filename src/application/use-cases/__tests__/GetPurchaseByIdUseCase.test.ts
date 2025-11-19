@@ -55,6 +55,15 @@ class MockPurchaseRepository implements IPurchaseRepository {
     );
   }
 
+  async markAsRefunded(purchaseId: string): Promise<void> {
+    const purchase = await this.findById(purchaseId);
+    if (!purchase) {
+      throw new Error('Purchase not found');
+    }
+    // In a real implementation, this would update the purchase status
+    // For mock purposes, we just verify it exists
+  }
+
   // Helper for tests
   async createPurchase(data: {
     sellerId: string;
@@ -65,6 +74,7 @@ class MockPurchaseRepository implements IPurchaseRepository {
     const purchase = Purchase.create({
       sellerId: data.sellerId,
       productId: data.productId,
+      providerId: 'provider789',
       amount: Money.create(data.price),
       commissionRate: data.commissionRate,
     });
