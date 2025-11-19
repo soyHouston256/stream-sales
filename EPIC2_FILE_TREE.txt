@@ -1,0 +1,88 @@
+Epic 2: Admin Dashboard - File Structure
+==========================================
+
+📁 src/
+│
+├─📁 app/
+│  └─📁 dashboard/
+│     └─📁 admin/
+│        ├─📄 page.tsx                    ⭐ Dashboard Principal
+│        ├─📄 layout.tsx
+│        ├─📁 users/
+│        │  └─📄 page.tsx                 ⭐ Gestión de Usuarios
+│        ├─📁 commissions/
+│        │  └─📄 page.tsx                 ⭐ Configuración Comisiones
+│        └─📁 transactions/
+│           └─📄 page.tsx                 ⭐ Monitoreo Transacciones
+│
+├─📁 components/
+│  ├─📁 admin/
+│  │  ├─📄 index.ts                       🔧 Exports
+│  │  ├─📄 StatsCard.tsx                  🎨 Componente Reutilizable
+│  │  ├─📄 DataTable.tsx                  🎨 Componente Reutilizable
+│  │  ├─📄 SalesChart.tsx                 📊 Gráfico Recharts
+│  │  ├─📄 EditUserDialog.tsx             💬 Modal Edición
+│  │  └─📁 __tests__/
+│  │     ├─📄 StatsCard.test.tsx          ✅ 6 tests
+│  │     └─📄 DataTable.test.tsx          ✅ 10 tests
+│  │
+│  ├─📁 ui/                                (Shadcn/ui components)
+│  │  ├─📄 table.tsx                      ✨ NUEVO
+│  │  ├─📄 badge.tsx                      ✨ NUEVO
+│  │  ├─📄 select.tsx                     ✨ NUEVO
+│  │  ├─📄 dialog.tsx                     ✨ NUEVO
+│  │  ├─📄 skeleton.tsx                   ✨ NUEVO
+│  │  ├─📄 button.tsx
+│  │  ├─📄 card.tsx
+│  │  ├─📄 input.tsx
+│  │  ├─📄 label.tsx
+│  │  └─📄 toast.tsx
+│  │
+│  └─📁 layout/
+│     └─📁 navigation/
+│        └─📄 AdminNav.tsx                📝 ACTUALIZADO
+│
+├─📁 lib/
+│  └─📁 hooks/
+│     ├─📄 index.ts                       🔧 Exports
+│     ├─📄 useAdminStats.ts               🪝 Hook Stats
+│     ├─📄 useUsers.ts                    🪝 Hook Users
+│     ├─📄 useCommissions.ts              🪝 Hook Commissions
+│     ├─📄 useTransactions.ts             🪝 Hook Transactions
+│     └─📄 useToast.ts                    🪝 Hook Toast
+│
+└─📁 types/
+   └─📄 admin.ts                          📋 TypeScript Types
+
+📁 root/
+├─📄 EPIC2_ADMIN_DASHBOARD.md             📚 Documentación Completa
+├─📄 EPIC2_SUMMARY.md                     📝 Resumen Implementación
+└─📄 EPIC2_FILE_TREE.txt                  🌲 Este archivo
+
+════════════════════════════════════════════════════════════════
+
+Leyenda:
+⭐ = Página principal
+🎨 = Componente reutilizable
+📊 = Gráfico/visualización
+💬 = Modal/Dialog
+✅ = Tests
+✨ = Componente nuevo
+📝 = Actualizado
+🪝 = Hook personalizado
+🔧 = Archivo de configuración/exports
+📋 = Tipos TypeScript
+📚 = Documentación
+
+════════════════════════════════════════════════════════════════
+
+Total de archivos creados/modificados: 27
+
+Páginas: 4
+Componentes: 9 (4 reutilizables + 5 UI)
+Hooks: 5
+Tests: 2 archivos (16 tests)
+Tipos: 1 archivo (7 interfaces)
+Docs: 3 archivos
+
+════════════════════════════════════════════════════════════════

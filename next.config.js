@@ -1,28 +1,25 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-
-  // SECURITY: Additional security headers
-  async headers() {
-    return [
+  images: {
+    domains: [
+      'streams-laboratory.s3.sa-east-1.amazonaws.com',
+      'vortex-streaming.com',
+      'imgur.com',
+      'i.imgur.com',
+      'localhost',
+    ],
+    remotePatterns: [
       {
-        source: '/:path*',
-        headers: [
-          {
-            key: 'X-DNS-Prefetch-Control',
-            value: 'on'
-          },
-          {
-            key: 'X-Download-Options',
-            value: 'noopen'
-          },
-        ],
+        protocol: 'https',
+        hostname: '**.amazonaws.com',
       },
-    ];
+      {
+        protocol: 'https',
+        hostname: '**.cloudinary.com',
+      },
+    ],
   },
-
-  // SECURITY: Disable x-powered-by header to hide Next.js
-  poweredByHeader: false,
 }
 
 module.exports = nextConfig
