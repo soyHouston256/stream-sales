@@ -100,7 +100,7 @@ export function PurchaseDetailsDialog({
                     {t('purchases.status.partial_refund')}
                   </h4>
                   <p className="text-sm text-muted-foreground mt-1">
-                    {t('purchases.partialRefundNotice', { percentage: '50' })}
+                    {t('purchases.partialRefundNotice')}
                   </p>
                   {purchase.refundedAt && (
                     <p className="text-xs text-muted-foreground mt-2">
