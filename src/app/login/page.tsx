@@ -30,9 +30,7 @@ export default function LoginPage() {
         throw new Error(data.error || 'Login failed');
       }
 
-      // Store token in localStorage for API calls
-      localStorage.setItem('token', data.token);
-
+      // SECURITY: Token is in httpOnly cookie, no localStorage needed
       // Cookie is set by the server automatically
 
       // Redirect to dashboard
