@@ -4,8 +4,23 @@ import { MarketplaceProduct } from '@/types/seller';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 
 // Mock translation files
-jest.mock('@/locales/es.json', () => ({}), { virtual: true });
-jest.mock('@/locales/en.json', () => ({}), { virtual: true });
+jest.mock('@/locales/es.json', () => ({
+  seller: {
+    marketplace: {
+      buyNow: 'Comprar Ahora',
+      by: 'por',
+    },
+  },
+}), { virtual: true });
+
+jest.mock('@/locales/en.json', () => ({
+  seller: {
+    marketplace: {
+      buyNow: 'Buy Now',
+      by: 'by',
+    },
+  },
+}), { virtual: true });
 
 // Mock localStorage
 const localStorageMock = (() => {
@@ -76,7 +91,8 @@ describe('ProductCard', () => {
 
     renderWithProviders(<ProductCard product={mockProduct} onBuyClick={onBuyClick} />);
 
-    const buyButton = screen.getByRole('button', { name: /Buy Now/i });
+    // Find button by its text content (translation key or translated text)
+    const buyButton = screen.getByRole('button', { name: /buyNow|Buy Now/i });
     fireEvent.click(buyButton);
 
     expect(onBuyClick).toHaveBeenCalledWith(mockProduct);
@@ -92,7 +108,8 @@ describe('ProductCard', () => {
     expect(screen.getByText('Netflix Premium Account')).toBeInTheDocument();
     expect(screen.getByText(/Test Provider/i)).toBeInTheDocument();
     expect(screen.getByText('$15.99')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /Buy Now/i })).toBeInTheDocument();
+    // Find button by its text content (translation key or translated text)
+    expect(screen.getByRole('button', { name: /buyNow|Buy Now/i })).toBeInTheDocument();
   });
 });
 
