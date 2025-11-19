@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
@@ -28,6 +29,7 @@ import { Wallet, TrendingUp, TrendingDown, Clock } from 'lucide-react';
 import { StatsCard } from '@/components/admin/StatsCard';
 
 export default function WalletPage() {
+  const { t } = useLanguage();
   const [filters, setFilters] = useState<TransactionsFilters>({
     page: 1,
     limit: 10,
@@ -57,19 +59,19 @@ export default function WalletPage() {
   const transactionColumns: Column<WalletTransaction>[] = [
     {
       key: 'type',
-      label: 'Type',
+      label: t('seller.wallet.type'),
       render: (transaction) => <TransactionTypeBadge type={transaction.type} />,
     },
     {
       key: 'description',
-      label: 'Description',
+      label: t('seller.wallet.description'),
       render: (transaction) => (
         <span className="text-sm">{transaction.description}</span>
       ),
     },
     {
       key: 'amount',
-      label: 'Amount',
+      label: t('seller.wallet.amount'),
       render: (transaction) => {
         const isPositive = transaction.type === 'credit';
         return (
@@ -86,7 +88,7 @@ export default function WalletPage() {
     },
     {
       key: 'balanceAfter',
-      label: 'Balance After',
+      label: t('seller.wallet.balanceAfter'),
       render: (transaction) =>
         transaction.balanceAfter ? (
           <span className="font-medium">
@@ -98,7 +100,7 @@ export default function WalletPage() {
     },
     {
       key: 'createdAt',
-      label: 'Date',
+      label: t('seller.wallet.date'),
       render: (transaction) => (
         <span className="text-sm">
           {format(new Date(transaction.createdAt), 'PPp')}
@@ -110,21 +112,21 @@ export default function WalletPage() {
   const rechargeColumns: Column<Recharge>[] = [
     {
       key: 'id',
-      label: 'Recharge ID',
+      label: t('seller.wallet.rechargeId'),
       render: (recharge) => (
         <span className="font-mono text-xs">{recharge.id.slice(0, 8)}...</span>
       ),
     },
     {
       key: 'amount',
-      label: 'Amount',
+      label: t('seller.wallet.amount'),
       render: (recharge) => (
         <span className="font-medium">{formatCurrency(recharge.amount)}</span>
       ),
     },
     {
       key: 'paymentMethod',
-      label: 'Payment Method',
+      label: t('seller.wallet.paymentMethod'),
       render: (recharge) => (
         <span className="text-sm capitalize">
           {recharge.paymentMethod.replace('_', ' ')}
@@ -133,12 +135,12 @@ export default function WalletPage() {
     },
     {
       key: 'status',
-      label: 'Status',
+      label: t('common.status'),
       render: (recharge) => <RechargeStatusBadge status={recharge.status} />,
     },
     {
       key: 'createdAt',
-      label: 'Requested',
+      label: t('seller.wallet.requested'),
       render: (recharge) => (
         <span className="text-sm">
           {format(new Date(recharge.createdAt), 'PPp')}
@@ -147,7 +149,7 @@ export default function WalletPage() {
     },
     {
       key: 'completedAt',
-      label: 'Completed',
+      label: t('seller.wallet.completed'),
       render: (recharge) =>
         recharge.completedAt ? (
           <span className="text-sm">
@@ -163,9 +165,9 @@ export default function WalletPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">My Wallet</h1>
+          <h1 className="text-3xl font-bold">{t('seller.wallet.title')}</h1>
           <p className="text-muted-foreground mt-2">
-            Manage your balance, transactions, and recharges
+            {t('seller.wallet.subtitle')}
           </p>
         </div>
         <RechargeDialog currentBalance={balance?.balance} />
@@ -175,7 +177,7 @@ export default function WalletPage() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card className="col-span-2">
           <CardHeader className="pb-3">
-            <CardDescription>Current Balance</CardDescription>
+            <CardDescription>{t('seller.wallet.currentBalance')}</CardDescription>
             <CardTitle className="text-4xl">
               {balance ? formatCurrency(balance.balance) : '$0.00'}
             </CardTitle>
@@ -191,15 +193,15 @@ export default function WalletPage() {
         </Card>
 
         <StatsCard
-          title="Total Recharged"
+          title={t('seller.wallet.totalRecharged')}
           value={formatCurrency(totalRecharged.toFixed(2))}
-          description="Lifetime recharges"
+          description={t('seller.wallet.lifetimeRecharges')}
           icon={TrendingUp}
           isLoading={rechargesLoading}
         />
 
         <StatsCard
-          title="Pending Recharges"
+          title={t('seller.wallet.pendingRecharges')}
           value={pendingRecharges.length}
           description={formatCurrency(pendingAmount.toFixed(2))}
           icon={Clock}
@@ -212,11 +214,11 @@ export default function WalletPage() {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle>Transaction History</CardTitle>
+              <CardTitle>{t('seller.wallet.transactionHistory')}</CardTitle>
               <CardDescription>
                 {pagination
-                  ? `Showing ${transactions.length} of ${pagination.total} transactions`
-                  : 'All your wallet transactions'}
+                  ? `${t('seller.wallet.showing')} ${transactions.length} ${t('seller.wallet.of')} ${pagination.total} ${t('seller.wallet.transactions')}`
+                  : t('seller.wallet.allTransactions')}
               </CardDescription>
             </div>
             <div className="flex items-center gap-2">
@@ -231,13 +233,13 @@ export default function WalletPage() {
                 }
               >
                 <SelectTrigger className="w-40">
-                  <SelectValue placeholder="Filter by type" />
+                  <SelectValue placeholder={t('seller.wallet.filterByType')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Types</SelectItem>
-                  <SelectItem value="credit">Credit</SelectItem>
-                  <SelectItem value="debit">Debit</SelectItem>
-                  <SelectItem value="transfer">Transfer</SelectItem>
+                  <SelectItem value="all">{t('seller.wallet.allTypes')}</SelectItem>
+                  <SelectItem value="credit">{t('seller.wallet.credit')}</SelectItem>
+                  <SelectItem value="debit">{t('seller.wallet.debit')}</SelectItem>
+                  <SelectItem value="transfer">{t('seller.wallet.transfer')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -248,7 +250,7 @@ export default function WalletPage() {
             data={transactions}
             columns={transactionColumns}
             isLoading={transactionsLoading}
-            emptyMessage="No transactions yet."
+            emptyMessage={t('seller.wallet.noTransactions')}
           />
 
           {/* Pagination */}
@@ -261,10 +263,10 @@ export default function WalletPage() {
                 }
                 disabled={filters.page === 1}
               >
-                Previous
+                {t('seller.wallet.previous')}
               </Button>
               <span className="text-sm text-muted-foreground">
-                Page {filters.page} of {pagination.totalPages}
+                {t('seller.wallet.page')} {filters.page} {t('seller.wallet.of')} {pagination.totalPages}
               </span>
               <Button
                 variant="outline"
@@ -273,7 +275,7 @@ export default function WalletPage() {
                 }
                 disabled={filters.page === pagination.totalPages}
               >
-                Next
+                {t('seller.wallet.next')}
               </Button>
             </div>
           )}
@@ -283,9 +285,9 @@ export default function WalletPage() {
       {/* Recharges */}
       <Card>
         <CardHeader>
-          <CardTitle>Recharge History</CardTitle>
+          <CardTitle>{t('seller.wallet.rechargeHistory')}</CardTitle>
           <CardDescription>
-            All your recharge requests and their status
+            {t('seller.wallet.allRechargeRequests')}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -293,7 +295,7 @@ export default function WalletPage() {
             data={rechargesList}
             columns={rechargeColumns}
             isLoading={rechargesLoading}
-            emptyMessage="No recharge requests yet. Click 'Add Funds' to request a recharge."
+            emptyMessage={t('seller.wallet.noRecharges')}
           />
         </CardContent>
       </Card>

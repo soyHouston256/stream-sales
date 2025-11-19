@@ -40,21 +40,13 @@ class MockWalletRepository implements IWalletRepository {
   }
 
   async findByUserId(userId: string): Promise<Wallet | null> {
-    for (const wallet of this.wallets.values()) {
-      if (wallet.userId === userId) {
-        return wallet;
-      }
-    }
-    return null;
+    return (
+      Array.from(this.wallets.values()).find((w) => w.userId === userId) || null
+    );
   }
 
   async existsByUserId(userId: string): Promise<boolean> {
-    for (const wallet of this.wallets.values()) {
-      if (wallet.userId === userId) {
-        return true;
-      }
-    }
-    return false;
+    return Array.from(this.wallets.values()).some((w) => w.userId === userId);
   }
 
   async delete(id: string): Promise<boolean> {

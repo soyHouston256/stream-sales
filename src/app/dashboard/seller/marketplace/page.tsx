@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -21,6 +22,7 @@ import { Search, Filter, X } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function MarketplacePage() {
+  const { t } = useLanguage();
   const [selectedProduct, setSelectedProduct] = useState<MarketplaceProduct | null>(null);
   const [showProductDetails, setShowProductDetails] = useState(false);
   const [filters, setFilters] = useState<MarketplaceFilters>({
@@ -86,9 +88,9 @@ export default function MarketplacePage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Marketplace</h1>
+        <h1 className="text-3xl font-bold">{t('seller.marketplace.title')}</h1>
         <p className="text-muted-foreground mt-2">
-          Browse and purchase digital products
+          {t('seller.marketplace.subtitle')}
         </p>
       </div>
 
@@ -98,12 +100,12 @@ export default function MarketplacePage() {
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-2">
               <Filter className="h-5 w-5" />
-              Filters
+              {t('seller.marketplace.filters')}
             </CardTitle>
             {hasActiveFilters && (
               <Button variant="ghost" size="sm" onClick={handleClearFilters}>
                 <X className="h-4 w-4 mr-2" />
-                Clear Filters
+                {t('seller.marketplace.clearFilters')}
               </Button>
             )}
           </div>
@@ -112,11 +114,11 @@ export default function MarketplacePage() {
           <div className="grid gap-4 md:grid-cols-3">
             {/* Search */}
             <div className="space-y-2">
-              <Label htmlFor="search">Search by name</Label>
+              <Label htmlFor="search">{t('seller.marketplace.searchByName')}</Label>
               <div className="flex gap-2">
                 <Input
                   id="search"
-                  placeholder="Search products..."
+                  placeholder={t('seller.marketplace.searchPlaceholder')}
                   value={searchInput}
                   onChange={(e) => setSearchInput(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
@@ -129,16 +131,16 @@ export default function MarketplacePage() {
 
             {/* Category */}
             <div className="space-y-2">
-              <Label htmlFor="category">Category</Label>
+              <Label htmlFor="category">{t('seller.marketplace.category')}</Label>
               <Select
                 value={filters.categories?.[0] || 'all'}
                 onValueChange={handleCategoryChange}
               >
                 <SelectTrigger id="category">
-                  <SelectValue placeholder="All Categories" />
+                  <SelectValue placeholder={t('seller.marketplace.allCategories')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Categories</SelectItem>
+                  <SelectItem value="all">{t('seller.marketplace.allCategories')}</SelectItem>
                   <SelectItem value="netflix">Netflix</SelectItem>
                   <SelectItem value="spotify">Spotify</SelectItem>
                   <SelectItem value="hbo">HBO</SelectItem>
@@ -153,7 +155,7 @@ export default function MarketplacePage() {
             {/* Max Price */}
             <div className="space-y-2">
               <Label htmlFor="maxPrice">
-                Max Price: ${maxPriceInput[0]}
+                {t('seller.marketplace.maxPrice')}: ${maxPriceInput[0]}
               </Label>
               <div className="flex items-center gap-2">
                 <Slider
@@ -166,7 +168,7 @@ export default function MarketplacePage() {
                   className="flex-1"
                 />
                 <Button onClick={handleMaxPriceChange} size="sm">
-                  Apply
+                  {t('seller.marketplace.apply')}
                 </Button>
               </div>
             </div>
@@ -179,8 +181,8 @@ export default function MarketplacePage() {
         <div className="flex items-center justify-between mb-4">
           <p className="text-sm text-muted-foreground">
             {pagination
-              ? `Showing ${products.length} of ${pagination.total} products`
-              : 'Loading...'}
+              ? `${t('seller.marketplace.showing')} ${products.length} ${t('seller.marketplace.of')} ${pagination.total} ${t('seller.marketplace.products')}`
+              : t('seller.marketplace.loading')}
           </p>
         </div>
 
@@ -221,10 +223,10 @@ export default function MarketplacePage() {
                   }
                   disabled={filters.page === 1}
                 >
-                  Previous
+                  {t('seller.marketplace.previous')}
                 </Button>
                 <span className="text-sm text-muted-foreground">
-                  Page {filters.page} of {pagination.totalPages}
+                  {t('seller.marketplace.page')} {filters.page} {t('seller.marketplace.of')} {pagination.totalPages}
                 </span>
                 <Button
                   variant="outline"
@@ -233,7 +235,7 @@ export default function MarketplacePage() {
                   }
                   disabled={filters.page === pagination.totalPages}
                 >
-                  Next
+                  {t('seller.marketplace.next')}
                 </Button>
               </div>
             )}
@@ -242,7 +244,7 @@ export default function MarketplacePage() {
           <Card>
             <CardContent className="py-12 text-center">
               <p className="text-muted-foreground">
-                No products found matching your criteria.
+                {t('seller.marketplace.noProductsFound')}
               </p>
               {hasActiveFilters && (
                 <Button
@@ -250,7 +252,7 @@ export default function MarketplacePage() {
                   onClick={handleClearFilters}
                   className="mt-2"
                 >
-                  Clear filters
+                  {t('seller.marketplace.clearFiltersLink')}
                 </Button>
               )}
             </CardContent>
