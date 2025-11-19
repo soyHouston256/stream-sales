@@ -132,91 +132,6 @@ class MockProductRepository implements IProductRepository {
   }
 }
 
-class MockUserRepository implements IUserRepository {
-  private users: Map<string, User> = new Map();
-
-  async save(user: User): Promise<User> {
-    this.users.set(user.id, user);
-    return user;
-  }
-
-  async findById(id: string): Promise<User | null> {
-    return this.users.get(id) || null;
-  }
-
-  async findByEmail(email: Email): Promise<User | null> {
-    return (
-      Array.from(this.users.values()).find((u) => u.email.equals(email)) || null
-    );
-  }
-
-  async existsByEmail(email: Email): Promise<boolean> {
-    return Array.from(this.users.values()).some((u) => u.email.equals(email));
-  }
-
-  async delete(id: string): Promise<boolean> {
-    return this.users.delete(id);
-  }
-
-  async findByRole(role: string): Promise<User[]> {
-    return Array.from(this.users.values()).filter((u) => u.role === role);
-  }
-
-  async countByRole(role: string): Promise<number> {
-    return this.findByRole(role).then((users) => users.length);
-  }
-}
-
-class MockCommissionConfigRepository implements ICommissionConfigRepository {
-  private configs: Map<string, CommissionConfig> = new Map();
-
-  async save(config: CommissionConfig): Promise<CommissionConfig> {
-    this.configs.set(config.id, config);
-    return config;
-  }
-
-  async findById(id: string): Promise<CommissionConfig | null> {
-    return this.configs.get(id) || null;
-  }
-
-  async findActiveByType(type: 'sale' | 'registration'): Promise<CommissionConfig | null> {
-    return (
-      Array.from(this.configs.values()).find(
-        (c) => c.type === type && c.isActive
-      ) || null
-    );
-  }
-
-  async findAllByType(type: 'sale' | 'registration'): Promise<CommissionConfig[]> {
-    return Array.from(this.configs.values()).filter((c) => c.type === type);
-  }
-
-  async findAll(): Promise<CommissionConfig[]> {
-    return Array.from(this.configs.values());
-  }
-
-  async deactivateAllByType(type: 'sale' | 'registration'): Promise<void> {
-    const configs = await this.findAllByType(type);
-    configs.forEach((c) => {
-      (c as any).props.isActive = false;
-      this.configs.set(c.id, c);
-    });
-  }
-
-  // Helper for tests
-  async createConfig(data: {
-    type: 'sale' | 'registration';
-    rate: number;
-  }): Promise<CommissionConfig> {
-    const config = CommissionConfig.create({
-      type: data.type,
-      rate: data.rate,
-      effectiveFrom: new Date(),
-    });
-    return this.save(config);
-  }
-}
-
 class MockPurchaseRepository implements IPurchaseRepository {
   private purchases: Map<string, Purchase> = new Map();
 
@@ -284,6 +199,104 @@ class MockPurchaseRepository implements IPurchaseRepository {
   }
 }
 
+class MockUserRepository implements IUserRepository {
+  private users: Map<string, User> = new Map();
+
+  async save(user: User): Promise<User> {
+    this.users.set(user.id, user);
+    return user;
+  }
+
+  async findById(id: string): Promise<User | null> {
+    return this.users.get(id) || null;
+  }
+
+  async findByEmail(email: Email): Promise<User | null> {
+    return (
+      Array.from(this.users.values()).find((u) =>
+        u.email.equals(email)
+      ) || null
+    );
+  }
+
+  async existsByEmail(email: Email): Promise<boolean> {
+    return Array.from(this.users.values()).some((u) => u.email.equals(email));
+  }
+
+  async delete(id: string): Promise<boolean> {
+    return this.users.delete(id);
+  }
+
+  // Helper for tests
+  async createUser(data: {
+    id: string;
+    email: string;
+    name: string;
+    role: 'admin' | 'provider' | 'seller';
+  }): Promise<User> {
+    const user = User.create({
+      email: Email.create(data.email),
+      password: await Password.create('password123'),
+      name: data.name,
+      role: data.role,
+    });
+    // Override ID for testing
+    (user as any).props.id = data.id;
+    return this.save(user);
+  }
+}
+
+class MockCommissionConfigRepository implements ICommissionConfigRepository {
+  private configs: Map<string, CommissionConfig> = new Map();
+
+  async save(config: CommissionConfig): Promise<CommissionConfig> {
+    this.configs.set(config.id, config);
+    return config;
+  }
+
+  async findById(id: string): Promise<CommissionConfig | null> {
+    return this.configs.get(id) || null;
+  }
+
+  async findActiveByType(
+    type: 'sale' | 'registration'
+  ): Promise<CommissionConfig | null> {
+    return (
+      Array.from(this.configs.values()).find(
+        (c) => c.type === type && c.isActive
+      ) || null
+    );
+  }
+
+  async findAllByType(type: 'sale' | 'registration'): Promise<CommissionConfig[]> {
+    return Array.from(this.configs.values()).filter((c) => c.type === type);
+  }
+
+  async findAll(): Promise<CommissionConfig[]> {
+    return Array.from(this.configs.values());
+  }
+
+  async deactivateAllByType(type: 'sale' | 'registration'): Promise<void> {
+    const configs = await this.findAllByType(type);
+    configs.forEach((c) => {
+      (c as any).props.isActive = false;
+      this.configs.set(c.id, c);
+    });
+  }
+
+  // Helper for tests
+  async createConfig(data: {
+    type: 'sale' | 'registration';
+    rate: number;
+  }): Promise<CommissionConfig> {
+    const config = CommissionConfig.create({
+      type: data.type,
+      rate: data.rate,
+    });
+    return this.save(config);
+  }
+}
+
 // ============================================
 // TESTS
 // ============================================
@@ -302,6 +315,21 @@ describe('PurchaseProductUseCase', () => {
     purchaseRepository = new MockPurchaseRepository();
     userRepository = new MockUserRepository();
     commissionConfigRepository = new MockCommissionConfigRepository();
+
+    // Create admin user for all tests
+    await userRepository.createUser({
+      id: 'admin',
+      email: 'admin@streamsales.com',
+      name: 'Admin User',
+      role: 'admin',
+    });
+
+    // Create default commission config (5%)
+    await commissionConfigRepository.createConfig({
+      type: 'sale',
+      rate: 5.00, // Stored as percentage (5.00 = 5%)
+    });
+
     useCase = new PurchaseProductUseCase(
       walletRepository,
       productRepository,
@@ -309,16 +337,14 @@ describe('PurchaseProductUseCase', () => {
       userRepository,
       commissionConfigRepository
     );
-    // Ensure there is an active sale commission (5%) so admin receives commission on purchases
-    await commissionConfigRepository.createConfig({ type: 'sale', rate: 0.05 });
   });
 
   describe('execute', () => {
     it('should successfully purchase a product', async () => {
       // Setup: Create seller, provider, admin wallets
-      const sellerWallet = await walletRepository.createWallet('seller1', 100);
-      const providerWallet = await walletRepository.createWallet('provider1', 0);
-      const adminWallet = await walletRepository.createWallet('admin', 0);
+      await walletRepository.createWallet('seller1', 100);
+      await walletRepository.createWallet('provider1', 0);
+      await walletRepository.createWallet('admin', 0);
 
       // Setup: Create available product
       const product = await productRepository.createProduct({
@@ -340,24 +366,24 @@ describe('PurchaseProductUseCase', () => {
       expect(result.purchase.amount).toBe('15.9900');
 
       // Verify commission (5% of 15.99 = 0.7995)
-      expect(result.purchase.adminCommission).toBe('0.0080');
+      expect(result.purchase.adminCommission).toBe('0.7995');
 
       // Verify provider earnings (15.99 - 0.7995 = 15.1905)
-      expect(result.purchase.providerEarnings).toBe('15.9820');
+      expect(result.purchase.providerEarnings).toBe('15.1905');
 
       // Verify seller wallet was debited
       const updatedSellerWallet = await walletRepository.findByUserId('seller1');
       expect(updatedSellerWallet?.balance.toNumber()).toBeCloseTo(84.01, 2); // 100 - 15.99
 
-      // Verify provider wallet was credited
+      // Verify provider wallet was credited (15.1905)
       const updatedProviderWallet = await walletRepository.findByUserId(
         'provider1'
       );
-      expect(updatedProviderWallet?.balance.toNumber()).toBeCloseTo(15.982, 4);
+      expect(updatedProviderWallet?.balance.toNumber()).toBeCloseTo(15.1905, 4);
 
-      // Verify admin wallet received commission
+      // Verify admin wallet received commission (0.7995)
       const updatedAdminWallet = await walletRepository.findByUserId('admin');
-      expect(updatedAdminWallet?.balance.toNumber()).toBeCloseTo(0, 4);
+      expect(updatedAdminWallet?.balance.toNumber()).toBeCloseTo(0.7995, 4);
 
       // Verify product status changed to sold
       expect(result.product.status).toBe('sold');

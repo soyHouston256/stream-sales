@@ -94,13 +94,14 @@ class MockPurchaseRepository implements IPurchaseRepository {
   async createPurchase(data: {
     sellerId: string;
     productId: string;
+    providerId?: string;
     price: number;
     commissionRate: number;
   }): Promise<Purchase> {
     const purchase = Purchase.create({
       sellerId: data.sellerId,
       productId: data.productId,
-      providerId: 'provider789',
+      providerId: data.providerId || 'provider123',
       amount: Money.create(data.price),
       commissionRate: data.commissionRate,
     });
