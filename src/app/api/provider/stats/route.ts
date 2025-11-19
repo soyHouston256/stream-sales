@@ -80,10 +80,11 @@ export async function GET(request: NextRequest) {
     const soldProducts = products.filter((p: any) => p.status === 'sold').length;
 
     // 4. Get sales statistics from purchases
+    // IMPORTANTE: Solo contar compras completadas, NO refunded
     const purchases = await prisma.purchase.findMany({
       where: {
         providerId: user.id,
-        status: 'completed',
+        status: 'completed', // Excluye refunded automáticamente
       },
       select: {
         providerEarnings: true,

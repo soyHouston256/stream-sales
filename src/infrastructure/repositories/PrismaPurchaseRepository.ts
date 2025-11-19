@@ -143,10 +143,15 @@ export class PrismaPurchaseRepository implements IPurchaseRepository {
 
   /**
    * Contar total de compras de un seller
+   *
+   * IMPORTANTE: Excluye purchases refunded ya que no cuentan como compras activas
    */
   async countBySellerId(sellerId: string): Promise<number> {
     return this.prisma.purchase.count({
-      where: { sellerId },
+      where: {
+        sellerId,
+        status: { not: 'refunded' }, // Excluir refunded
+      },
     });
   }
 
@@ -166,12 +171,17 @@ export class PrismaPurchaseRepository implements IPurchaseRepository {
   /**
    * Calcular total gastado por un seller
    *
+   * IMPORTANTE: Excluye purchases refunded ya que el dinero fue devuelto
+   *
    * @param sellerId - ID del usuario
    * @returns Total amount gastado como número
    */
   async getTotalSpentBySeller(sellerId: string): Promise<number> {
     const result = await this.prisma.purchase.aggregate({
-      where: { sellerId },
+      where: {
+        sellerId,
+        status: { not: 'refunded' }, // Excluir refunded
+      },
       _sum: { amount: true },
     });
 
@@ -189,6 +199,29 @@ export class PrismaPurchaseRepository implements IPurchaseRepository {
     });
 
     return result._sum.adminCommission?.toNumber() || 0;
+  }
+
+  /**
+   * Marca una compra como refunded
+   *
+   * Se ejecuta cuando una disputa se resuelve con refund (completo o parcial)
+   */
+  async markAsRefunded(purchaseId: string): Promise<void> {
+    const purchase = await this.prisma.purchase.findUnique({
+      where: { id: purchaseId },
+    });
+
+    if (!purchase) {
+      throw new Error(`Purchase with ID ${purchaseId} not found`);
+    }
+
+    await this.prisma.purchase.update({
+      where: { id: purchaseId },
+      data: {
+        status: 'refunded',
+        refundedAt: new Date(),
+      },
+    });
   }
 
   // ============================================

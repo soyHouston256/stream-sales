@@ -1,17 +1,13 @@
 import { NextResponse } from 'next/server';
 import { verifyJWT } from '@/infrastructure/auth/jwt';
 import { prisma } from '@/infrastructure/database/prisma';
-import { PrismaDisputeRepository } from '@/infrastructure/repositories/PrismaDisputeRepository';
-import { PrismaDisputeMessageRepository } from '@/infrastructure/repositories/PrismaDisputeMessageRepository';
-import { PrismaPurchaseRepository } from '@/infrastructure/repositories/PrismaPurchaseRepository';
-import { GetDisputeDetailsUseCase } from '@/application/use-cases/GetDisputeDetailsUseCase';
 
 /**
  * GET /api/conciliator/disputes/[id]
  *
  * Obtiene los detalles completos de una disputa incluyendo:
  * - Información de la disputa
- * - Información de la compra
+ * - Información de la compra con producto
  * - Mensajes (públicos + internos para conciliator)
  */
 export async function GET(
@@ -36,35 +32,123 @@ export async function GET(
       );
     }
 
-    // 3. Ejecutar use case
-    const disputeRepository = new PrismaDisputeRepository(prisma);
-    const messageRepository = new PrismaDisputeMessageRepository(prisma);
-    const purchaseRepository = new PrismaPurchaseRepository(prisma);
-
-    const useCase = new GetDisputeDetailsUseCase(
-      disputeRepository,
-      messageRepository,
-      purchaseRepository
-    );
-
-    const result = await useCase.execute({
-      disputeId: params.id,
-      userId: decoded.userId,
-      userRole: 'conciliator',
+    // 3. Buscar disputa con todas las relaciones
+    const dispute = await prisma.dispute.findUnique({
+      where: { id: params.id },
+      include: {
+        purchase: {
+          include: {
+            product: {
+              select: {
+                id: true,
+                name: true,
+                category: true,
+                description: true,
+                price: true,
+              },
+            },
+          },
+        },
+        seller: { select: { id: true, name: true, email: true } },
+        provider: { select: { id: true, name: true, email: true } },
+        conciliator: { select: { id: true, name: true, email: true } },
+      },
     });
 
-    // 4. Retornar resultado
-    return NextResponse.json(result, { status: 200 });
+    if (!dispute) {
+      return NextResponse.json(
+        { error: `Dispute not found: ${params.id}` },
+        { status: 404 }
+      );
+    }
+
+    // 4. Validar acceso (solo participantes)
+    const isParticipant =
+      dispute.sellerId === decoded.userId ||
+      dispute.providerId === decoded.userId ||
+      dispute.conciliatorId === decoded.userId;
+
+    if (!isParticipant) {
+      return NextResponse.json(
+        { error: 'Access denied. Only dispute participants can view details.' },
+        { status: 403 }
+      );
+    }
+
+    // 5. Obtener mensajes (incluir internos para conciliator)
+    const messages = await prisma.disputeMessage.findMany({
+      where: {
+        disputeId: params.id,
+        // Conciliator ve mensajes internos
+        ...(decoded.role !== 'conciliator' ? { isInternal: false } : {}),
+      },
+      orderBy: { createdAt: 'asc' },
+      include: {
+        sender: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            role: true,
+          },
+        },
+      },
+    });
+
+    const messageCount = messages.length;
+
+    // 6. Formatear respuesta
+    const formattedDispute = {
+      id: dispute.id,
+      purchaseId: dispute.purchaseId,
+      sellerId: dispute.sellerId,
+      providerId: dispute.providerId,
+      conciliatorId: dispute.conciliatorId,
+      openedBy: dispute.openedBy,
+      reason: dispute.reason,
+      status: dispute.status,
+      resolution: dispute.resolution,
+      resolutionType: dispute.resolutionType,
+      createdAt: dispute.createdAt.toISOString(),
+      assignedAt: dispute.assignedAt?.toISOString() || null,
+      resolvedAt: dispute.resolvedAt?.toISOString() || null,
+      purchase: {
+        id: dispute.purchase.id,
+        amount: dispute.purchase.amount.toString(),
+        status: dispute.purchase.status,
+        createdAt: dispute.purchase.createdAt.toISOString(),
+        product: dispute.purchase.product ? {
+          id: dispute.purchase.product.id,
+          name: dispute.purchase.product.name,
+          category: dispute.purchase.product.category,
+          description: dispute.purchase.product.description,
+          price: dispute.purchase.product.price.toString(),
+        } : undefined,
+      },
+      seller: dispute.seller,
+      provider: dispute.provider,
+      conciliator: dispute.conciliator,
+    };
+
+    const formattedMessages = messages.map((m: any) => ({
+      id: m.id,
+      disputeId: m.disputeId,
+      senderId: m.senderId,
+      message: m.message,
+      isInternal: m.isInternal,
+      createdAt: m.createdAt.toISOString(),
+      sender: m.sender,
+    }));
+
+    // 7. Retornar resultado
+    return NextResponse.json({
+      dispute: formattedDispute,
+      purchase: formattedDispute.purchase,
+      messages: formattedMessages,
+      messageCount,
+    }, { status: 200 });
   } catch (error: any) {
     console.error('[GET /api/conciliator/disputes/[id]] Error:', error);
-
-    if (error.message.includes('not found')) {
-      return NextResponse.json({ error: error.message }, { status: 404 });
-    }
-
-    if (error.message.includes('Access denied')) {
-      return NextResponse.json({ error: error.message }, { status: 403 });
-    }
 
     return NextResponse.json(
       { error: error.message || 'Internal server error' },

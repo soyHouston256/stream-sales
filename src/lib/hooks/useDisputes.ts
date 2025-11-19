@@ -11,13 +11,19 @@ export function useDisputes(filters: DisputeFilters = {}) {
   const queryParams = new URLSearchParams();
 
   if (filters.status) queryParams.append('status', filters.status);
-  if (filters.dateFrom) queryParams.append('dateFrom', filters.dateFrom);
-  if (filters.dateTo) queryParams.append('dateTo', filters.dateTo);
+  if (filters.dateFrom) queryParams.append('startDate', filters.dateFrom);
+  if (filters.dateTo) queryParams.append('endDate', filters.dateTo);
   if (filters.sellerId) queryParams.append('sellerId', filters.sellerId);
   if (filters.providerId) queryParams.append('providerId', filters.providerId);
   if (filters.conciliatorId) queryParams.append('conciliatorId', filters.conciliatorId);
-  if (filters.page) queryParams.append('page', filters.page.toString());
-  if (filters.limit) queryParams.append('limit', filters.limit.toString());
+
+  // API uses offset/limit instead of page/limit
+  const limit = filters.limit || 20;
+  const page = filters.page || 1;
+  const offset = (page - 1) * limit;
+
+  queryParams.append('limit', limit.toString());
+  queryParams.append('offset', offset.toString());
 
   return useQuery<DisputesResponse>({
     queryKey: ['conciliator', 'disputes', filters],
@@ -32,7 +38,18 @@ export function useDisputes(filters: DisputeFilters = {}) {
         throw new Error('Failed to fetch disputes');
       }
 
-      return response.json();
+      const data = await response.json();
+
+      // Transform API response to match DisputesResponse
+      return {
+        disputes: data.disputes,
+        pagination: {
+          page,
+          limit,
+          total: data.total,
+          totalPages: Math.ceil(data.total / limit),
+        },
+      };
     },
     refetchInterval: 30000, // Refetch cada 30 segundos para actualizaciones
   });
@@ -55,7 +72,10 @@ export function useDisputeDetails(id: string) {
         throw new Error('Failed to fetch dispute details');
       }
 
-      return response.json();
+      const data = await response.json();
+      // API returns { dispute, purchase, messages, messageCount }
+      // We only need the dispute object
+      return data.dispute;
     },
     enabled: !!id,
   });

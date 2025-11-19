@@ -20,6 +20,7 @@ npm run lint             # Run ESLint
 ```bash
 npm test                 # Run all tests with Jest
 npm run test:watch       # Run tests in watch mode
+npm run test:db          # Test database connection (local or AWS)
 ```
 
 ### Database (Prisma)
@@ -27,6 +28,7 @@ npm run test:watch       # Run tests in watch mode
 npm run prisma:generate  # Generate Prisma Client (run after schema changes)
 npm run prisma:migrate   # Create and apply migrations
 npm run prisma:studio    # Open Prisma Studio GUI to view/edit data
+npm run test:db          # Test database connection with comprehensive suite
 ```
 
 ### Maintenance Scripts
@@ -126,14 +128,56 @@ To protect a new route:
 ## Database
 
 - **Provider**: PostgreSQL (configured in `prisma/schema.prisma`)
-- **Connection**: `DATABASE_URL` environment variable
-- **Schema**: Single `User` table with:
-  - `id` (String, cuid)
-  - `email` (String, unique)
-  - `password` (String, bcrypt hashed)
-  - `name` (String?, optional)
-  - `role` (String, default "user")
-  - `createdAt`, `updatedAt` (DateTime)
+- **Connection**: Environment-aware (see Database Infrastructure below)
+- **ORM**: Prisma Client with AWS Secrets Manager integration
+
+### Database Infrastructure
+
+The Prisma client initialization supports both local development and production AWS deployments:
+
+**Development Mode** (default):
+- Uses `DATABASE_URL` from `.env` file
+- Direct PostgreSQL connection
+- Query logging enabled
+
+**Production Mode** (AWS):
+- Retrieves credentials from AWS Secrets Manager
+- Automatic retry logic with exponential backoff
+- Connection pooling optimized for serverless (5 connections)
+- SSL/TLS encryption enforced
+
+**Configuration:**
+```env
+# Development
+DATABASE_URL="postgresql://user:pass@localhost:5432/streams?schema=public"
+
+# Production
+NODE_ENV=production
+AWS_SECRET_NAME="stream-sales/database/credentials"
+AWS_REGION="us-east-1"
+```
+
+**Testing Database Connection:**
+```bash
+# Test local connection
+npm run test:db
+
+# Test AWS Secrets Manager integration
+NODE_ENV=production AWS_SECRET_NAME=your-secret npm run test:db
+```
+
+**Key Features:**
+- Singleton pattern prevents connection leaks during Next.js hot reload
+- Graceful shutdown with automatic connection cleanup
+- Connection retry logic (3 attempts with exponential backoff)
+- Comprehensive error handling and logging
+- Type-safe configuration with TypeScript interfaces
+
+**Documentation:**
+- Implementation: `src/infrastructure/database/prisma.ts`
+- Type definitions: `src/infrastructure/database/types.ts`
+- Usage guide: `src/infrastructure/database/README.md`
+- CDK integration: `src/infrastructure/database/CDK_INTEGRATION.md`
 
 ### Database Workflow
 
@@ -141,6 +185,7 @@ To protect a new route:
 2. Run `npm run prisma:migrate` to create migration
 3. Run `npm run prisma:generate` to update Prisma Client types
 4. Update domain entities and repositories as needed
+5. Test connection: `npm run test:db`
 
 ## Testing
 
@@ -171,11 +216,41 @@ npm test -- --coverage          # Run with coverage report
 
 ## Environment Variables
 
-Required in `.env`:
-```
-DATABASE_URL="postgresql://user:password@localhost:5432/dbname?schema=public"
+### Development (.env)
+```env
+# Database
+DATABASE_URL="postgresql://user:password@localhost:5432/streams?schema=public"
+
+# JWT Authentication
 JWT_SECRET="your-secret-key-change-this-in-production"
 JWT_EXPIRES_IN="7d"  # Token expiration (e.g., 7d, 24h, 60m)
+
+# Environment
+NODE_ENV="development"
+```
+
+### Production (AWS Lambda/ECS)
+```env
+# Database (AWS Secrets Manager)
+NODE_ENV=production
+AWS_SECRET_NAME="stream-sales/database/credentials"
+AWS_REGION="us-east-1"
+
+# JWT Authentication (store in separate secret)
+JWT_SECRET="your-production-secret"
+JWT_EXPIRES_IN="7d"
+```
+
+**AWS Secrets Manager Secret Format:**
+```json
+{
+  "host": "stream-sales-db.abc123.us-east-1.rds.amazonaws.com",
+  "port": "5432",
+  "username": "dbadmin",
+  "password": "SecurePassword123!",
+  "dbname": "streams",
+  "engine": "postgres"
+}
 ```
 
 ## Common Issues & Solutions

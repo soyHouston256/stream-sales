@@ -101,4 +101,15 @@ export interface IPurchaseRepository {
    * @returns Total de comisiones (como número)
    */
   getTotalAdminCommissions(): Promise<number>;
+
+  /**
+   * Marcar una compra como refunded
+   *
+   * Se ejecuta cuando una disputa se resuelve con refund (completo o parcial)
+   * Actualiza el status a 'refunded' y establece refundedAt
+   *
+   * @param purchaseId - ID de la compra
+   * @throws Error si la compra no existe
+   */
+  markAsRefunded(purchaseId: string): Promise<void>;
 }

@@ -36,7 +36,11 @@ export function DisputeDetailsCard({ dispute }: DisputeDetailsCardProps) {
 
           <div>
             <label className="text-sm font-medium text-muted-foreground">Purchase Date</label>
-            <p className="mt-1">{format(new Date(dispute.createdAt), 'PPP')}</p>
+            <p className="mt-1">
+              {dispute.purchase.createdAt
+                ? format(new Date(dispute.purchase.createdAt), 'PPP')
+                : 'N/A'}
+            </p>
           </div>
 
           {dispute.purchase.product.accountEmail && (
@@ -58,14 +62,14 @@ export function DisputeDetailsCard({ dispute }: DisputeDetailsCardProps) {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="text-sm font-medium text-muted-foreground">Seller</label>
-              <p className="mt-1 font-medium">{dispute.seller.name}</p>
-              <p className="text-sm text-muted-foreground">{dispute.seller.email}</p>
+              <p className="mt-1 font-medium">{dispute.seller?.name || 'N/A'}</p>
+              <p className="text-sm text-muted-foreground">{dispute.seller?.email || 'N/A'}</p>
             </div>
 
             <div>
               <label className="text-sm font-medium text-muted-foreground">Provider</label>
-              <p className="mt-1 font-medium">{dispute.provider.name}</p>
-              <p className="text-sm text-muted-foreground">{dispute.provider.email}</p>
+              <p className="mt-1 font-medium">{dispute.provider?.name || 'N/A'}</p>
+              <p className="text-sm text-muted-foreground">{dispute.provider?.email || 'N/A'}</p>
             </div>
           </div>
         </CardContent>

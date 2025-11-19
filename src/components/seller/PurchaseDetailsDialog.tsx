@@ -13,9 +13,11 @@ import { Separator } from '@/components/ui/separator';
 import { Purchase } from '@/types/seller';
 import { CategoryBadge } from '@/components/provider/CategoryBadge';
 import { PurchaseStatusBadge } from './PurchaseStatusBadge';
+import { CreateDisputeDialog } from './CreateDisputeDialog';
 import { formatCurrency, copyToClipboard, parseAccountDetails } from '@/lib/utils/seller';
-import { Copy, Check, Mail, Key, FileJson, User, Calendar } from 'lucide-react';
+import { Copy, Check, Mail, Key, FileJson, User, Calendar, AlertCircle } from 'lucide-react';
 import { format } from 'date-fns';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface PurchaseDetailsDialogProps {
   purchase: Purchase | null;
@@ -28,8 +30,10 @@ export function PurchaseDetailsDialog({
   isOpen,
   onClose,
 }: PurchaseDetailsDialogProps) {
+  const { t } = useLanguage();
   const [copiedEmail, setCopiedEmail] = useState(false);
   const [copiedPassword, setCopiedPassword] = useState(false);
+  const [isDisputeDialogOpen, setIsDisputeDialogOpen] = useState(false);
 
   if (!purchase) return null;
 
@@ -64,6 +68,50 @@ export function PurchaseDetailsDialog({
         </DialogHeader>
 
         <div className="space-y-4">
+          {/* Refund Notice */}
+          {purchase.effectiveStatus === 'refunded' && (
+            <div className="bg-destructive/10 border-2 border-destructive/30 p-4 rounded-lg">
+              <div className="flex items-start gap-3">
+                <AlertCircle className="h-5 w-5 text-destructive mt-0.5" />
+                <div>
+                  <h4 className="font-semibold text-destructive">
+                    {t('purchases.status.refunded')}
+                  </h4>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {t('purchases.refundedNotice')}
+                  </p>
+                  {purchase.refundedAt && (
+                    <p className="text-xs text-muted-foreground mt-2">
+                      Refunded: {format(new Date(purchase.refundedAt), 'PPp')}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Partial Refund Notice */}
+          {purchase.effectiveStatus === 'partial_refund' && (
+            <div className="bg-orange-500/10 border-2 border-orange-500/30 p-4 rounded-lg">
+              <div className="flex items-start gap-3">
+                <AlertCircle className="h-5 w-5 text-orange-500 mt-0.5" />
+                <div>
+                  <h4 className="font-semibold text-orange-500">
+                    {t('purchases.status.partial_refund')}
+                  </h4>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {t('purchases.partialRefundNotice', { percentage: '50' })}
+                  </p>
+                  {purchase.refundedAt && (
+                    <p className="text-xs text-muted-foreground mt-2">
+                      Refunded: {format(new Date(purchase.refundedAt), 'PPp')}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Account Credentials */}
           <div className="bg-primary/5 p-4 rounded-lg border-2 border-primary/20">
             <h4 className="text-sm font-semibold mb-3 flex items-center gap-2">
@@ -209,15 +257,33 @@ export function PurchaseDetailsDialog({
             </div>
           </div>
 
-          {/* TODO: Add dispute button when dispute feature is ready */}
-          {/* {purchase.status === 'completed' && !purchase.dispute && (
-            <Button variant="outline" className="w-full">
+          {/* Dispute Button */}
+          {purchase.status === 'completed' && !purchase.dispute && (
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => setIsDisputeDialogOpen(true)}
+            >
               <AlertCircle className="h-4 w-4 mr-2" />
-              Open Dispute
+              {t('disputes.openDispute')}
             </Button>
-          )} */}
+          )}
         </div>
       </DialogContent>
+
+      {/* Dispute Dialog */}
+      <CreateDisputeDialog
+        purchaseId={purchase.id}
+        productName={purchase.product.name}
+        isOpen={isDisputeDialogOpen}
+        onClose={() => setIsDisputeDialogOpen(false)}
+        onSuccess={() => {
+          // Close both dialogs after successful dispute creation
+          setIsDisputeDialogOpen(false);
+          onClose();
+        }}
+        userType="seller"
+      />
     </Dialog>
   );
 }

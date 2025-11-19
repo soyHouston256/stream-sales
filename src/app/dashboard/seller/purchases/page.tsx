@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import {
   Select,
   SelectContent,
@@ -14,14 +15,21 @@ import { DataTable, Column } from '@/components/admin/DataTable';
 import { usePurchases } from '@/lib/hooks/usePurchases';
 import { Purchase, PurchasesFilters } from '@/types/seller';
 import { CategoryBadge } from '@/components/provider/CategoryBadge';
-import { PurchaseStatusBadge, PurchaseDetailsDialog } from '@/components/seller';
+import { PurchaseDetailsDialog } from '@/components/seller';
 import { formatCurrency } from '@/lib/utils/seller';
 import { format } from 'date-fns';
 import { ShoppingBag, DollarSign, TrendingDown, Eye } from 'lucide-react';
 import { StatsCard } from '@/components/admin/StatsCard';
 import { ProductCategory } from '@/types/provider';
+import { useLanguage } from '@/contexts/LanguageContext';
+import {
+  getEffectiveStatusBadgeVariant,
+  getEffectiveStatusLabel,
+  getEffectiveStatusDescription,
+} from '@/lib/utils/effective-status';
 
 export default function PurchasesPage() {
+  const { t } = useLanguage();
   const [selectedPurchase, setSelectedPurchase] = useState<Purchase | null>(null);
   const [showDetails, setShowDetails] = useState(false);
   const [filters, setFilters] = useState<PurchasesFilters>({
@@ -44,17 +52,19 @@ export default function PurchasesPage() {
       };
     }
 
-    const totalSpent = purchases.reduce(
-      (sum, p) => sum + parseFloat(p.amount),
-      0
-    );
+    // Use totalEffectiveSpent from API (calculated across ALL purchases, not just current page)
+    const totalSpent = data?.stats?.totalEffectiveSpent
+      ? parseFloat(data.stats.totalEffectiveSpent)
+      : purchases.reduce((sum, p) => sum + parseFloat(p.effectiveAmount), 0);
+
+    const totalCount = pagination?.total || purchases.length;
 
     return {
-      totalPurchases: pagination?.total || purchases.length,
+      totalPurchases: totalCount,
       totalSpent: totalSpent.toFixed(2),
-      averagePrice: (totalSpent / purchases.length).toFixed(2),
+      averagePrice: totalCount > 0 ? (totalSpent / totalCount).toFixed(2) : '0',
     };
-  }, [purchases, pagination]);
+  }, [purchases, pagination, data?.stats]);
 
   const handleViewDetails = (purchase: Purchase) => {
     setSelectedPurchase(purchase);
@@ -101,7 +111,21 @@ export default function PurchasesPage() {
     {
       key: 'status',
       label: 'Status',
-      render: (purchase) => <PurchaseStatusBadge status={purchase.status} />,
+      render: (purchase) => {
+        const variant = getEffectiveStatusBadgeVariant(purchase.effectiveStatus);
+        const label = getEffectiveStatusLabel(purchase.effectiveStatus, t);
+        const description = getEffectiveStatusDescription(purchase.effectiveStatus, t);
+
+        return (
+          <Badge
+            variant={variant}
+            className="text-xs"
+            title={description}
+          >
+            {label}
+          </Badge>
+        );
+      },
     },
     {
       key: 'actions',

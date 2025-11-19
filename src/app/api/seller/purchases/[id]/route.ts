@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/infrastructure/database/prisma';
 import { verifyJWT } from '@/infrastructure/auth/jwt';
+import { computeEffectiveFields } from '@/lib/utils/purchase-helpers';
 
 /**
  * GET /api/seller/purchases/:id
@@ -94,6 +95,13 @@ export async function GET(
             email: true,
           },
         },
+        dispute: {
+          select: {
+            id: true,
+            status: true,
+            resolutionType: true,
+          },
+        },
       },
     });
 
@@ -104,7 +112,14 @@ export async function GET(
       );
     }
 
-    // 4. Return purchase details
+    // 4. Compute effective fields
+    const { effectiveStatus, effectiveAmount } = computeEffectiveFields({
+      status: purchase.status,
+      amount: purchase.amount,
+      dispute: purchase.dispute,
+    });
+
+    // 5. Return purchase details
     return NextResponse.json({
       id: purchase.id,
       sellerId: purchase.sellerId,
@@ -115,6 +130,17 @@ export async function GET(
       createdAt: purchase.createdAt.toISOString(),
       completedAt: purchase.completedAt?.toISOString(),
       refundedAt: purchase.refundedAt?.toISOString(),
+      // Computed fields
+      effectiveStatus,
+      effectiveAmount,
+      // Dispute info
+      dispute: purchase.dispute
+        ? {
+            id: purchase.dispute.id,
+            status: purchase.dispute.status,
+            resolutionType: purchase.dispute.resolutionType,
+          }
+        : undefined,
       product: {
         id: purchase.product.id,
         category: purchase.product.category,

@@ -8,6 +8,7 @@ import { PrismaUserRepository } from '@/infrastructure/repositories/PrismaUserRe
 import { PrismaCommissionConfigRepository } from '@/infrastructure/repositories/PrismaCommissionConfigRepository';
 import { PurchaseProductUseCase } from '@/application/use-cases/PurchaseProductUseCase';
 import { verifyJWT } from '@/infrastructure/auth/jwt';
+import { computeEffectiveFields } from '@/lib/utils/purchase-helpers';
 
 /**
  * GET /api/seller/purchases
@@ -151,44 +152,94 @@ export async function GET(request: NextRequest) {
             email: true,
           },
         },
+        dispute: {
+          select: {
+            id: true,
+            status: true,
+            resolutionType: true,
+          },
+        },
       },
     });
 
     // 7. Transform to response format
-    const data = purchases.map((purchase: any) => ({
-      id: purchase.id,
-      sellerId: purchase.sellerId,
-      productId: purchase.productId,
-      providerId: purchase.providerId,
-      amount: purchase.amount.toString(),
-      status: purchase.status,
-      createdAt: purchase.createdAt.toISOString(),
-      completedAt: purchase.completedAt?.toISOString(),
-      refundedAt: purchase.refundedAt?.toISOString(),
-      product: {
-        id: purchase.product.id,
-        category: purchase.product.category,
-        name: purchase.product.name,
-        description: purchase.product.description || '',
-        // Only show credentials if purchase is completed
-        accountEmail:
-          purchase.status === 'completed'
-            ? purchase.product.accountEmail
-            : '***',
-        accountPassword:
-          purchase.status === 'completed'
-            ? purchase.product.accountPassword
-            : '***',
-        accountDetails: purchase.product.accountDetails,
-      },
-      provider: {
-        id: purchase.provider.id,
-        name: purchase.provider.name || purchase.provider.email,
-        email: purchase.provider.email,
-      },
-    }));
+    const data = purchases.map((purchase: any) => {
+      const { effectiveStatus, effectiveAmount } = computeEffectiveFields({
+        status: purchase.status,
+        amount: purchase.amount,
+        dispute: purchase.dispute,
+      });
 
-    // 8. Return paginated response
+      return {
+        id: purchase.id,
+        sellerId: purchase.sellerId,
+        productId: purchase.productId,
+        providerId: purchase.providerId,
+        amount: purchase.amount.toString(),
+        status: purchase.status,
+        createdAt: purchase.createdAt.toISOString(),
+        completedAt: purchase.completedAt?.toISOString(),
+        refundedAt: purchase.refundedAt?.toISOString(),
+        // Computed fields
+        effectiveStatus,
+        effectiveAmount,
+        // Dispute info
+        dispute: purchase.dispute
+          ? {
+              id: purchase.dispute.id,
+              status: purchase.dispute.status,
+              resolutionType: purchase.dispute.resolutionType,
+            }
+          : undefined,
+        product: {
+          id: purchase.product.id,
+          category: purchase.product.category,
+          name: purchase.product.name,
+          description: purchase.product.description || '',
+          // Only show credentials if purchase is completed (including completed disputes)
+          accountEmail:
+            effectiveStatus === 'completed' || effectiveStatus === 'disputed'
+              ? purchase.product.accountEmail
+              : '***',
+          accountPassword:
+            effectiveStatus === 'completed' || effectiveStatus === 'disputed'
+              ? purchase.product.accountPassword
+              : '***',
+          accountDetails: purchase.product.accountDetails,
+        },
+        provider: {
+          id: purchase.provider.id,
+          name: purchase.provider.name || purchase.provider.email,
+          email: purchase.provider.email,
+        },
+      };
+    });
+
+    // 8. Calculate total effective spent across ALL purchases (not just current page)
+    const allPurchases = await prisma.purchase.findMany({
+      where,
+      select: {
+        amount: true,
+        status: true,
+        dispute: {
+          select: {
+            status: true,
+            resolutionType: true,
+          },
+        },
+      },
+    });
+
+    const totalEffectiveSpent = allPurchases.reduce((sum, purchase) => {
+      const { effectiveAmount } = computeEffectiveFields({
+        status: purchase.status,
+        amount: purchase.amount,
+        dispute: purchase.dispute,
+      });
+      return sum + parseFloat(effectiveAmount);
+    }, 0);
+
+    // 9. Return paginated response with global stats
     return NextResponse.json({
       data,
       pagination: {
@@ -196,6 +247,9 @@ export async function GET(request: NextRequest) {
         limit,
         total,
         totalPages: Math.ceil(total / limit),
+      },
+      stats: {
+        totalEffectiveSpent: totalEffectiveSpent.toFixed(2),
       },
     });
   } catch (error: any) {

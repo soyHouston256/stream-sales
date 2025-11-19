@@ -2,6 +2,14 @@ import { ProductCategory } from './provider';
 
 export type PurchaseStatus = 'pending' | 'completed' | 'failed' | 'refunded';
 
+export type EffectivePurchaseStatus =
+  | 'pending'
+  | 'completed'
+  | 'failed'
+  | 'refunded'
+  | 'partial_refund'
+  | 'disputed';
+
 export type RechargeStatus = 'pending' | 'completed' | 'failed' | 'cancelled';
 
 export type PaymentMethod =
@@ -35,6 +43,15 @@ export interface Purchase {
   createdAt: string;
   completedAt?: string;
   refundedAt?: string;
+  // Computed fields for UI
+  effectiveStatus: EffectivePurchaseStatus;
+  effectiveAmount: string; // Amount after considering refunds (full, partial, or none)
+  // Dispute info (if exists)
+  dispute?: {
+    id: string;
+    status: string;
+    resolutionType?: string | null;
+  };
   // Producto info
   product: {
     id: string;
@@ -135,5 +152,8 @@ export interface PaginatedResponse<T> {
     limit: number;
     total: number;
     totalPages: number;
+  };
+  stats?: {
+    totalEffectiveSpent: string;
   };
 }

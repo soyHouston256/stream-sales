@@ -60,7 +60,17 @@ export class PrismaDisputeRepository implements IDisputeRepository {
     const dispute = await this.prisma.dispute.findUnique({
       where: { id },
       include: {
-        purchase: true,
+        purchase: {
+          include: {
+            product: {
+              select: {
+                id: true,
+                name: true,
+                category: true,
+              },
+            },
+          },
+        },
         seller: { select: { id: true, name: true, email: true } },
         provider: { select: { id: true, name: true, email: true } },
         conciliator: { select: { id: true, name: true, email: true } },
@@ -77,7 +87,17 @@ export class PrismaDisputeRepository implements IDisputeRepository {
     const dispute = await this.prisma.dispute.findUnique({
       where: { purchaseId },
       include: {
-        purchase: true,
+        purchase: {
+          include: {
+            product: {
+              select: {
+                id: true,
+                name: true,
+                category: true,
+              },
+            },
+          },
+        },
         seller: { select: { id: true, name: true, email: true } },
         provider: { select: { id: true, name: true, email: true } },
         conciliator: { select: { id: true, name: true, email: true } },
@@ -99,7 +119,17 @@ export class PrismaDisputeRepository implements IDisputeRepository {
       skip: filters?.offset || 0,
       take: filters?.limit || 20,
       include: {
-        purchase: true,
+        purchase: {
+          include: {
+            product: {
+              select: {
+                id: true,
+                name: true,
+                category: true,
+              },
+            },
+          },
+        },
         seller: { select: { id: true, name: true, email: true } },
         provider: { select: { id: true, name: true, email: true } },
         conciliator: { select: { id: true, name: true, email: true } },
@@ -126,7 +156,17 @@ export class PrismaDisputeRepository implements IDisputeRepository {
       where,
       orderBy: { createdAt: 'desc' },
       include: {
-        purchase: true,
+        purchase: {
+          include: {
+            product: {
+              select: {
+                id: true,
+                name: true,
+                category: true,
+              },
+            },
+          },
+        },
         seller: { select: { id: true, name: true, email: true } },
         provider: { select: { id: true, name: true, email: true } },
         conciliator: { select: { id: true, name: true, email: true } },
@@ -144,7 +184,17 @@ export class PrismaDisputeRepository implements IDisputeRepository {
       where: { sellerId },
       orderBy: { createdAt: 'desc' },
       include: {
-        purchase: true,
+        purchase: {
+          include: {
+            product: {
+              select: {
+                id: true,
+                name: true,
+                category: true,
+              },
+            },
+          },
+        },
         seller: { select: { id: true, name: true, email: true } },
         provider: { select: { id: true, name: true, email: true } },
         conciliator: { select: { id: true, name: true, email: true } },
@@ -162,7 +212,17 @@ export class PrismaDisputeRepository implements IDisputeRepository {
       where: { providerId },
       orderBy: { createdAt: 'desc' },
       include: {
-        purchase: true,
+        purchase: {
+          include: {
+            product: {
+              select: {
+                id: true,
+                name: true,
+                category: true,
+              },
+            },
+          },
+        },
         seller: { select: { id: true, name: true, email: true } },
         provider: { select: { id: true, name: true, email: true } },
         conciliator: { select: { id: true, name: true, email: true } },
@@ -302,5 +362,30 @@ export class PrismaDisputeRepository implements IDisputeRepository {
       assignedAt: prismaDispute.assignedAt,
       resolvedAt: prismaDispute.resolvedAt,
     });
+  }
+
+  /**
+   * Convierte a formato JSON con relaciones incluidas
+   */
+  private toJSONWithRelations(prismaDispute: any): any {
+    const dispute = this.toDomain(prismaDispute);
+    const json = dispute.toJSON();
+
+    // Agregar relaciones si existen
+    return {
+      ...json,
+      purchase: prismaDispute.purchase ? {
+        id: prismaDispute.purchase.id,
+        amount: prismaDispute.purchase.amount,
+        product: prismaDispute.purchase.product ? {
+          id: prismaDispute.purchase.product.id,
+          name: prismaDispute.purchase.product.name,
+          category: prismaDispute.purchase.product.category,
+        } : undefined,
+      } : undefined,
+      seller: prismaDispute.seller || undefined,
+      provider: prismaDispute.provider || undefined,
+      conciliator: prismaDispute.conciliator || undefined,
+    };
   }
 }

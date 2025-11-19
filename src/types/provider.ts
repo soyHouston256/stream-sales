@@ -70,6 +70,10 @@ export interface ProviderSale {
   completedAt?: string;
   refundedAt?: string;
   createdAt: string;
+  dispute?: {
+    id: string;
+    status: string;
+  };
 }
 
 export interface ProviderStats {

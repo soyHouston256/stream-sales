@@ -18,9 +18,11 @@ import { CategoryBadge } from '@/components/provider/CategoryBadge';
 import { useProviderSales } from '@/lib/hooks/useProviderSales';
 import { ProviderSale } from '@/types/provider';
 import { format } from 'date-fns';
-import { TrendingUp, DollarSign } from 'lucide-react';
+import { TrendingUp, DollarSign, AlertCircle } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function SalesPage() {
+  const { t } = useLanguage();
   const [page, setPage] = useState(1);
   const [status, setStatus] = useState<'completed' | 'refunded' | 'all'>('all');
   const [startDate, setStartDate] = useState('');
@@ -109,13 +111,47 @@ export default function SalesPage() {
     {
       key: 'status',
       label: 'Status',
-      render: (sale) => (
-        <Badge
-          variant={sale.status === 'completed' ? 'default' : 'destructive'}
-        >
-          {sale.status}
-        </Badge>
-      ),
+      render: (sale) => {
+        const getStatusVariant = (status: string) => {
+          switch (status) {
+            case 'completed':
+              return 'default';
+            case 'refunded':
+              return 'destructive';
+            case 'pending':
+              return 'secondary';
+            default:
+              return 'secondary';
+          }
+        };
+
+        const getStatusLabel = (status: string) => {
+          // Try to get translation
+          const key = `purchases.status.${status}`;
+          const translation = t(key);
+          // If translation exists, use it. Otherwise use status as-is
+          return translation !== key ? translation : status;
+        };
+
+        return (
+          <div className="flex flex-col gap-1">
+            <Badge variant={getStatusVariant(sale.status)}>
+              {getStatusLabel(sale.status)}
+            </Badge>
+            {sale.refundedAt && (
+              <span className="text-xs text-muted-foreground">
+                {format(new Date(sale.refundedAt), 'MMM dd, yyyy')}
+              </span>
+            )}
+            {sale.dispute && (
+              <Badge variant="warning" className="text-xs">
+                <AlertCircle className="h-3 w-3 mr-1" />
+                {t('disputes.status')}: {sale.dispute.status}
+              </Badge>
+            )}
+          </div>
+        );
+      },
     },
   ];
 

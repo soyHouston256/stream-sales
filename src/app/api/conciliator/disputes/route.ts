@@ -1,8 +1,6 @@
 import { NextResponse } from 'next/server';
 import { verifyJWT } from '@/infrastructure/auth/jwt';
 import { prisma } from '@/infrastructure/database/prisma';
-import { PrismaDisputeRepository } from '@/infrastructure/repositories/PrismaDisputeRepository';
-import { ListDisputesUseCase } from '@/application/use-cases/ListDisputesUseCase';
 
 /**
  * GET /api/conciliator/disputes
@@ -39,30 +37,98 @@ export async function GET(request: Request) {
 
     // 3. Obtener query params
     const { searchParams } = new URL(request.url);
-    const status = searchParams.get('status') || undefined;
+    const queryStatus = searchParams.get('status') || undefined;
     const startDate = searchParams.get('startDate') || undefined;
     const endDate = searchParams.get('endDate') || undefined;
     const limit = parseInt(searchParams.get('limit') || '20');
     const offset = parseInt(searchParams.get('offset') || '0');
 
-    // 4. Ejecutar use case
-    const disputeRepository = new PrismaDisputeRepository(prisma);
-    const listDisputesUseCase = new ListDisputesUseCase(disputeRepository);
+    // 4. Build where clause
+    const where: any = {};
 
-    const result = await listDisputesUseCase.execute({
-      userId: decoded.userId,
-      userRole: 'conciliator',
-      filters: {
-        status,
-        startDate,
-        endDate,
-        limit,
-        offset,
+    // Lógica para conciliator:
+    // - Si status=open: ver disputas abiertas para asignar
+    // - De lo contrario: ver disputas asignadas a él
+    if (queryStatus === 'open') {
+      where.status = 'open';
+    } else {
+      where.conciliatorId = decoded.userId;
+      if (queryStatus) {
+        where.status = queryStatus;
+      }
+    }
+
+    if (startDate || endDate) {
+      where.createdAt = {};
+      if (startDate) {
+        where.createdAt.gte = new Date(startDate);
+      }
+      if (endDate) {
+        where.createdAt.lte = new Date(endDate);
+      }
+    }
+
+    // 5. Fetch disputes with relations
+    const disputes = await prisma.dispute.findMany({
+      where,
+      orderBy: { createdAt: 'desc' },
+      skip: offset,
+      take: limit,
+      include: {
+        purchase: {
+          include: {
+            product: {
+              select: {
+                id: true,
+                name: true,
+                category: true,
+              },
+            },
+          },
+        },
+        seller: { select: { id: true, name: true, email: true } },
+        provider: { select: { id: true, name: true, email: true } },
+        conciliator: { select: { id: true, name: true, email: true } },
       },
     });
 
-    // 5. Retornar resultado
-    return NextResponse.json(result, { status: 200 });
+    // 6. Count total
+    const total = await prisma.dispute.count({ where });
+
+    // 7. Format response
+    const formattedDisputes = disputes.map((d: any) => ({
+      id: d.id,
+      purchaseId: d.purchaseId,
+      sellerId: d.sellerId,
+      providerId: d.providerId,
+      conciliatorId: d.conciliatorId,
+      openedBy: d.openedBy,
+      reason: d.reason,
+      status: d.status,
+      resolution: d.resolution,
+      resolutionType: d.resolutionType,
+      createdAt: d.createdAt.toISOString(),
+      assignedAt: d.assignedAt?.toISOString() || null,
+      resolvedAt: d.resolvedAt?.toISOString() || null,
+      purchase: d.purchase ? {
+        id: d.purchase.id,
+        amount: d.purchase.amount.toString(),
+        product: d.purchase.product ? {
+          id: d.purchase.product.id,
+          name: d.purchase.product.name,
+          category: d.purchase.product.category,
+        } : undefined,
+      } : undefined,
+      seller: d.seller,
+      provider: d.provider,
+      conciliator: d.conciliator,
+    }));
+
+    // 8. Return result
+    return NextResponse.json({
+      disputes: formattedDisputes,
+      total,
+    }, { status: 200 });
   } catch (error: any) {
     console.error('[GET /api/conciliator/disputes] Error:', error);
     return NextResponse.json(

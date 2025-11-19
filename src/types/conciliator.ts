@@ -23,11 +23,14 @@ export interface Dispute {
   purchase: {
     id: string;
     amount: string;
+    status: string;
+    createdAt: string;
     product: {
       id: string;
       category: ProductCategory;
       name: string;
       description: string;
+      price: string;
       accountEmail?: string; // Solo si soy conciliator
       accountPassword?: string;
       accountDetails?: any;

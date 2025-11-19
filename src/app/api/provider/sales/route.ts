@@ -134,6 +134,12 @@ export async function GET(request: NextRequest) {
             name: true,
           },
         },
+        dispute: {
+          select: {
+            id: true,
+            status: true,
+          },
+        },
       },
     });
 
@@ -154,6 +160,10 @@ export async function GET(request: NextRequest) {
       completedAt: purchase.completedAt?.toISOString(),
       refundedAt: purchase.refundedAt?.toISOString(),
       createdAt: purchase.createdAt.toISOString(),
+      dispute: purchase.dispute ? {
+        id: purchase.dispute.id,
+        status: purchase.dispute.status,
+      } : undefined,
     }));
 
     // 8. Return paginated response

@@ -130,6 +130,9 @@ export class ResolveDisputeUseCase {
       console.log(
         `[ResolveDisputeUseCase] Refund executed: ${refundAmount.toPlainString()} from provider ${dispute.providerId} to seller ${dispute.sellerId}`
       );
+
+      // Marcar purchase como refunded cuando hay refund completo o parcial
+      await this.purchaseRepository.markAsRefunded(dispute.purchaseId);
     }
 
     // 6. Resolver la disputa

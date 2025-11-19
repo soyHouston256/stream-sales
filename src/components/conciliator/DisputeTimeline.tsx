@@ -28,14 +28,18 @@ export function DisputeTimeline({ dispute, messages = [] }: DisputeTimelineProps
   const events: TimelineEvent[] = [];
 
   // Disputa creada
+  const creatorName = dispute.openedBy === 'seller'
+    ? (dispute.seller?.name || dispute.seller?.email || 'Unknown')
+    : (dispute.provider?.name || dispute.provider?.email || 'Unknown');
+
   events.push({
     id: `created-${dispute.id}`,
     type: 'created',
     timestamp: dispute.createdAt,
     title: 'Dispute Opened',
-    description: `By ${dispute.openedBy === 'seller' ? dispute.seller.name : dispute.provider.name}`,
+    description: `By ${creatorName}`,
     user: {
-      name: dispute.openedBy === 'seller' ? dispute.seller.name : dispute.provider.name,
+      name: creatorName,
       role: dispute.openedBy,
     },
   });
@@ -48,24 +52,25 @@ export function DisputeTimeline({ dispute, messages = [] }: DisputeTimelineProps
       timestamp: message.createdAt,
       title: message.isInternal ? 'Internal Note' : 'Message',
       description: message.message,
-      user: {
-        name: message.sender.name,
-        role: message.sender.role,
-      },
+      user: message.sender ? {
+        name: message.sender.name || message.sender.email || 'Unknown',
+        role: message.sender.role || 'user',
+      } : undefined,
       isInternal: message.isInternal,
     });
   });
 
   // Asignada a conciliator
   if (dispute.assignedAt && dispute.conciliator) {
+    const conciliatorName = dispute.conciliator.name || dispute.conciliator.email || 'Unknown';
     events.push({
       id: `assigned-${dispute.id}`,
       type: 'assigned',
       timestamp: dispute.assignedAt,
       title: 'Assigned to Conciliator',
-      description: dispute.conciliator.name,
+      description: conciliatorName,
       user: {
-        name: dispute.conciliator.name,
+        name: conciliatorName,
         role: 'conciliator',
       },
     });
@@ -80,7 +85,7 @@ export function DisputeTimeline({ dispute, messages = [] }: DisputeTimelineProps
       title: 'Dispute Resolved',
       description: dispute.resolution,
       user: dispute.conciliator ? {
-        name: dispute.conciliator.name,
+        name: dispute.conciliator.name || dispute.conciliator.email || 'Unknown',
         role: 'conciliator',
       } : undefined,
     });
