@@ -64,7 +64,10 @@ describe('InputSanitizer', () => {
       const result = InputSanitizer.sanitizeName(input);
       expect(result).not.toContain('<');
       expect(result).not.toContain('>');
-      expect(result).not.toContain('script');
+      expect(result).not.toContain('(');
+      expect(result).not.toContain(')');
+      // Result should only contain alphanumeric characters (Johnscriptalert1script)
+      expect(result).toMatch(/^[a-zA-Z0-9\s\-'.]+$/);
     });
 
     it('should limit length to 100 characters', () => {

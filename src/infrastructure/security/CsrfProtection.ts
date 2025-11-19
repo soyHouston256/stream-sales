@@ -50,7 +50,13 @@ export class CsrfProtection {
     }
 
     const now = Date.now();
-    if (now - tokenTime > maxAgeMs) {
+    const tokenAge = now - tokenTime;
+    if (tokenAge > maxAgeMs) {
+      return false;
+    }
+
+    // Special case: if maxAge is 0, reject all tokens (no age is acceptable)
+    if (maxAgeMs === 0 && tokenAge >= 0) {
       return false;
     }
 
