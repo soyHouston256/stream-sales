@@ -16,8 +16,10 @@ import {
 import { Transaction, WithdrawalRequest } from '@/types/provider';
 import { Wallet, TrendingUp, TrendingDown, DollarSign } from 'lucide-react';
 import { format } from 'date-fns';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function EarningsPage() {
+  const { t } = useLanguage();
   const [page, setPage] = useState(1);
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
@@ -38,21 +40,21 @@ export default function EarningsPage() {
   const transactionColumns: Column<Transaction>[] = [
     {
       key: 'type',
-      label: 'Type',
+      label: t('provider.earnings.type'),
       render: (tx) => {
         const config = {
           earning: {
-            label: 'Earning',
+            label: t('provider.earnings.earning'),
             icon: TrendingUp,
             color: 'bg-green-500/10 text-green-700 border-green-500/20',
           },
           withdrawal: {
-            label: 'Withdrawal',
+            label: t('provider.earnings.withdrawal'),
             icon: TrendingDown,
             color: 'bg-red-500/10 text-red-700 border-red-500/20',
           },
           refund: {
-            label: 'Refund',
+            label: t('provider.earnings.refund'),
             icon: TrendingDown,
             color: 'bg-orange-500/10 text-orange-700 border-orange-500/20',
           },
@@ -70,7 +72,7 @@ export default function EarningsPage() {
     },
     {
       key: 'amount',
-      label: 'Amount',
+      label: t('provider.earnings.amount'),
       render: (tx) => {
         const isPositive = tx.type === 'earning';
         return (
@@ -86,12 +88,12 @@ export default function EarningsPage() {
     },
     {
       key: 'balance',
-      label: 'Balance After',
+      label: t('provider.earnings.balanceAfter'),
       render: (tx) => <span className="font-medium">${tx.balance}</span>,
     },
     {
       key: 'description',
-      label: 'Description',
+      label: t('provider.earnings.description'),
       render: (tx) => (
         <span className="text-sm text-muted-foreground">
           {tx.description || '-'}
@@ -100,7 +102,7 @@ export default function EarningsPage() {
     },
     {
       key: 'createdAt',
-      label: 'Date',
+      label: t('provider.date'),
       render: (tx) => format(new Date(tx.createdAt), 'MMM dd, yyyy HH:mm'),
     },
   ];
@@ -108,31 +110,31 @@ export default function EarningsPage() {
   const withdrawalColumns: Column<WithdrawalRequest>[] = [
     {
       key: 'amount',
-      label: 'Amount',
+      label: t('provider.earnings.amount'),
       render: (w) => <span className="font-medium">${w.amount}</span>,
     },
     {
       key: 'paymentMethod',
-      label: 'Payment Method',
+      label: t('provider.earnings.paymentMethod'),
       render: (w) => {
         const labels = {
-          paypal: 'PayPal',
-          bank_transfer: 'Bank Transfer',
-          crypto: 'Cryptocurrency',
+          paypal: t('provider.earnings.paypal'),
+          bank_transfer: t('provider.earnings.bankTransfer'),
+          crypto: t('provider.earnings.crypto'),
         };
         return labels[w.paymentMethod];
       },
     },
     {
       key: 'paymentDetails',
-      label: 'Payment Details',
+      label: t('provider.earnings.paymentDetails'),
       render: (w) => (
         <span className="text-sm font-mono">{w.paymentDetails}</span>
       ),
     },
     {
       key: 'status',
-      label: 'Status',
+      label: t('products.status'),
       render: (w) => {
         const config = {
           pending: 'bg-yellow-500/10 text-yellow-700 border-yellow-500/20',
@@ -140,16 +142,22 @@ export default function EarningsPage() {
           completed: 'bg-green-500/10 text-green-700 border-green-500/20',
           rejected: 'bg-red-500/10 text-red-700 border-red-500/20',
         };
+        const statusLabels = {
+          pending: t('provider.earnings.pending'),
+          approved: t('provider.earnings.approved'),
+          completed: t('provider.earnings.completed'),
+          rejected: t('provider.earnings.rejected'),
+        };
         return (
           <Badge variant="outline" className={config[w.status]}>
-            {w.status.charAt(0).toUpperCase() + w.status.slice(1)}
+            {statusLabels[w.status]}
           </Badge>
         );
       },
     },
     {
       key: 'requestedAt',
-      label: 'Requested',
+      label: t('provider.earnings.requested'),
       render: (w) => format(new Date(w.requestedAt), 'MMM dd, yyyy'),
     },
   ];
@@ -158,9 +166,9 @@ export default function EarningsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Earnings & Withdrawals</h1>
+          <h1 className="text-3xl font-bold">{t('provider.earnings.title')}</h1>
           <p className="text-muted-foreground mt-2">
-            Manage your balance and withdrawal requests
+            {t('provider.earnings.subtitle')}
           </p>
         </div>
         <WithdrawalRequestDialog availableBalance={availableBalance} />
@@ -170,7 +178,7 @@ export default function EarningsPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Available Balance
+              {t('provider.earnings.availableBalance')}
             </CardTitle>
             <Wallet className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
@@ -179,7 +187,7 @@ export default function EarningsPage() {
               ${balance ? parseFloat(balance.balance).toFixed(2) : '0.00'}
             </div>
             <p className="text-xs text-muted-foreground">
-              Ready for withdrawal
+              {t('provider.earnings.readyForWithdrawal')}
             </p>
           </CardContent>
         </Card>
@@ -187,7 +195,7 @@ export default function EarningsPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Total Earnings
+              {t('provider.earnings.totalEarnings')}
             </CardTitle>
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
@@ -196,7 +204,7 @@ export default function EarningsPage() {
               ${balance ? parseFloat(balance.totalEarnings).toFixed(2) : '0.00'}
             </div>
             <p className="text-xs text-muted-foreground">
-              Lifetime earnings
+              {t('provider.earnings.lifetimeEarnings')}
             </p>
           </CardContent>
         </Card>
@@ -204,7 +212,7 @@ export default function EarningsPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Total Withdrawn
+              {t('provider.earnings.totalWithdrawn')}
             </CardTitle>
             <TrendingDown className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
@@ -213,7 +221,7 @@ export default function EarningsPage() {
               ${balance ? parseFloat(balance.totalWithdrawals).toFixed(2) : '0.00'}
             </div>
             <p className="text-xs text-muted-foreground">
-              Successfully withdrawn
+              {t('provider.earnings.successfullyWithdrawn')}
             </p>
           </CardContent>
         </Card>
@@ -221,7 +229,7 @@ export default function EarningsPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Pending Withdrawals
+              {t('provider.earnings.pendingWithdrawals')}
             </CardTitle>
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
@@ -230,7 +238,7 @@ export default function EarningsPage() {
               ${balance ? parseFloat(balance.pendingWithdrawals).toFixed(2) : '0.00'}
             </div>
             <p className="text-xs text-muted-foreground">
-              Awaiting approval
+              {t('provider.earnings.awaitingApproval')}
             </p>
           </CardContent>
         </Card>
@@ -238,14 +246,14 @@ export default function EarningsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Transaction History</CardTitle>
-          <CardDescription>All earnings and withdrawals</CardDescription>
+          <CardTitle>{t('provider.earnings.transactionHistory')}</CardTitle>
+          <CardDescription>{t('provider.earnings.allEarningsWithdrawals')}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
             <div className="grid gap-4 md:grid-cols-3">
               <div className="space-y-2">
-                <Label htmlFor="txStartDate">Start Date</Label>
+                <Label htmlFor="txStartDate">{t('provider.earnings.startDate')}</Label>
                 <Input
                   id="txStartDate"
                   type="date"
@@ -258,7 +266,7 @@ export default function EarningsPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="txEndDate">End Date</Label>
+                <Label htmlFor="txEndDate">{t('provider.earnings.endDate')}</Label>
                 <Input
                   id="txEndDate"
                   type="date"
@@ -281,7 +289,7 @@ export default function EarningsPage() {
                   }}
                   className="w-full"
                 >
-                  Clear Filters
+                  {t('provider.earnings.clearFilters')}
                 </Button>
               </div>
             </div>
@@ -299,7 +307,7 @@ export default function EarningsPage() {
                     }
                   : undefined
               }
-              emptyMessage="No transactions yet. Your earnings will appear here."
+              emptyMessage={t('provider.earnings.noTransactions')}
             />
           </div>
         </CardContent>
@@ -307,15 +315,15 @@ export default function EarningsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Withdrawal Requests</CardTitle>
-          <CardDescription>Track your withdrawal requests</CardDescription>
+          <CardTitle>{t('provider.earnings.withdrawalRequests')}</CardTitle>
+          <CardDescription>{t('provider.earnings.trackRequests')}</CardDescription>
         </CardHeader>
         <CardContent>
           <DataTable
             data={withdrawals}
             columns={withdrawalColumns}
             isLoading={withdrawalsLoading}
-            emptyMessage="No withdrawal requests yet. Request a withdrawal to get started."
+            emptyMessage={t('provider.earnings.noWithdrawals')}
           />
         </CardContent>
       </Card>

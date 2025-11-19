@@ -52,19 +52,19 @@ export default function SalesPage() {
   const columns: Column<ProviderSale>[] = [
     {
       key: 'id',
-      label: 'Purchase ID',
+      label: t('provider.sales.purchaseId'),
       render: (sale) => (
         <span className="font-mono text-xs">{sale.id.slice(0, 8)}...</span>
       ),
     },
     {
       key: 'productCategory',
-      label: 'Category',
+      label: t('provider.category'),
       render: (sale) => <CategoryBadge category={sale.productCategory} />,
     },
     {
       key: 'productName',
-      label: 'Product',
+      label: t('provider.product'),
       render: (sale) => (
         <div>
           <p className="font-medium">{sale.productName}</p>
@@ -76,12 +76,12 @@ export default function SalesPage() {
     },
     {
       key: 'amount',
-      label: 'Sale Price',
+      label: t('provider.sales.salePrice'),
       render: (sale) => <span className="font-medium">${sale.amount}</span>,
     },
     {
       key: 'adminCommission',
-      label: 'Commission',
+      label: t('provider.sales.commission'),
       render: (sale) => (
         <div>
           <p className="text-sm">${sale.adminCommission}</p>
@@ -93,7 +93,7 @@ export default function SalesPage() {
     },
     {
       key: 'providerEarnings',
-      label: 'Net Earnings',
+      label: t('provider.sales.netEarnings'),
       render: (sale) => (
         <span className="font-medium text-green-600">
           ${sale.providerEarnings}
@@ -102,7 +102,7 @@ export default function SalesPage() {
     },
     {
       key: 'completedAt',
-      label: 'Date',
+      label: t('provider.date'),
       render: (sale) =>
         sale.completedAt
           ? format(new Date(sale.completedAt), 'MMM dd, yyyy HH:mm')
@@ -110,7 +110,7 @@ export default function SalesPage() {
     },
     {
       key: 'status',
-      label: 'Status',
+      label: t('products.status'),
       render: (sale) => {
         const getStatusVariant = (status: string) => {
           switch (status) {
@@ -158,9 +158,9 @@ export default function SalesPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Sales History</h1>
+        <h1 className="text-3xl font-bold">{t('provider.sales.title')}</h1>
         <p className="text-muted-foreground mt-2">
-          Track all purchases of your products
+          {t('provider.sales.subtitle')}
         </p>
       </div>
 
@@ -169,7 +169,7 @@ export default function SalesPage() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
-                Total Revenue
+                {t('provider.sales.totalRevenue')}
               </CardTitle>
               <TrendingUp className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
@@ -178,8 +178,9 @@ export default function SalesPage() {
                 ${totals.revenue.toFixed(2)}
               </div>
               <p className="text-xs text-muted-foreground">
-                From {sales.length} sale{sales.length !== 1 ? 's' : ''} on this
-                page
+                {t('provider.sales.fromSales')
+                  .replace('{count}', sales.length.toString())
+                  .replace('{plural}', sales.length !== 1 ? 's' : '')}
               </p>
             </CardContent>
           </Card>
@@ -187,7 +188,7 @@ export default function SalesPage() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
-                Your Earnings
+                {t('provider.sales.yourEarnings')}
               </CardTitle>
               <DollarSign className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
@@ -196,7 +197,7 @@ export default function SalesPage() {
                 ${totals.earnings.toFixed(2)}
               </div>
               <p className="text-xs text-muted-foreground">
-                After commission deductions
+                {t('provider.sales.afterCommission')}
               </p>
             </CardContent>
           </Card>
@@ -204,7 +205,7 @@ export default function SalesPage() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
-                Total Commission
+                {t('provider.sales.totalCommission')}
               </CardTitle>
               <DollarSign className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
@@ -213,7 +214,7 @@ export default function SalesPage() {
                 ${totals.commission.toFixed(2)}
               </div>
               <p className="text-xs text-muted-foreground">
-                Platform fees
+                {t('provider.sales.platformFees')}
               </p>
             </CardContent>
           </Card>
@@ -222,13 +223,13 @@ export default function SalesPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Filters</CardTitle>
-          <CardDescription>Filter sales by date range and status</CardDescription>
+          <CardTitle>{t('provider.sales.filters')}</CardTitle>
+          <CardDescription>{t('provider.sales.filtersDescription')}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-4">
             <div className="space-y-2">
-              <Label htmlFor="startDate">Start Date</Label>
+              <Label htmlFor="startDate">{t('provider.sales.startDate')}</Label>
               <Input
                 id="startDate"
                 type="date"
@@ -241,7 +242,7 @@ export default function SalesPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="endDate">End Date</Label>
+              <Label htmlFor="endDate">{t('provider.sales.endDate')}</Label>
               <Input
                 id="endDate"
                 type="date"
@@ -254,7 +255,7 @@ export default function SalesPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="status">Status</Label>
+              <Label htmlFor="status">{t('products.status')}</Label>
               <Select
                 value={status}
                 onValueChange={(value) => {
@@ -263,12 +264,12 @@ export default function SalesPage() {
                 }}
               >
                 <SelectTrigger id="status">
-                  <SelectValue placeholder="All statuses" />
+                  <SelectValue placeholder={t('provider.sales.allStatuses')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All statuses</SelectItem>
-                  <SelectItem value="completed">Completed</SelectItem>
-                  <SelectItem value="refunded">Refunded</SelectItem>
+                  <SelectItem value="all">{t('provider.sales.allStatuses')}</SelectItem>
+                  <SelectItem value="completed">{t('provider.sales.completed')}</SelectItem>
+                  <SelectItem value="refunded">{t('provider.sales.refunded')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -285,7 +286,7 @@ export default function SalesPage() {
                 }}
                 className="w-full"
               >
-                Clear Filters
+                {t('provider.sales.clearFilters')}
               </Button>
             </div>
           </div>
@@ -305,7 +306,7 @@ export default function SalesPage() {
               }
             : undefined
         }
-        emptyMessage="No sales found. Your sold products will appear here."
+        emptyMessage={t('provider.sales.noSales')}
       />
     </div>
   );

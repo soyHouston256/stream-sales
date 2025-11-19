@@ -15,6 +15,7 @@ describe('Purchase Entity', () => {
       expect(purchase.id).toBeDefined();
       expect(purchase.sellerId).toBe('seller123');
       expect(purchase.productId).toBe('product456');
+      expect(purchase.providerId).toBe('provider789');
       expect(purchase.amount.toNumber()).toBe(15.99);
       expect(purchase.commissionRate).toBe(0.05);
     });
@@ -73,7 +74,7 @@ describe('Purchase Entity', () => {
         Purchase.create({
           sellerId: '',
           productId: 'product456',
-        providerId: 'provider789',
+          providerId: 'provider789',
           amount: Money.create(15.99),
           commissionRate: 0.05,
         })
@@ -97,7 +98,7 @@ describe('Purchase Entity', () => {
         Purchase.create({
           sellerId: 'seller123',
           productId: 'product456',
-        providerId: 'provider789',
+          providerId: 'provider789',
           amount: Money.create(0),
           commissionRate: 0.05,
         })
@@ -109,7 +110,7 @@ describe('Purchase Entity', () => {
         Purchase.create({
           sellerId: 'seller123',
           productId: 'product456',
-        providerId: 'provider789',
+          providerId: 'provider789',
           amount: Money.create(15.99),
           commissionRate: -0.05,
         })
@@ -121,7 +122,7 @@ describe('Purchase Entity', () => {
         Purchase.create({
           sellerId: 'seller123',
           productId: 'product456',
-        providerId: 'provider789',
+          providerId: 'provider789',
           amount: Money.create(15.99),
           commissionRate: 1.5,
         })
@@ -174,6 +175,7 @@ describe('Purchase Entity', () => {
       expect(purchase.id).toBe('purchase123');
       expect(purchase.sellerId).toBe('seller123');
       expect(purchase.productId).toBe('product456');
+      expect(purchase.providerId).toBe('provider789');
       expect(purchase.amount.toNumber()).toBe(15.99);
       expect(purchase.commissionRate).toBe(0.05);
     });
