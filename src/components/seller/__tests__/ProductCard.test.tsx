@@ -1,6 +1,34 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { ProductCard } from '../ProductCard';
 import { MarketplaceProduct } from '@/types/seller';
+import { LanguageProvider } from '@/contexts/LanguageContext';
+
+// Mock translation files
+jest.mock('@/locales/es.json', () => ({}), { virtual: true });
+jest.mock('@/locales/en.json', () => ({}), { virtual: true });
+
+// Mock localStorage
+const localStorageMock = (() => {
+  let store: Record<string, string> = {};
+  return {
+    getItem: (key: string) => store[key] || null,
+    setItem: (key: string, value: string) => {
+      store[key] = value.toString();
+    },
+    clear: () => {
+      store = {};
+    },
+  };
+})();
+
+Object.defineProperty(window, 'localStorage', {
+  value: localStorageMock,
+});
+
+// Test wrapper with LanguageProvider
+const renderWithProviders = (ui: React.ReactElement) => {
+  return render(<LanguageProvider>{ui}</LanguageProvider>);
+};
 
 const mockProduct: MarketplaceProduct = {
   id: '1',
@@ -15,10 +43,14 @@ const mockProduct: MarketplaceProduct = {
 };
 
 describe('ProductCard', () => {
+  beforeEach(() => {
+    localStorageMock.clear();
+  });
+
   it('renders product information correctly', () => {
     const onBuyClick = jest.fn();
 
-    render(<ProductCard product={mockProduct} onBuyClick={onBuyClick} />);
+    renderWithProviders(<ProductCard product={mockProduct} onBuyClick={onBuyClick} />);
 
     expect(screen.getByText('Netflix Premium Account')).toBeInTheDocument();
     expect(screen.getByText(/Test Provider/i)).toBeInTheDocument();
@@ -33,7 +65,7 @@ describe('ProductCard', () => {
     };
     const onBuyClick = jest.fn();
 
-    render(<ProductCard product={longDescProduct} onBuyClick={onBuyClick} />);
+    renderWithProviders(<ProductCard product={longDescProduct} onBuyClick={onBuyClick} />);
 
     const description = screen.getByText(/This is a very long description/);
     expect(description.textContent).toContain('...');
@@ -42,7 +74,7 @@ describe('ProductCard', () => {
   it('calls onBuyClick when Buy Now button is clicked', () => {
     const onBuyClick = jest.fn();
 
-    render(<ProductCard product={mockProduct} onBuyClick={onBuyClick} />);
+    renderWithProviders(<ProductCard product={mockProduct} onBuyClick={onBuyClick} />);
 
     const buyButton = screen.getByRole('button', { name: /Buy Now/i });
     fireEvent.click(buyButton);
@@ -54,7 +86,7 @@ describe('ProductCard', () => {
   it('renders all product details', () => {
     const onBuyClick = jest.fn();
 
-    render(<ProductCard product={mockProduct} onBuyClick={onBuyClick} />);
+    renderWithProviders(<ProductCard product={mockProduct} onBuyClick={onBuyClick} />);
 
     // Check that key elements are rendered
     expect(screen.getByText('Netflix Premium Account')).toBeInTheDocument();
@@ -63,3 +95,4 @@ describe('ProductCard', () => {
     expect(screen.getByRole('button', { name: /Buy Now/i })).toBeInTheDocument();
   });
 });
+
