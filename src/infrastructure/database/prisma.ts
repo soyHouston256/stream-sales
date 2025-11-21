@@ -248,21 +248,6 @@ async function getPrismaClient(): Promise<PrismaClient> {
 }
 
 /**
- * Prisma Client singleton instance
- *
- * Usage in API routes and repositories:
- * ```typescript
- * import { prisma } from '@/infrastructure/database/prisma';
- *
- * const user = await prisma.user.findUnique({ where: { id: '123' } });
- * ```
- *
- * Note: This is a Promise that resolves to PrismaClient.
- * The client is initialized lazily on first use.
- */
-export const prismaClientPromise = getPrismaClient();
-
-/**
  * Cached client instance
  * This is populated by the initialization promise
  */
@@ -271,13 +256,64 @@ let cachedClient: PrismaClient | undefined;
 /**
  * Initialization promise tracking
  */
-let initializationStarted = false;
+let initializationPromise: Promise<PrismaClient> | undefined;
+
+/**
+ * Error state tracking
+ */
+let initializationError: Error | undefined;
+
+/**
+ * Lazy initialization function
+ * Only starts connecting when first database call is made
+ */
+function getOrInitializeClient(): Promise<PrismaClient> {
+  // Return cached client if available
+  if (cachedClient) {
+    return Promise.resolve(cachedClient);
+  }
+
+  // Return existing initialization attempt if in progress
+  if (initializationPromise) {
+    return initializationPromise;
+  }
+
+  // If previous initialization failed, throw the error
+  if (initializationError) {
+    return Promise.reject(initializationError);
+  }
+
+  // Start new initialization
+  console.log('[Prisma] Starting lazy database initialization...');
+  initializationPromise = getPrismaClient()
+    .then(client => {
+      cachedClient = client;
+      // Store in global for hot reload
+      if (globalForPrisma.prisma === undefined) {
+        globalForPrisma.prisma = client;
+      }
+      console.log('[Prisma] Database client initialized successfully');
+      return client;
+    })
+    .catch(error => {
+      console.error('[Prisma] Failed to initialize client:', error);
+      initializationError = error instanceof Error ? error : new Error(String(error));
+      initializationPromise = undefined;
+      // Don't crash the app - let the error propagate to the caller
+      throw initializationError;
+    });
+
+  return initializationPromise;
+}
 
 /**
  * Default export: Prisma Client singleton
  *
  * This is the primary export that should be used throughout the application.
  * It handles async initialization transparently using a Proxy pattern.
+ *
+ * IMPORTANT: Database connection is initialized LAZILY on first use, not at module load time.
+ * This prevents crashes during Next.js startup if the database is unreachable.
  *
  * The Proxy intercepts all property access and ensures the client is initialized
  * before forwarding the call. This works seamlessly with async/await:
@@ -286,40 +322,19 @@ let initializationStarted = false;
  * import { prisma } from '@/infrastructure/database/prisma';
  *
  * export async function GET() {
- *   const users = await prisma.user.findMany();
- *   return Response.json(users);
+ *   try {
+ *     const users = await prisma.user.findMany();
+ *     return Response.json(users);
+ *   } catch (error) {
+ *     // Handle database connection errors gracefully
+ *     return Response.json({ error: 'Database unavailable' }, { status: 503 });
+ *   }
  * }
- * ```
- *
- * For synchronous contexts (scripts, tests), ensure initialization first:
- * ```typescript
- * import { prismaClientPromise } from '@/infrastructure/database/prisma';
- *
- * const prisma = await prismaClientPromise;
- * const users = await prisma.user.findMany();
  * ```
  */
 export const prisma = new Proxy({} as PrismaClient, {
   get(target, prop, receiver) {
-    // Start initialization on first access if not already started
-    if (!initializationStarted && !cachedClient) {
-      initializationStarted = true;
-      prismaClientPromise.then(client => {
-        cachedClient = client;
-        // Store in global for hot reload
-        if (globalForPrisma.prisma === undefined) {
-          globalForPrisma.prisma = client;
-        }
-      }).catch(error => {
-        console.error('[Prisma] Failed to initialize client:', error);
-        // Don't exit in non-production - allow error handling
-        if (process.env.NODE_ENV === 'production') {
-          process.exit(1);
-        }
-      });
-    }
-
-    // If client is cached, return the property
+    // If client is cached, return the property directly
     if (cachedClient) {
       return (cachedClient as any)[prop];
     }
@@ -327,7 +342,7 @@ export const prisma = new Proxy({} as PrismaClient, {
     // If property is a Prisma method (starts with $), return async wrapper
     if (typeof prop === 'string' && prop.startsWith('$')) {
       return async (...args: any[]) => {
-        const client = await prismaClientPromise;
+        const client = await getOrInitializeClient();
         return (client as any)[prop](...args);
       };
     }
@@ -337,7 +352,7 @@ export const prisma = new Proxy({} as PrismaClient, {
       return new Proxy({}, {
         get(_modelTarget, method) {
           return async (...args: any[]) => {
-            const client = await prismaClientPromise;
+            const client = await getOrInitializeClient();
             const model = (client as any)[prop];
             if (!model || typeof model[method] !== 'function') {
               throw new Error(`Method ${String(method)} not found on model ${prop}`);
@@ -348,7 +363,7 @@ export const prisma = new Proxy({} as PrismaClient, {
       });
     }
 
-    // For other properties, wait for initialization
+    // For other properties, return undefined (won't be used in practice)
     return undefined;
   },
 });
@@ -366,9 +381,9 @@ export const prisma = new Proxy({} as PrismaClient, {
  */
 export async function disconnectPrisma(): Promise<void> {
   // Wait for initialization if in progress
-  if (initializationStarted && !cachedClient) {
+  if (initializationPromise && !cachedClient) {
     try {
-      cachedClient = await prismaClientPromise;
+      cachedClient = await initializationPromise;
     } catch (error) {
       console.error('[Prisma] Error during initialization cleanup:', error);
       return;
@@ -381,6 +396,8 @@ export async function disconnectPrisma(): Promise<void> {
     console.log('[Prisma] Database connection closed');
     cachedClient = undefined;
     globalForPrisma.prisma = undefined;
+    initializationPromise = undefined;
+    initializationError = undefined;
   }
 }
 

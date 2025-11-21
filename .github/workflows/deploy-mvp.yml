@@ -1,0 +1,290 @@
+name: Deploy MVP to AWS
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch: # Allow manual triggers
+    inputs:
+      environment:
+        description: 'Environment to deploy'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+          - dev
+          - production
+
+# Environment variables
+env:
+  NODE_VERSION: '18'
+  AWS_REGION: 'us-east-1' # Change to your preferred region
+
+# Permissions needed for GitHub OIDC
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  # ============================================
+  # JOB 1: Build and Test
+  # ============================================
+  build-and-test:
+    name: Build & Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run linter
+        run: npm run lint
+
+      - name: Run tests
+        run: npm test
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/test
+          JWT_SECRET: test-secret-key-for-ci
+
+      - name: Build Next.js app
+        run: npm run build
+        env:
+          # Build-time env vars
+          DATABASE_URL: postgresql://placeholder:placeholder@placeholder:5432/placeholder
+          JWT_SECRET: placeholder
+          NODE_ENV: production
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-output
+          path: |
+            .next/
+            .open-next/
+          retention-days: 1
+
+  # ============================================
+  # JOB 2: Deploy Infrastructure (CDK)
+  # ============================================
+  deploy-infrastructure:
+    name: Deploy Infrastructure
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    environment:
+      name: ${{ github.event.inputs.environment || 'dev' }}
+
+    outputs:
+      cloudfront-url: ${{ steps.cdk-outputs.outputs.cloudfront_url }}
+      db-secret-arn: ${{ steps.cdk-outputs.outputs.db_secret_arn }}
+      static-bucket: ${{ steps.cdk-outputs.outputs.static_bucket }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: infrastructure/package-lock.json
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          # OPTION 1: Using GitHub OIDC (Recommended)
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+          # OPTION 2: Using IAM User credentials (Fallback)
+          # Uncomment if not using OIDC
+          # aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          # aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - name: Install CDK dependencies
+        working-directory: infrastructure
+        run: npm ci
+
+      - name: CDK Bootstrap (first time only)
+        working-directory: infrastructure
+        run: |
+          npx cdk bootstrap aws://${{ secrets.AWS_ACCOUNT_ID }}/${{ env.AWS_REGION }} \
+            --cloudformation-execution-policies arn:aws:iam::aws:policy/AdministratorAccess \
+            || echo "Already bootstrapped"
+
+      - name: CDK Synth
+        working-directory: infrastructure
+        run: npx cdk synth -c environment=${{ github.event.inputs.environment || 'dev' }}
+
+      - name: CDK Deploy
+        working-directory: infrastructure
+        run: |
+          npx cdk deploy StreamSalesMvp-${{ github.event.inputs.environment || 'dev' }} \
+            --require-approval never \
+            --outputs-file outputs.json \
+            -c environment=${{ github.event.inputs.environment || 'dev' }} \
+            -c alarmEmail=${{ secrets.ALARM_EMAIL }}
+
+      - name: Extract CDK Outputs
+        id: cdk-outputs
+        working-directory: infrastructure
+        run: |
+          CLOUDFRONT_URL=$(jq -r '.["StreamSalesMvp-${{ github.event.inputs.environment || 'dev' }}"].CloudFrontURL' outputs.json)
+          DB_SECRET_ARN=$(jq -r '.["StreamSalesMvp-${{ github.event.inputs.environment || 'dev' }}"].DatabaseSecretArn' outputs.json)
+          STATIC_BUCKET=$(jq -r '.["StreamSalesMvp-${{ github.event.inputs.environment || 'dev' }}"].StaticBucketName' outputs.json)
+
+          echo "cloudfront_url=$CLOUDFRONT_URL" >> $GITHUB_OUTPUT
+          echo "db_secret_arn=$DB_SECRET_ARN" >> $GITHUB_OUTPUT
+          echo "static_bucket=$STATIC_BUCKET" >> $GITHUB_OUTPUT
+
+      - name: Upload CDK outputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: cdk-outputs
+          path: infrastructure/outputs.json
+          retention-days: 1
+
+  # ============================================
+  # JOB 3: Deploy Application (OpenNext)
+  # ============================================
+  deploy-application:
+    name: Deploy Application
+    runs-on: ubuntu-latest
+    needs: deploy-infrastructure
+    environment:
+      name: ${{ github.event.inputs.environment || 'dev' }}
+      url: ${{ needs.deploy-infrastructure.outputs.cloudfront-url }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-output
+
+      - name: Download CDK outputs
+        uses: actions/download-artifact@v4
+        with:
+          name: cdk-outputs
+          path: infrastructure
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Deploy with OpenNext
+        run: |
+          # OpenNext deployment script will go here
+          # This uploads Lambda functions and invalidates CloudFront cache
+          echo "Deploying application with OpenNext..."
+
+          # Get stack outputs
+          STATIC_BUCKET="${{ needs.deploy-infrastructure.outputs.static-bucket }}"
+
+          # Upload static assets to S3
+          aws s3 sync .open-next/assets s3://$STATIC_BUCKET/assets --delete
+
+          # Deploy Lambda functions
+          # (OpenNext CLI handles this automatically)
+          npx open-next deploy \
+            --region ${{ env.AWS_REGION }} \
+            --stack-name StreamSalesMvp-${{ github.event.inputs.environment || 'dev' }}
+
+      - name: Run Database Migrations
+        run: |
+          # Get database credentials from Secrets Manager
+          DB_SECRET_ARN="${{ needs.deploy-infrastructure.outputs.db-secret-arn }}"
+
+          # Retrieve secret value
+          SECRET_VALUE=$(aws secretsmanager get-secret-value \
+            --secret-id $DB_SECRET_ARN \
+            --query SecretString \
+            --output text)
+
+          # Extract connection details
+          DB_HOST=$(echo $SECRET_VALUE | jq -r '.host')
+          DB_PORT=$(echo $SECRET_VALUE | jq -r '.port // "5432"')
+          DB_USER=$(echo $SECRET_VALUE | jq -r '.username')
+          DB_PASS=$(echo $SECRET_VALUE | jq -r '.password')
+          DB_NAME=$(echo $SECRET_VALUE | jq -r '.dbname')
+
+          # Construct DATABASE_URL
+          export DATABASE_URL="postgresql://${DB_USER}:${DB_PASS}@${DB_HOST}:${DB_PORT}/${DB_NAME}?sslmode=require"
+
+          # Run Prisma migrations
+          npx prisma migrate deploy
+
+          # Generate Prisma Client
+          npx prisma generate
+
+      - name: Invalidate CloudFront Cache
+        run: |
+          DISTRIBUTION_ID=$(aws cloudformation describe-stacks \
+            --stack-name StreamSalesMvp-${{ github.event.inputs.environment || 'dev' }} \
+            --query 'Stacks[0].Outputs[?OutputKey==`DistributionId`].OutputValue' \
+            --output text)
+
+          aws cloudfront create-invalidation \
+            --distribution-id $DISTRIBUTION_ID \
+            --paths "/*"
+
+      - name: Deployment Summary
+        run: |
+          echo "✅ Deployment completed successfully!"
+          echo "🌐 Application URL: ${{ needs.deploy-infrastructure.outputs.cloudfront-url }}"
+          echo "📦 Environment: ${{ github.event.inputs.environment || 'dev' }}"
+          echo "🕐 Deployed at: $(date -u +"%Y-%m-%d %H:%M:%S UTC")"
+
+  # ============================================
+  # JOB 4: Smoke Tests (Post-deployment)
+  # ============================================
+  smoke-tests:
+    name: Smoke Tests
+    runs-on: ubuntu-latest
+    needs: deploy-application
+
+    steps:
+      - name: Test CloudFront endpoint
+        run: |
+          URL="${{ needs.deploy-infrastructure.outputs.cloudfront-url }}"
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" $URL)
+
+          if [ $STATUS -eq 200 ]; then
+            echo "✅ Smoke test passed: CloudFront is responding"
+          else
+            echo "❌ Smoke test failed: Got status $STATUS"
+            exit 1
+          fi
+
+      - name: Test API health endpoint
+        run: |
+          URL="${{ needs.deploy-infrastructure.outputs.cloudfront-url }}/api/health"
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" $URL)
+
+          if [ $STATUS -eq 200 ]; then
+            echo "✅ API health check passed"
+          else
+            echo "⚠️  API health check returned status $STATUS"
+          fi
