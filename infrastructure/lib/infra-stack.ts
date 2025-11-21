@@ -18,6 +18,9 @@ import * as cloudwatch from "aws-cdk-lib/aws-cloudwatch";
 import * as sns from "aws-cdk-lib/aws-sns";
 import * as cloudwatch_actions from "aws-cdk-lib/aws-cloudwatch-actions";
 import * as lambda from "aws-cdk-lib/aws-lambda";
+import * as ecs from "aws-cdk-lib/aws-ecs";
+import * as elbv2 from "aws-cdk-lib/aws-elasticloadbalancingv2";
+import * as ecr from "aws-cdk-lib/aws-ecr";
 
 interface InfraStackProps extends StackProps {
   /**
@@ -46,6 +49,9 @@ export class InfraStack extends Stack {
   public readonly dbCluster: rds.DatabaseCluster;
   public readonly dbSecret: secretsmanager.ISecret;
   public readonly imagesBucket: s3.Bucket;
+  public readonly ecsCluster: ecs.Cluster;
+  public readonly ecsService: ecs.FargateService;
+  public readonly alb: elbv2.ApplicationLoadBalancer;
   // public readonly openNextStack: OpenNextStack; // TODO: Fix OpenNext integration
 
   constructor(scope: Construct, id: string, props?: InfraStackProps) {
@@ -295,7 +301,256 @@ export class InfraStack extends Stack {
     });
 
     // ============================================
-    // 5. MIGRATIONS - Lambda for Prisma Migrations
+    // 5. COMPUTE - ECS Fargate with Application Load Balancer
+    // ============================================
+
+    // Security Group for ALB (public-facing)
+    const albSecurityGroup = new ec2.SecurityGroup(this, "ALBSecurityGroup", {
+      vpc: this.vpc,
+      description: "Security group for Application Load Balancer",
+      allowAllOutbound: true,
+    });
+
+    // Allow HTTP traffic from internet to ALB
+    albSecurityGroup.addIngressRule(
+      ec2.Peer.anyIpv4(),
+      ec2.Port.tcp(80),
+      "Allow HTTP traffic from internet"
+    );
+
+    // Allow HTTPS traffic from internet to ALB (for future SSL/TLS)
+    albSecurityGroup.addIngressRule(
+      ec2.Peer.anyIpv4(),
+      ec2.Port.tcp(443),
+      "Allow HTTPS traffic from internet"
+    );
+
+    // Security Group for ECS Tasks
+    const ecsSecurityGroup = new ec2.SecurityGroup(this, "ECSSecurityGroup", {
+      vpc: this.vpc,
+      description: "Security group for ECS Fargate tasks",
+      allowAllOutbound: true,
+    });
+
+    // Allow traffic from ALB to ECS tasks on port 3000 (Next.js default)
+    ecsSecurityGroup.addIngressRule(
+      albSecurityGroup,
+      ec2.Port.tcp(3000),
+      "Allow traffic from ALB to ECS tasks"
+    );
+
+    // Allow ECS tasks to connect to Aurora database
+    dbSecurityGroup.addIngressRule(
+      ecsSecurityGroup,
+      ec2.Port.tcp(5432),
+      "Allow ECS tasks to connect to Aurora cluster"
+    );
+
+    // ECS Cluster
+    this.ecsCluster = new ecs.Cluster(this, "ECSCluster", {
+      vpc: this.vpc,
+      clusterName: `stream-sales-${env}-cluster`,
+      containerInsights: isProd, // Enable Container Insights in production
+    });
+
+    // Reference existing ECR repository
+    const ecrRepository = ecr.Repository.fromRepositoryArn(
+      this,
+      "ECRRepository",
+      `arn:aws:ecr:us-east-1:336912793236:repository/stream-sales/nextjs`
+    );
+
+    // Task Definition
+    const taskDefinition = new ecs.FargateTaskDefinition(this, "TaskDefinition", {
+      memoryLimitMiB: 1024, // 1GB memory
+      cpu: 512, // 0.5 vCPU
+      family: `stream-sales-${env}-task`,
+    });
+
+    // Grant permissions to read secrets
+    this.dbSecret.grantRead(taskDefinition.taskRole);
+    jwtSecret.grantRead(taskDefinition.taskRole);
+    encryptionSecret.grantRead(taskDefinition.taskRole);
+
+    // Grant S3 permissions
+    this.imagesBucket.grantReadWrite(taskDefinition.taskRole);
+
+    // CloudWatch log group for ECS tasks
+    const logGroup = new logs.LogGroup(this, "ECSLogGroup", {
+      logGroupName: `/ecs/stream-sales-${env}`,
+      retention: isProd ? logs.RetentionDays.ONE_MONTH : logs.RetentionDays.ONE_WEEK,
+      removalPolicy: RemovalPolicy.DESTROY,
+    });
+
+    // Container Definition
+    const container = taskDefinition.addContainer("NextJsContainer", {
+      containerName: "nextjs-app",
+      image: ecs.ContainerImage.fromEcrRepository(ecrRepository, "dev"),
+      logging: ecs.LogDrivers.awsLogs({
+        streamPrefix: "nextjs",
+        logGroup: logGroup,
+      }),
+      environment: {
+        // Environment
+        NODE_ENV: "production",
+        AWS_REGION: this.region,
+
+        // Database - Secret ARNs (read at runtime)
+        AWS_SECRET_NAME: `stream-sales/${env}/database/credentials`,
+        DATABASE_HOST: this.dbCluster.clusterEndpoint.hostname,
+        DATABASE_PORT: this.dbCluster.clusterEndpoint.port.toString(),
+        DATABASE_NAME: "streams",
+
+        // JWT Configuration
+        JWT_EXPIRES_IN: "7d",
+
+        // Storage
+        IMAGES_BUCKET_NAME: this.imagesBucket.bucketName,
+        IMAGES_BUCKET_REGION: this.region,
+      },
+      secrets: {
+        // Secrets from AWS Secrets Manager
+        JWT_SECRET: ecs.Secret.fromSecretsManager(jwtSecret),
+        ENCRYPTION_KEY: ecs.Secret.fromSecretsManager(encryptionSecret),
+      },
+      healthCheck: {
+        command: [
+          "CMD-SHELL",
+          "curl -f http://localhost:3000/api/health || exit 1",
+        ],
+        interval: Duration.seconds(30),
+        timeout: Duration.seconds(5),
+        retries: 3,
+        startPeriod: Duration.seconds(60),
+      },
+    });
+
+    // Expose port 3000 for the Next.js application
+    container.addPortMappings({
+      containerPort: 3000,
+      protocol: ecs.Protocol.TCP,
+    });
+
+    // Application Load Balancer
+    this.alb = new elbv2.ApplicationLoadBalancer(this, "ALB", {
+      vpc: this.vpc,
+      internetFacing: true,
+      loadBalancerName: `stream-sales-${env}-alb`,
+      securityGroup: albSecurityGroup,
+      vpcSubnets: {
+        subnetType: ec2.SubnetType.PUBLIC, // ALB in public subnets
+      },
+      deletionProtection: props?.deletionProtection ?? isProd,
+    });
+
+    // Target Group
+    const targetGroup = new elbv2.ApplicationTargetGroup(this, "TargetGroup", {
+      vpc: this.vpc,
+      port: 3000,
+      protocol: elbv2.ApplicationProtocol.HTTP,
+      targetType: elbv2.TargetType.IP,
+      healthCheck: {
+        path: "/api/health",
+        interval: Duration.seconds(30),
+        timeout: Duration.seconds(5),
+        healthyThresholdCount: 2,
+        unhealthyThresholdCount: 3,
+        healthyHttpCodes: "200",
+      },
+      deregistrationDelay: Duration.seconds(30),
+    });
+
+    // HTTP Listener
+    this.alb.addListener("HTTPListener", {
+      port: 80,
+      protocol: elbv2.ApplicationProtocol.HTTP,
+      defaultAction: elbv2.ListenerAction.forward([targetGroup]),
+    });
+
+    // ECS Fargate Service
+    this.ecsService = new ecs.FargateService(this, "FargateService", {
+      cluster: this.ecsCluster,
+      taskDefinition: taskDefinition,
+      desiredCount: 1, // 1 task for dev environment
+      serviceName: `stream-sales-${env}-service`,
+      assignPublicIp: false, // Tasks in private subnets
+      vpcSubnets: {
+        subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS, // ECS tasks in private subnets
+      },
+      securityGroups: [ecsSecurityGroup],
+      healthCheckGracePeriod: Duration.seconds(60),
+      minHealthyPercent: isProd ? 50 : 0, // Allow rolling updates
+      maxHealthyPercent: 200,
+    });
+
+    // Attach service to target group
+    this.ecsService.attachToApplicationTargetGroup(targetGroup);
+
+    // Auto-scaling (optional, can be enabled later)
+    const scaling = this.ecsService.autoScaleTaskCount({
+      minCapacity: 1,
+      maxCapacity: isProd ? 10 : 2,
+    });
+
+    // Scale based on CPU utilization
+    scaling.scaleOnCpuUtilization("CpuScaling", {
+      targetUtilizationPercent: 70,
+      scaleInCooldown: Duration.seconds(60),
+      scaleOutCooldown: Duration.seconds(60),
+    });
+
+    // Scale based on memory utilization
+    scaling.scaleOnMemoryUtilization("MemoryScaling", {
+      targetUtilizationPercent: 80,
+      scaleInCooldown: Duration.seconds(60),
+      scaleOutCooldown: Duration.seconds(60),
+    });
+
+    // CloudWatch Alarms for ECS Service
+    if (props?.alarmEmail) {
+      const alarmTopic = new sns.Topic(this, "ECSAlarmTopic", {
+        displayName: `Stream Sales ${env} ECS Alarms`,
+      });
+
+      new sns.Subscription(this, "ECSAlarmEmailSubscription", {
+        topic: alarmTopic,
+        protocol: sns.SubscriptionProtocol.EMAIL,
+        endpoint: props.alarmEmail,
+      });
+
+      // Service CPU alarm
+      const ecsCpuAlarm = new cloudwatch.Alarm(this, "ECSCPUAlarm", {
+        metric: this.ecsService.metricCpuUtilization(),
+        threshold: 80,
+        evaluationPeriods: 2,
+        datapointsToAlarm: 2,
+        alarmDescription: "ECS service CPU utilization is too high",
+      });
+      ecsCpuAlarm.addAlarmAction(new cloudwatch_actions.SnsAction(alarmTopic));
+
+      // Service memory alarm
+      const ecsMemoryAlarm = new cloudwatch.Alarm(this, "ECSMemoryAlarm", {
+        metric: this.ecsService.metricMemoryUtilization(),
+        threshold: 80,
+        evaluationPeriods: 2,
+        datapointsToAlarm: 2,
+        alarmDescription: "ECS service memory utilization is too high",
+      });
+      ecsMemoryAlarm.addAlarmAction(new cloudwatch_actions.SnsAction(alarmTopic));
+
+      // ALB target health alarm
+      const albHealthAlarm = new cloudwatch.Alarm(this, "ALBHealthAlarm", {
+        metric: targetGroup.metricHealthyHostCount(),
+        threshold: 1,
+        comparisonOperator: cloudwatch.ComparisonOperator.LESS_THAN_THRESHOLD,
+        evaluationPeriods: 2,
+        alarmDescription: "No healthy targets in ALB target group",
+      });
+      albHealthAlarm.addAlarmAction(new cloudwatch_actions.SnsAction(alarmTopic));
+    }
+
+    // ============================================
+    // 6. MIGRATIONS - Lambda for Prisma Migrations
     // ============================================
 
     // Migration Lambda function
@@ -328,7 +583,7 @@ export class InfraStack extends Stack {
     this.dbSecret.grantRead(migrationLambda);
 
     // ============================================
-    // 6. COMPUTE - OpenNext (Lambda + CloudFront)
+    // 7. COMPUTE - OpenNext (Lambda + CloudFront)
     // ============================================
     // TODO: Fix OpenNext integration - temporarily commented out
     /*
@@ -373,7 +628,7 @@ export class InfraStack extends Stack {
     */
 
     // ============================================
-    // 6. PERMISSIONS - IAM Policies
+    // 8. PERMISSIONS - IAM Policies
     // ============================================
     // TODO: Uncomment when OpenNext is integrated
     /*
@@ -417,7 +672,7 @@ export class InfraStack extends Stack {
     */
 
     // ============================================
-    // 7. MONITORING & LOGGING
+    // 9. MONITORING & LOGGING
     // ============================================
     // TODO: Uncomment when OpenNext is integrated
     /*
@@ -447,7 +702,7 @@ export class InfraStack extends Stack {
     */
 
     // ============================================
-    // 8. TAGS - Resource Tagging
+    // 10. TAGS - Resource Tagging
     // ============================================
     Tags.of(this).add("Project", "StreamSales");
     Tags.of(this).add("Environment", env);
@@ -455,7 +710,7 @@ export class InfraStack extends Stack {
     Tags.of(this).add("CostCenter", "Engineering");
 
     // ============================================
-    // 9. OUTPUTS - Stack Outputs
+    // 11. OUTPUTS - Stack Outputs
     // ============================================
     // TODO: Uncomment when OpenNext is integrated
     /*
@@ -502,10 +757,47 @@ export class InfraStack extends Stack {
       exportName: `StreamSales-${env}-VPCId`,
     });
 
+    // ECS and ALB outputs
+    new CfnOutput(this, "ApplicationLoadBalancerURL", {
+      value: `http://${this.alb.loadBalancerDnsName}`,
+      description: "Application Load Balancer URL (HTTP)",
+      exportName: `StreamSales-${env}-ALBURL`,
+    });
+
+    new CfnOutput(this, "ALBDNSName", {
+      value: this.alb.loadBalancerDnsName,
+      description: "ALB DNS name for CNAME configuration",
+      exportName: `StreamSales-${env}-ALBDNSName`,
+    });
+
+    new CfnOutput(this, "ECSClusterName", {
+      value: this.ecsCluster.clusterName,
+      description: "ECS Cluster name",
+      exportName: `StreamSales-${env}-ECSClusterName`,
+    });
+
+    new CfnOutput(this, "ECSServiceName", {
+      value: this.ecsService.serviceName,
+      description: "ECS Service name",
+      exportName: `StreamSales-${env}-ECSServiceName`,
+    });
+
+    new CfnOutput(this, "ECSTaskDefinitionArn", {
+      value: this.ecsService.taskDefinition.taskDefinitionArn,
+      description: "ECS Task Definition ARN",
+      exportName: `StreamSales-${env}-TaskDefinitionArn`,
+    });
+
     // Database connection command for emergency access
     new CfnOutput(this, "DatabaseConnectCommand", {
       value: `aws secretsmanager get-secret-value --secret-id ${this.dbSecret.secretArn} --query SecretString --output text | jq -r '"postgresql://\\(.username):\\(.password)@${this.dbCluster.clusterEndpoint.hostname}:${this.dbCluster.clusterEndpoint.port}/streams"'`,
       description: "Command to get database connection string",
+    });
+
+    // ECS deployment command
+    new CfnOutput(this, "ECSDeployCommand", {
+      value: `aws ecs update-service --cluster ${this.ecsCluster.clusterName} --service ${this.ecsService.serviceName} --force-new-deployment --region ${this.region}`,
+      description: "Command to force new ECS deployment",
     });
   }
 }

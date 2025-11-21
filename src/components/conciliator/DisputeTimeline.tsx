@@ -53,7 +53,7 @@ export function DisputeTimeline({ dispute, messages = [] }: DisputeTimelineProps
       title: message.isInternal ? 'Internal Note' : 'Message',
       description: message.message,
       user: message.sender ? {
-        name: message.sender.name || message.sender.email || 'Unknown',
+        name: message.sender.name || 'Unknown',
         role: message.sender.role || 'user',
       } : undefined,
       isInternal: message.isInternal,
@@ -62,7 +62,7 @@ export function DisputeTimeline({ dispute, messages = [] }: DisputeTimelineProps
 
   // Asignada a conciliator
   if (dispute.assignedAt && dispute.conciliator) {
-    const conciliatorName = dispute.conciliator.name || dispute.conciliator.email || 'Unknown';
+    const conciliatorName = dispute.conciliator.name || 'Unknown';
     events.push({
       id: `assigned-${dispute.id}`,
       type: 'assigned',

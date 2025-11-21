@@ -80,7 +80,7 @@ export function getEffectiveStatusDescription(
       }
     }
     if (status === 'partial_refund') {
-      const translation = t('purchases.partialRefundNotice', { percentage: '50' });
+      const translation = t('purchases.partialRefundNotice');
       if (translation !== 'purchases.partialRefundNotice') {
         return translation;
       }
