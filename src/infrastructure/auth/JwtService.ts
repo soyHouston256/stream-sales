@@ -12,8 +12,17 @@ export interface JwtPayload {
 export class JwtService {
   private secret: string;
   private expiresIn: string | number;
+  private validated: boolean = false;
 
   constructor() {
+    // Allow instantiation during build, but validate on first use
+    this.secret = process.env.JWT_SECRET || '';
+    this.expiresIn = process.env.JWT_EXPIRES_IN || '7d';
+  }
+
+  private validateSecret(): void {
+    if (this.validated) return;
+
     // SECURITY: Fail fast if JWT_SECRET is not configured
     if (!process.env.JWT_SECRET) {
       throw new Error('JWT_SECRET environment variable is required for security');
@@ -25,10 +34,11 @@ export class JwtService {
     }
 
     this.secret = process.env.JWT_SECRET;
-    this.expiresIn = process.env.JWT_EXPIRES_IN || '7d';
+    this.validated = true;
   }
 
   sign(payload: JwtPayload): string {
+    this.validateSecret();
     return jwt.sign(payload, this.secret, {
       expiresIn: this.expiresIn,
       algorithm: 'HS256', // SECURITY: Explicitly specify algorithm to prevent algorithm confusion attacks
@@ -36,6 +46,7 @@ export class JwtService {
   }
 
   verify(token: string): JwtPayload {
+    this.validateSecret();
     try {
       // SECURITY: Check if token is blacklisted (logged out)
       if (TokenBlacklist.isBlacklisted(token)) {
