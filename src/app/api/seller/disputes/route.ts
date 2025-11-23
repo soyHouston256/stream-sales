@@ -4,6 +4,8 @@ import { prisma } from '@/infrastructure/database/prisma';
 import { PrismaDisputeRepository } from '@/infrastructure/repositories/PrismaDisputeRepository';
 import { ListDisputesUseCase } from '@/application/use-cases/ListDisputesUseCase';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/seller/disputes
  *

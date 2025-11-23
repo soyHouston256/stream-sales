@@ -10,8 +10,11 @@ import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { CheckCircle, AlertCircle, Loader2, TrendingUp, Users, DollarSign } from 'lucide-react';
 import { tokenManager } from '@/lib/utils/tokenManager';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { LanguageSelector } from '@/components/LanguageSelector';
 
 export default function AffiliateApplicationPage() {
+  const { t } = useLanguage();
   const router = useRouter();
   const { user, isLoading: authLoading } = useAuth();
   const [applicationNote, setApplicationNote] = useState('');
@@ -79,12 +82,12 @@ export default function AffiliateApplicationPage() {
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-purple-50 to-blue-50 p-4">
         <Card className="max-w-md w-full">
           <CardHeader>
-            <CardTitle>Login Required</CardTitle>
-            <CardDescription>You must be logged in to apply for the affiliate program</CardDescription>
+            <CardTitle>{t('affiliate.application.loginRequired')}</CardTitle>
+            <CardDescription>{t('affiliate.application.loginRequiredMessage')}</CardDescription>
           </CardHeader>
           <CardContent>
             <Button onClick={() => router.push('/login')} className="w-full">
-              Go to Login
+              {t('affiliate.application.goToLogin')}
             </Button>
           </CardContent>
         </Card>
@@ -99,18 +102,17 @@ export default function AffiliateApplicationPage() {
           <CardHeader>
             <div className="flex items-center gap-2 text-green-600">
               <CheckCircle className="h-6 w-6" />
-              <CardTitle>Application Submitted!</CardTitle>
+              <CardTitle>{t('affiliate.application.successTitle')}</CardTitle>
             </div>
-            <CardDescription>Your affiliate application has been received</CardDescription>
+            <CardDescription>{t('affiliate.application.successSubtitle')}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              Thank you for applying to our affiliate program! Your application is now under review.
-              We'll notify you once an admin has reviewed your application.
+              {t('affiliate.application.successMessage')}
             </p>
             <Alert>
               <AlertDescription>
-                Redirecting to dashboard in a few seconds...
+                {t('affiliate.application.redirecting')}
               </AlertDescription>
             </Alert>
           </CardContent>
@@ -121,14 +123,19 @@ export default function AffiliateApplicationPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-purple-50 to-blue-50 py-12 px-4">
+      {/* Language Selector - Fixed position */}
+      <div className="fixed top-4 right-4 z-50">
+        <LanguageSelector />
+      </div>
+
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-2">
-            Join Our Affiliate Program
+            {t('affiliate.application.title')}
           </h1>
           <p className="text-lg text-gray-600">
-            Earn commissions by referring new users to our platform
+            {t('affiliate.application.subtitle')}
           </p>
         </div>
 
@@ -137,11 +144,11 @@ export default function AffiliateApplicationPage() {
           <Card>
             <CardHeader>
               <TrendingUp className="h-8 w-8 text-purple-600 mb-2" />
-              <CardTitle className="text-lg">Earn Commissions</CardTitle>
+              <CardTitle className="text-lg">{t('affiliate.application.benefit1Title')}</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">
-                Get paid for every user you refer who registers on our platform
+                {t('affiliate.application.benefit1Description')}
               </p>
             </CardContent>
           </Card>
@@ -149,11 +156,11 @@ export default function AffiliateApplicationPage() {
           <Card>
             <CardHeader>
               <Users className="h-8 w-8 text-blue-600 mb-2" />
-              <CardTitle className="text-lg">Grow Your Network</CardTitle>
+              <CardTitle className="text-lg">{t('affiliate.application.benefit2Title')}</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">
-                Build a network of referrals and earn passive income
+                {t('affiliate.application.benefit2Description')}
               </p>
             </CardContent>
           </Card>
@@ -161,11 +168,11 @@ export default function AffiliateApplicationPage() {
           <Card>
             <CardHeader>
               <DollarSign className="h-8 w-8 text-green-600 mb-2" />
-              <CardTitle className="text-lg">Track Performance</CardTitle>
+              <CardTitle className="text-lg">{t('affiliate.application.benefit3Title')}</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">
-                Access detailed analytics and track your earnings in real-time
+                {t('affiliate.application.benefit3Description')}
               </p>
             </CardContent>
           </Card>
@@ -174,18 +181,18 @@ export default function AffiliateApplicationPage() {
         {/* Application Form */}
         <Card>
           <CardHeader>
-            <CardTitle>Application Form</CardTitle>
+            <CardTitle>{t('affiliate.application.formTitle')}</CardTitle>
             <CardDescription>
-              Tell us why you want to become an affiliate partner
+              {t('affiliate.application.formSubtitle')}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="note">Why do you want to join our affiliate program?</Label>
+                <Label htmlFor="note">{t('affiliate.application.questionLabel')}</Label>
                 <Textarea
                   id="note"
-                  placeholder="Tell us about your audience, marketing channels, or why you're interested in becoming an affiliate..."
+                  placeholder={t('affiliate.application.questionPlaceholder')}
                   value={applicationNote}
                   onChange={(e) => setApplicationNote(e.target.value)}
                   rows={6}
@@ -194,7 +201,7 @@ export default function AffiliateApplicationPage() {
                   required
                 />
                 <p className="text-xs text-muted-foreground">
-                  {applicationNote.length}/500 characters
+                  {t('affiliate.application.characterCount').replace('{count}', applicationNote.length.toString())}
                 </p>
               </div>
 
@@ -212,16 +219,16 @@ export default function AffiliateApplicationPage() {
                   onClick={() => router.back()}
                   disabled={isSubmitting}
                 >
-                  Cancel
+                  {t('affiliate.application.cancel')}
                 </Button>
                 <Button type="submit" disabled={isSubmitting} className="flex-1">
                   {isSubmitting ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Submitting...
+                      {t('affiliate.application.submitting')}
                     </>
                   ) : (
-                    'Submit Application'
+                    t('affiliate.application.submitApplication')
                   )}
                 </Button>
               </div>
@@ -232,8 +239,7 @@ export default function AffiliateApplicationPage() {
         {/* Info Box */}
         <Alert className="mt-6">
           <AlertDescription>
-            <strong>Note:</strong> Your application will be reviewed by our admin team.
-            You'll be notified once your application has been approved or if additional information is needed.
+            <strong>{t('affiliate.application.noteTitle')}</strong> {t('affiliate.application.noteDescription')}
           </AlertDescription>
         </Alert>
       </div>

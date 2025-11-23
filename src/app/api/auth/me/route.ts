@@ -6,6 +6,8 @@ import { UserNotFoundException } from '@/domain/exceptions/DomainException';
 import { SecurityLogger, SecurityEventType } from '@/infrastructure/security/SecurityLogger';
 import { RateLimiter } from '@/infrastructure/security/RateLimiter';
 
+export const dynamic = 'force-dynamic';
+
 const userRepository = new PrismaUserRepository();
 const getUserByIdUseCase = new GetUserByIdUseCase(userRepository);
 const jwtService = new JwtService();

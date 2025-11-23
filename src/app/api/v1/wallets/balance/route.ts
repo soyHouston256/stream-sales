@@ -3,6 +3,8 @@ import { prisma } from '../../../../../infrastructure/database/prisma';
 import { PrismaWalletRepository } from '../../../../../infrastructure/repositories/PrismaWalletRepository';
 import { verifyJWT } from '../../../../../infrastructure/auth/jwt';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/v1/wallets/balance
  *

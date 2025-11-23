@@ -6,6 +6,8 @@ import { TransferMoneyUseCase } from '../../../../../application/use-cases/Trans
 import { InsufficientBalanceException } from '../../../../../domain/exceptions/InsufficientBalanceException';
 import { verifyJWT } from '../../../../../infrastructure/auth/jwt';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * POST /api/v1/wallets/transfer
  *

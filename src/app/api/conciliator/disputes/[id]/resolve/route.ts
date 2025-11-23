@@ -6,6 +6,8 @@ import { PrismaWalletRepository } from '@/infrastructure/repositories/PrismaWall
 import { PrismaPurchaseRepository } from '@/infrastructure/repositories/PrismaPurchaseRepository';
 import { ResolveDisputeUseCase } from '@/application/use-cases/ResolveDisputeUseCase';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * POST /api/conciliator/disputes/[id]/resolve
  *

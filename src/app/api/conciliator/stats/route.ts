@@ -3,6 +3,8 @@ import { verifyJWT } from '@/infrastructure/auth/jwt';
 import { prisma } from '@/infrastructure/database/prisma';
 import { PrismaDisputeRepository } from '@/infrastructure/repositories/PrismaDisputeRepository';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/conciliator/stats
  *

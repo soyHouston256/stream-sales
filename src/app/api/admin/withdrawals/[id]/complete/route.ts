@@ -3,6 +3,8 @@ import { prisma } from '@/infrastructure/database/prisma';
 import { verifyJWT } from '@/infrastructure/auth/jwt';
 import { Decimal } from '@prisma/client/runtime/library';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * POST /api/admin/withdrawals/[id]/complete
  *

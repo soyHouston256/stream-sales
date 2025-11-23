@@ -5,6 +5,7 @@ import {
   DollarSign,
   ArrowLeftRight,
   Wallet,
+  UserCheck,
 } from 'lucide-react';
 import type { NavItem } from '../Sidebar';
 
@@ -20,6 +21,12 @@ export const getAdminNavItems = (t: (key: string) => string): NavItem[] => [
     href: '/dashboard/admin/users',
     icon: Users,
     description: t('navigation.userManagement'),
+  },
+  {
+    title: t('navigation.affiliates'),
+    href: '/dashboard/admin/affiliates',
+    icon: UserCheck,
+    description: t('navigation.affiliateManagement'),
   },
   {
     title: t('navigation.recharges'),

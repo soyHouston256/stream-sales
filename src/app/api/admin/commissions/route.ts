@@ -6,6 +6,8 @@ import { PrismaCommissionConfigRepository } from '@/infrastructure/repositories/
 import { GetActiveCommissionConfigUseCase } from '@/application/use-cases/GetActiveCommissionConfigUseCase';
 import { UpdateCommissionConfigUseCase } from '@/application/use-cases/UpdateCommissionConfigUseCase';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/admin/commissions
  *

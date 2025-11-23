@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/infrastructure/database/prisma';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/marketplace
  *

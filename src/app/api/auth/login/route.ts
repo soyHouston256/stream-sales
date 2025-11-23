@@ -7,6 +7,8 @@ import { RateLimiter } from '@/infrastructure/security/RateLimiter';
 import { SecurityLogger, SecurityEventType } from '@/infrastructure/security/SecurityLogger';
 import { InputSanitizer } from '@/infrastructure/security/InputSanitizer';
 
+export const dynamic = 'force-dynamic';
+
 const userRepository = new PrismaUserRepository();
 const loginUserUseCase = new LoginUserUseCase(userRepository);
 const jwtService = new JwtService();

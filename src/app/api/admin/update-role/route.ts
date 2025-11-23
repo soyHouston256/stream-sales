@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/infrastructure/database/prisma';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * TEMPORARY ENDPOINT - DELETE AFTER USE
  * Updates user role in the database

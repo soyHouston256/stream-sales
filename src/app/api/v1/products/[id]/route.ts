@@ -6,6 +6,8 @@ import { UpdateProductUseCase } from '../../../../../application/use-cases/Updat
 import { DeleteProductUseCase } from '../../../../../application/use-cases/DeleteProductUseCase';
 import { verifyJWT } from '../../../../../infrastructure/auth/jwt';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * PUT /api/v1/products/:id
  *
