@@ -4,6 +4,8 @@ import { verifyJWT } from '@/infrastructure/auth/jwt';
 import { Decimal } from '@prisma/client/runtime/library';
 import crypto from 'crypto';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * PUT /api/admin/recharges/:id/approve
  *

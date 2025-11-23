@@ -81,13 +81,19 @@ export function isShareSupported(): boolean {
  * @returns String with variables replaced
  */
 export function replaceTemplateVariables(
-  template: string,
+  template: string | undefined,
   variables: { code: string; link: string; name: string }
 ): string {
+  if (!template) {
+    return '';
+  }
+
   return template
     .replace(/{code}/g, variables.code)
     .replace(/{link}/g, variables.link)
-    .replace(/{name}/g, variables.name);
+    .replace(/{name}/g, variables.name)
+    .replace(/\{\{referralLink\}\}/g, variables.link)
+    .replace(/\{\{referralCode\}\}/g, variables.code);
 }
 
 /**

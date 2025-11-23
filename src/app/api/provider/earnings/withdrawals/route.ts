@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/infrastructure/database/prisma';
 import { verifyJWT } from '@/infrastructure/auth/jwt';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/provider/earnings/withdrawals
  *

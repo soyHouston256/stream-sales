@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { verifyJWT } from '@/infrastructure/auth/jwt';
 import { prisma } from '@/infrastructure/database/prisma';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/conciliator/history
  *

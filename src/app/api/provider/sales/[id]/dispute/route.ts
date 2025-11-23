@@ -5,6 +5,8 @@ import { PrismaDisputeRepository } from '@/infrastructure/repositories/PrismaDis
 import { PrismaPurchaseRepository } from '@/infrastructure/repositories/PrismaPurchaseRepository';
 import { CreateDisputeUseCase } from '@/application/use-cases/CreateDisputeUseCase';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * POST /api/provider/sales/[id]/dispute
  *

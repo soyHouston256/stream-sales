@@ -3,6 +3,8 @@ import { prisma } from '@/infrastructure/database/prisma';
 import { verifyJWT } from '@/infrastructure/auth/jwt';
 import { computeEffectiveFields } from '@/lib/utils/purchase-helpers';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/seller/purchases/:id
  *

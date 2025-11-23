@@ -17,7 +17,8 @@ async function fetchMarketingTemplates(): Promise<MarketingTemplate[]> {
     throw new Error('Failed to fetch marketing templates');
   }
 
-  return response.json();
+  const data = await response.json();
+  return data.templates;
 }
 
 async function fetchMarketingStats(): Promise<MarketingStats> {
@@ -32,7 +33,8 @@ async function fetchMarketingStats(): Promise<MarketingStats> {
     throw new Error('Failed to fetch marketing stats');
   }
 
-  return response.json();
+  const data = await response.json();
+  return data.stats;
 }
 
 export function useMarketingTemplates() {

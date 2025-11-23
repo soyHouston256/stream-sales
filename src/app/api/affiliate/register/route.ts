@@ -3,6 +3,8 @@ import { z } from 'zod';
 import { prisma } from '@/infrastructure/database/prisma';
 import { verifyJWT } from '@/infrastructure/auth/jwt';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * POST /api/affiliate/register
  *

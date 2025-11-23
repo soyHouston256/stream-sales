@@ -4,6 +4,8 @@ import { PrismaUserRepository } from '@/infrastructure/repositories/PrismaUserRe
 import { JwtService } from '@/infrastructure/auth/JwtService';
 import { InvalidCredentialsException } from '@/domain/exceptions/DomainException';
 
+export const dynamic = 'force-dynamic';
+
 const userRepository = new PrismaUserRepository();
 const loginUserUseCase = new LoginUserUseCase(userRepository);
 const jwtService = new JwtService();
