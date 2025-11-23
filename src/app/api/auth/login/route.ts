@@ -16,9 +16,14 @@ const jwtService = new JwtService();
 export async function POST(request: NextRequest) {
   const clientIp = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
 
+  // Declare variables outside try block so they're accessible in catch
+  let email: string | undefined;
+  let body: any;
+
   try {
-    const body = await request.json();
-    const { email, password } = body;
+    body = await request.json();
+    email = body.email;
+    const password = body.password;
 
     if (!email || !password) {
       return NextResponse.json(
@@ -131,7 +136,7 @@ export async function POST(request: NextRequest) {
       SecurityLogger.log(
         SecurityEventType.LOGIN_FAILURE,
         'Invalid login credentials',
-        { identifier: clientIp, metadata: { email: body.email } }
+        { identifier: clientIp, metadata: { email: email || 'unknown' } }
       );
 
       // SECURITY: Generic error message to prevent user enumeration
@@ -146,7 +151,7 @@ export async function POST(request: NextRequest) {
       SecurityLogger.log(
         SecurityEventType.LOGIN_FAILURE,
         `Login error: ${error.message}`,
-        { identifier: clientIp, metadata: { email: body?.email } }
+        { identifier: clientIp, metadata: { email: email || 'unknown' } }
       );
 
       return NextResponse.json(
