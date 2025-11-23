@@ -1,8 +1,4 @@
 import { PrismaClient } from '@prisma/client';
-import {
-  SecretsManagerClient,
-  GetSecretValueCommand
-} from '@aws-sdk/client-secrets-manager';
 
 /**
  * Global type augmentation for Prisma singleton in development
@@ -21,116 +17,29 @@ interface DatabaseConfig {
 }
 
 /**
- * AWS Secrets Manager secret structure for database credentials
- * Expected format in AWS Secrets Manager:
- * {
- *   "host": "your-rds-endpoint.region.rds.amazonaws.com",
- *   "port": "5432",
- *   "username": "dbuser",
- *   "password": "dbpassword",
- *   "dbname": "streams",
- *   "engine": "postgres"
- * }
- */
-interface DatabaseSecret {
-  host: string;
-  port: string | number;
-  username: string;
-  password: string;
-  dbname: string;
-  engine: string;
-}
-
-/**
- * Retrieves database credentials from AWS Secrets Manager
- *
- * @param secretName - The name/ARN of the secret in AWS Secrets Manager
- * @param region - AWS region (defaults to AWS_REGION env var or us-east-1)
- * @returns Database configuration with connection URL
- * @throws Error if secret retrieval fails or secret is malformed
- */
-async function getDatabaseConfigFromSecretsManager(
-  secretName: string,
-  region?: string
-): Promise<DatabaseConfig> {
-  const client = new SecretsManagerClient({
-    region: region || process.env.AWS_REGION || 'us-east-1',
-  });
-
-  try {
-    console.log(`[Prisma] Retrieving database credentials from AWS Secrets Manager: ${secretName}`);
-
-    const response = await client.send(
-      new GetSecretValueCommand({
-        SecretId: secretName,
-      })
-    );
-
-    if (!response.SecretString) {
-      throw new Error('Secret value is empty or binary (expected JSON string)');
-    }
-
-    const secret: DatabaseSecret = JSON.parse(response.SecretString);
-
-    // Validate required fields
-    const requiredFields = ['host', 'port', 'username', 'password', 'dbname'];
-    const missingFields = requiredFields.filter(field => !(field in secret));
-
-    if (missingFields.length > 0) {
-      throw new Error(`Secret is missing required fields: ${missingFields.join(', ')}`);
-    }
-
-    // Construct PostgreSQL connection URL
-    const dbUrl = `postgresql://${secret.username}:${encodeURIComponent(secret.password)}@${secret.host}:${secret.port}/${secret.dbname}?schema=public&connection_limit=5&pool_timeout=20`;
-
-    console.log(`[Prisma] Successfully retrieved database credentials for ${secret.host}:${secret.port}/${secret.dbname}`);
-
-    return {
-      url: dbUrl,
-      // Direct URL for migrations (bypasses connection pooling)
-      directUrl: `postgresql://${secret.username}:${encodeURIComponent(secret.password)}@${secret.host}:${secret.port}/${secret.dbname}?schema=public`,
-    };
-  } catch (error) {
-    console.error('[Prisma] Failed to retrieve database credentials from AWS Secrets Manager:', error);
-    throw new Error(`AWS Secrets Manager error: ${error instanceof Error ? error.message : 'Unknown error'}`);
-  }
-}
-
-/**
- * Retrieves database configuration based on environment
- *
- * Development: Uses DATABASE_URL from .env file
- * Production: Uses AWS Secrets Manager
+ * Retrieves database configuration from environment variables
  *
  * Environment variables:
- * - DATABASE_URL: Direct database URL (development)
- * - AWS_SECRET_NAME: Secret name in AWS Secrets Manager (production)
- * - AWS_REGION: AWS region for Secrets Manager (optional, defaults to us-east-1)
+ * - DATABASE_URL: Database connection URL (required)
+ * - POSTGRES_URL: Alternative database URL (used by Vercel)
  * - NODE_ENV: Environment indicator (development/production)
  *
  * @returns Database configuration with connection URL
  */
 async function getDatabaseConfig(): Promise<DatabaseConfig> {
-  const isProduction = process.env.NODE_ENV === 'production';
-  const secretName = process.env.AWS_SECRET_NAME;
-
-  // Production: Use AWS Secrets Manager
-  if (isProduction && secretName) {
-    console.log('[Prisma] Production environment detected, using AWS Secrets Manager');
-    return getDatabaseConfigFromSecretsManager(secretName, process.env.AWS_REGION);
-  }
-
-  // Development: Use DATABASE_URL from .env
-  const databaseUrl = process.env.DATABASE_URL;
+  // Use DATABASE_URL or POSTGRES_URL from environment
+  // Vercel automatically sets POSTGRES_URL when using Vercel Postgres
+  const databaseUrl = process.env.DATABASE_URL || process.env.POSTGRES_URL;
 
   if (!databaseUrl) {
     throw new Error(
       'Database configuration missing. ' +
-      'Set DATABASE_URL for development or AWS_SECRET_NAME for production.'
+      'Set DATABASE_URL or POSTGRES_URL environment variable.'
     );
   }
 
-  console.log('[Prisma] Development environment detected, using DATABASE_URL from .env');
+  const env = process.env.NODE_ENV || 'development';
+  console.log(`[Prisma] ${env} environment detected, using DATABASE_URL from environment`);
 
   return {
     url: databaseUrl,
