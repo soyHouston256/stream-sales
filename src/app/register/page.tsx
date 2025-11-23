@@ -1,5 +1,6 @@
 'use client';
 
+import { Suspense } from 'react';
 import { RegisterForm } from '@/components/auth/RegisterForm';
 import { LanguageSelector } from '@/components/LanguageSelector';
 
@@ -11,7 +12,9 @@ export default function RegisterPage() {
       <div className="absolute top-4 right-4">
         <LanguageSelector />
       </div>
-      <RegisterForm />
+      <Suspense fallback={<div>Loading...</div>}>
+        <RegisterForm />
+      </Suspense>
     </div>
   );
 }
