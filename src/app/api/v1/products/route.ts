@@ -6,6 +6,8 @@ import { CreateProductUseCase } from '../../../../application/use-cases/CreatePr
 import { ListProductsUseCase } from '../../../../application/use-cases/ListProductsUseCase';
 import { verifyJWT } from '../../../../infrastructure/auth/jwt';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * POST /api/v1/products
  *

@@ -10,6 +10,8 @@ import { PurchaseProductUseCase } from '@/application/use-cases/PurchaseProductU
 import { verifyJWT } from '@/infrastructure/auth/jwt';
 import { computeEffectiveFields } from '@/lib/utils/purchase-helpers';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/seller/purchases
  *

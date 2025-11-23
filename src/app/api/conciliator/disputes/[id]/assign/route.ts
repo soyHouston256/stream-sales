@@ -4,6 +4,8 @@ import { prisma } from '@/infrastructure/database/prisma';
 import { PrismaDisputeRepository } from '@/infrastructure/repositories/PrismaDisputeRepository';
 import { AssignDisputeUseCase } from '@/application/use-cases/AssignDisputeUseCase';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * POST /api/conciliator/disputes/[id]/assign
  *

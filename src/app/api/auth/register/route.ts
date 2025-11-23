@@ -6,6 +6,8 @@ import { prisma } from '@/infrastructure/database/prisma';
 import { JwtService } from '@/infrastructure/auth/JwtService';
 import { UserAlreadyExistsException } from '@/domain/exceptions/DomainException';
 
+export const dynamic = 'force-dynamic';
+
 const userRepository = new PrismaUserRepository();
 const walletRepository = new PrismaWalletRepository(prisma);
 const registerUserUseCase = new RegisterUserUseCase(userRepository, walletRepository);
@@ -14,7 +16,7 @@ const jwtService = new JwtService();
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { email, password, name, role } = body;
+    const { email, password, name, role, referralCode } = body;
 
     if (!email || !password) {
       return NextResponse.json(
@@ -29,6 +31,48 @@ export async function POST(request: NextRequest) {
       name,
       role, // Pass the role to the use case
     });
+
+    // Handle referral code if provided
+    if (referralCode) {
+      try {
+        // Find the affiliate by their referral code
+        const affiliateProfile = await prisma.affiliateProfile.findUnique({
+          where: { referralCode: referralCode.trim().toUpperCase() },
+        });
+
+        if (affiliateProfile) {
+          // Create affiliation record
+          await prisma.affiliation.create({
+            data: {
+              affiliateId: affiliateProfile.userId,
+              referredUserId: result.user.id,
+              referralCode: referralCode.trim().toUpperCase(),
+              status: 'active',
+              commissionPaid: false,
+              commissionAmount: 10.00, // Default registration commission
+            },
+          });
+
+          // Update affiliate profile stats
+          await prisma.affiliateProfile.update({
+            where: { id: affiliateProfile.id },
+            data: {
+              totalReferrals: { increment: 1 },
+              activeReferrals: { increment: 1 },
+              totalEarnings: { increment: 10.00 }, // Add registration commission
+              pendingBalance: { increment: 10.00 },
+            },
+          });
+
+          console.log(`✅ Affiliation created: User ${result.user.id} referred by ${affiliateProfile.userId}`);
+        } else {
+          console.warn(`⚠️ Invalid referral code: ${referralCode}`);
+        }
+      } catch (error) {
+        // Log but don't fail registration if referral processing fails
+        console.error('Error processing referral code:', error);
+      }
+    }
 
     const token = jwtService.sign({
       userId: result.user.id,

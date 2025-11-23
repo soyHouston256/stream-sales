@@ -4,6 +4,8 @@ import { PrismaUserRepository } from '@/infrastructure/repositories/PrismaUserRe
 import { JwtService } from '@/infrastructure/auth/JwtService';
 import { UserNotFoundException } from '@/domain/exceptions/DomainException';
 
+export const dynamic = 'force-dynamic';
+
 const userRepository = new PrismaUserRepository();
 const getUserByIdUseCase = new GetUserByIdUseCase(userRepository);
 const jwtService = new JwtService();

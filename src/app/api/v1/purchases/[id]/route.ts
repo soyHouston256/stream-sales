@@ -4,6 +4,8 @@ import { PrismaPurchaseRepository } from '../../../../../infrastructure/reposito
 import { GetPurchaseByIdUseCase } from '../../../../../application/use-cases/GetPurchaseByIdUseCase';
 import { verifyJWT } from '../../../../../infrastructure/auth/jwt';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/v1/purchases/:id
  *

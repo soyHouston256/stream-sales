@@ -5,6 +5,8 @@ import { PrismaDisputeMessageRepository } from '@/infrastructure/repositories/Pr
 import { PrismaDisputeRepository } from '@/infrastructure/repositories/PrismaDisputeRepository';
 import { AddDisputeMessageUseCase } from '@/application/use-cases/AddDisputeMessageUseCase';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/seller/disputes/[id]/messages
  *

@@ -10,6 +10,8 @@ import { PurchaseProductUseCase } from '../../../../application/use-cases/Purcha
 import { ListMyPurchasesUseCase } from '../../../../application/use-cases/ListMyPurchasesUseCase';
 import { verifyJWT } from '../../../../infrastructure/auth/jwt';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * POST /api/v1/purchases
  *
