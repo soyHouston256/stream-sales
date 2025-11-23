@@ -6,7 +6,7 @@ describe('User Entity', () => {
   describe('create', () => {
     it('should create a new user', async () => {
       const email = Email.create('test@example.com');
-      const password = await Password.create('password123');
+      const password = await Password.create('TestPass123!');
 
       const user = User.create({
         email,
@@ -26,7 +26,7 @@ describe('User Entity', () => {
 
     it('should create user without name', async () => {
       const email = Email.create('test@example.com');
-      const password = await Password.create('password123');
+      const password = await Password.create('TestPass123!');
 
       const user = User.create({
         email,
@@ -41,7 +41,7 @@ describe('User Entity', () => {
   describe('fromPersistence', () => {
     it('should create user from persistence data', async () => {
       const email = Email.create('test@example.com');
-      const password = await Password.create('password123');
+      const password = await Password.create('TestPass123!');
       const createdAt = new Date('2024-01-01');
       const updatedAt = new Date('2024-01-02');
 
@@ -67,7 +67,7 @@ describe('User Entity', () => {
   describe('updateName', () => {
     it('should update user name', async () => {
       const email = Email.create('test@example.com');
-      const password = await Password.create('password123');
+      const password = await Password.create('TestPass123!');
 
       const user = User.create({
         email,
@@ -91,7 +91,7 @@ describe('User Entity', () => {
   describe('verifyPassword', () => {
     it('should verify correct password', async () => {
       const email = Email.create('test@example.com');
-      const password = await Password.create('password123');
+      const password = await Password.create('TestPass123!');
 
       const user = User.create({
         email,
@@ -99,13 +99,13 @@ describe('User Entity', () => {
         role: 'user',
       });
 
-      const isValid = await user.verifyPassword('password123');
+      const isValid = await user.verifyPassword('TestPass123!');
       expect(isValid).toBe(true);
     });
 
     it('should reject incorrect password', async () => {
       const email = Email.create('test@example.com');
-      const password = await Password.create('password123');
+      const password = await Password.create('TestPass123!');
 
       const user = User.create({
         email,
@@ -121,7 +121,7 @@ describe('User Entity', () => {
   describe('toJSON', () => {
     it('should convert user to JSON without password', async () => {
       const email = Email.create('test@example.com');
-      const password = await Password.create('password123');
+      const password = await Password.create('TestPass123!');
 
       const user = User.create({
         email,

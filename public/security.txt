@@ -1,0 +1,26 @@
+Contact: mailto:security@stream-sales.example.com
+Expires: 2026-12-31T23:59:59.000Z
+Preferred-Languages: en
+Canonical: https://stream-sales.example.com/.well-known/security.txt
+
+# Security Policy
+
+We take security seriously. If you discover a security vulnerability, please report it to us.
+
+## Reporting a Vulnerability
+
+Please send vulnerability reports to security@stream-sales.example.com
+
+Include the following information:
+- Description of the vulnerability
+- Steps to reproduce
+- Potential impact
+- Any suggested fixes
+
+## Our Commitment
+
+- We will acknowledge your report within 48 hours
+- We will provide regular updates on our progress
+- We will credit you for the discovery (unless you prefer to remain anonymous)
+
+Thank you for helping keep Stream Sales secure!

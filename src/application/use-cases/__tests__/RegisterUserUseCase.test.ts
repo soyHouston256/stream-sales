@@ -68,7 +68,7 @@ describe('RegisterUserUseCase', () => {
   it('should register a new user successfully', async () => {
     const result = await registerUserUseCase.execute({
       email: 'test@example.com',
-      password: 'password123',
+      password: 'TestPass123!',
       name: 'Test User',
     });
 
@@ -96,7 +96,7 @@ describe('RegisterUserUseCase', () => {
   it('should register user without name', async () => {
     const result = await registerUserUseCase.execute({
       email: 'test@example.com',
-      password: 'password123',
+      password: 'TestPass123!',
     });
 
     expect(result.user).toBeDefined();
@@ -107,13 +107,13 @@ describe('RegisterUserUseCase', () => {
   it('should throw error if user already exists', async () => {
     await registerUserUseCase.execute({
       email: 'test@example.com',
-      password: 'password123',
+      password: 'TestPass123!',
     });
 
     await expect(
       registerUserUseCase.execute({
         email: 'test@example.com',
-        password: 'password456',
+        password: 'ValidPass456!',
       })
     ).rejects.toThrow(UserAlreadyExistsException);
   });
@@ -122,7 +122,7 @@ describe('RegisterUserUseCase', () => {
     await expect(
       registerUserUseCase.execute({
         email: 'invalid-email',
-        password: 'password123',
+        password: 'TestPass123!',
       })
     ).rejects.toThrow('Invalid email format');
   });
@@ -131,15 +131,15 @@ describe('RegisterUserUseCase', () => {
     await expect(
       registerUserUseCase.execute({
         email: 'test@example.com',
-        password: '12345',
+        password: 'Short1!',
       })
-    ).rejects.toThrow('Password must be at least 6 characters long');
+    ).rejects.toThrow('Password must be at least 8 characters long');
   });
 
   it('should normalize email to lowercase', async () => {
     const result = await registerUserUseCase.execute({
       email: 'TEST@EXAMPLE.COM',
-      password: 'password123',
+      password: 'TestPass123!',
     });
 
     expect(result.user.email).toBe('test@example.com');

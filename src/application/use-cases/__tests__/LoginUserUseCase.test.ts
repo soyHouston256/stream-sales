@@ -72,14 +72,14 @@ describe('LoginUserUseCase', () => {
     // First register a user
     await registerUserUseCase.execute({
       email: 'test@example.com',
-      password: 'password123',
+      password: 'TestPass123!',
       name: 'Test User',
     });
 
     // Then try to login
     const result = await loginUserUseCase.execute({
       email: 'test@example.com',
-      password: 'password123',
+      password: 'TestPass123!',
     });
 
     expect(result.user).toBeDefined();
@@ -91,7 +91,7 @@ describe('LoginUserUseCase', () => {
     await expect(
       loginUserUseCase.execute({
         email: 'nonexistent@example.com',
-        password: 'password123',
+        password: 'TestPass123!',
       })
     ).rejects.toThrow(InvalidCredentialsException);
   });
@@ -99,13 +99,13 @@ describe('LoginUserUseCase', () => {
   it('should throw error for incorrect password', async () => {
     await registerUserUseCase.execute({
       email: 'test@example.com',
-      password: 'password123',
+      password: 'TestPass123!',
     });
 
     await expect(
       loginUserUseCase.execute({
         email: 'test@example.com',
-        password: 'wrongpassword',
+        password: 'WrongPass456!',
       })
     ).rejects.toThrow(InvalidCredentialsException);
   });
@@ -113,12 +113,12 @@ describe('LoginUserUseCase', () => {
   it('should login with email in different case', async () => {
     await registerUserUseCase.execute({
       email: 'test@example.com',
-      password: 'password123',
+      password: 'TestPass123!',
     });
 
     const result = await loginUserUseCase.execute({
       email: 'TEST@EXAMPLE.COM',
-      password: 'password123',
+      password: 'TestPass123!',
     });
 
     expect(result.user).toBeDefined();
@@ -129,7 +129,7 @@ describe('LoginUserUseCase', () => {
     await expect(
       loginUserUseCase.execute({
         email: 'invalid-email',
-        password: 'password123',
+        password: 'TestPass123!',
       })
     ).rejects.toThrow('Invalid email format');
   });

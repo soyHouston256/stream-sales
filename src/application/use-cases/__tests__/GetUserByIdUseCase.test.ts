@@ -71,7 +71,7 @@ describe('GetUserByIdUseCase', () => {
   it('should get user by id', async () => {
     const registeredUser = await registerUserUseCase.execute({
       email: 'test@example.com',
-      password: 'password123',
+      password: 'TestPass123!',
       name: 'Test User',
     });
 
