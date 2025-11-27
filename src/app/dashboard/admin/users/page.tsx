@@ -16,7 +16,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Pencil, Search } from 'lucide-react';
+import { Pencil, Search, Users } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
@@ -204,7 +204,14 @@ export default function UsersPage() {
                   }
                 : undefined
             }
-            emptyMessage="No se encontraron usuarios"
+            emptyState={{
+              icon: Users,
+              title: search ? 'No se encontraron usuarios' : 'No hay usuarios',
+              description: search
+                ? 'Intenta con otros términos de búsqueda o ajusta los filtros.'
+                : 'No hay usuarios registrados que coincidan con los filtros seleccionados.',
+              variant: search ? 'search' : 'default',
+            }}
           />
         </CardContent>
       </Card>

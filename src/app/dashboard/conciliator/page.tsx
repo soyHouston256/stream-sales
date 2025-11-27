@@ -6,7 +6,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { AlertCircle, CheckCircle, Clock, Inbox } from 'lucide-react';
 import { useConciliatorStats, useResolutionsByDay } from '@/lib/hooks/useConciliatorStats';
 import { useDisputes } from '@/lib/hooks/useDisputes';
-import { StatsCard } from '@/components/conciliator/StatsCard';
+import { EnhancedStatsCard } from '@/components/ui/enhanced-stats-card';
+import { EmptyState } from '@/components/ui/empty-state';
 import { ResolutionsByDayChart } from '@/components/conciliator/ResolutionsByDayChart';
 import { DisputesTable } from '@/components/conciliator/DisputesTable';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -52,29 +53,37 @@ export default function ConciliatorDashboard() {
           </>
         ) : stats ? (
           <>
-            <StatsCard
+            <EnhancedStatsCard
               title={t('conciliator.pendingDisputes')}
               value={stats.pendingDisputes}
               description={t('conciliator.awaitingAssignment')}
               icon={Inbox}
+              variant="warning"
+              isLoading={statsLoading}
             />
-            <StatsCard
+            <EnhancedStatsCard
               title={t('conciliator.myAssigned')}
               value={stats.myAssigned}
               description={t('conciliator.underReview')}
               icon={Clock}
+              variant="info"
+              isLoading={statsLoading}
             />
-            <StatsCard
+            <EnhancedStatsCard
               title={t('conciliator.resolvedToday')}
               value={stats.resolvedToday}
               description={t('conciliator.completedToday')}
               icon={CheckCircle}
+              variant="success"
+              isLoading={statsLoading}
             />
-            <StatsCard
+            <EnhancedStatsCard
               title={t('conciliator.totalResolved')}
               value={stats.totalResolved}
               description={t('conciliator.lifetime')}
               icon={CheckCircle}
+              variant="success"
+              isLoading={statsLoading}
             />
           </>
         ) : null}
@@ -133,9 +142,12 @@ export default function ConciliatorDashboard() {
               showConciliator={false}
             />
           ) : (
-            <p className="text-sm text-muted-foreground text-center py-8">
-              {t('conciliator.noPendingDisputes')}
-            </p>
+            <EmptyState
+              icon={Inbox}
+              title={t('conciliator.noPendingDisputes')}
+              description={t('conciliator.noPendingDisputesDescription')}
+              variant="default"
+            />
           )}
         </CardContent>
       </Card>
@@ -162,9 +174,12 @@ export default function ConciliatorDashboard() {
               showConciliator={false}
             />
           ) : (
-            <p className="text-sm text-muted-foreground text-center py-8">
-              {t('conciliator.noAssignedDisputes')}
-            </p>
+            <EmptyState
+              icon={Clock}
+              title={t('conciliator.noAssignedDisputes')}
+              description={t('conciliator.noAssignedDisputesDescription')}
+              variant="default"
+            />
           )}
         </CardContent>
       </Card>

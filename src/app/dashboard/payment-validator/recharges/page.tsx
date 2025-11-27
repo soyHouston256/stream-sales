@@ -12,10 +12,11 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { CheckCircle, XCircle } from 'lucide-react';
+import { CheckCircle, XCircle, Wallet } from 'lucide-react';
 import { tokenManager } from '@/lib/utils/tokenManager';
 import { useToast } from '@/hooks/use-toast';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { EmptyState } from '@/components/ui/empty-state';
 
 interface User {
   id: string;
@@ -252,6 +253,19 @@ export default function PaymentValidatorRechargesPage() {
                 <Skeleton key={i} className="h-16 w-full" />
               ))}
             </div>
+          ) : rechargesData?.data.length === 0 ? (
+            <EmptyState
+              icon={Wallet}
+              title={statusFilter === 'pending'
+                ? t('paymentValidator.recharges.noPendingRecharges') || 'No pending recharges'
+                : t('paymentValidator.recharges.noRecharges') || 'No recharges found'
+              }
+              description={statusFilter === 'pending'
+                ? t('paymentValidator.recharges.noPendingRechargesDesc') || 'No pending recharge requests at the moment'
+                : t('paymentValidator.recharges.noRechargesDesc') || 'No recharge requests found with the current filters'
+              }
+              variant="default"
+            />
           ) : (
             <>
               <Table>

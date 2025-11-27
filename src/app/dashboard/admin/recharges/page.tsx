@@ -13,9 +13,10 @@ import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { CheckCircle, XCircle, AlertCircle, Search, DollarSign } from 'lucide-react';
+import { CheckCircle, XCircle, AlertCircle, Search, DollarSign, Inbox } from 'lucide-react';
 import { tokenManager } from '@/lib/utils/tokenManager';
 import { useToast } from '@/hooks/use-toast';
+import { EmptyState } from '@/components/ui/empty-state';
 
 interface User {
   id: string;
@@ -368,6 +369,19 @@ export default function AdminRechargesPage() {
                 <Skeleton key={i} className="h-12 w-full" />
               ))}
             </div>
+          ) : rechargesData?.data.length === 0 ? (
+            <EmptyState
+              icon={Inbox}
+              title="No hay recargas"
+              description={
+                statusFilter === 'pending'
+                  ? 'No hay solicitudes de recarga pendientes en este momento.'
+                  : searchTerm
+                  ? 'No se encontraron recargas con los criterios de búsqueda.'
+                  : 'No hay recargas en este estado.'
+              }
+              variant={searchTerm ? 'search' : 'default'}
+            />
           ) : (
             <>
               <Table>
@@ -383,72 +397,64 @@ export default function AdminRechargesPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {rechargesData?.data.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={7} className="text-center text-muted-foreground">
-                        No se encontraron recargas
+                  {rechargesData?.data.map((recharge) => (
+                    <TableRow key={recharge.id}>
+                      <TableCell>
+                        <div>
+                          <div className="font-medium">{recharge.user.name}</div>
+                          <div className="text-sm text-muted-foreground">
+                            {recharge.user.email}
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center">
+                          <DollarSign className="h-4 w-4 mr-1 text-green-600" />
+                          <span className="font-semibold">${recharge.amount}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>{getPaymentMethodLabel(recharge.paymentMethod)}</TableCell>
+                      <TableCell>{getStatusBadge(recharge.status)}</TableCell>
+                      <TableCell>
+                        {new Date(recharge.createdAt).toLocaleDateString('es-ES', {
+                          day: '2-digit',
+                          month: '2-digit',
+                          year: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
+                      </TableCell>
+                      <TableCell>
+                        {recharge.metadata?.paymentDetails && (
+                          <div className="text-sm text-muted-foreground max-w-xs truncate">
+                            {recharge.metadata.paymentDetails}
+                          </div>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {recharge.status === 'pending' && (
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              onClick={() => handleApprove(recharge)}
+                              variant="default"
+                            >
+                              <CheckCircle className="h-4 w-4 mr-1" />
+                              Aprobar
+                            </Button>
+                            <Button
+                              size="sm"
+                              onClick={() => handleReject(recharge)}
+                              variant="destructive"
+                            >
+                              <XCircle className="h-4 w-4 mr-1" />
+                              Rechazar
+                            </Button>
+                          </div>
+                        )}
                       </TableCell>
                     </TableRow>
-                  ) : (
-                    rechargesData?.data.map((recharge) => (
-                      <TableRow key={recharge.id}>
-                        <TableCell>
-                          <div>
-                            <div className="font-medium">{recharge.user.name}</div>
-                            <div className="text-sm text-muted-foreground">
-                              {recharge.user.email}
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center">
-                            <DollarSign className="h-4 w-4 mr-1 text-green-600" />
-                            <span className="font-semibold">${recharge.amount}</span>
-                          </div>
-                        </TableCell>
-                        <TableCell>{getPaymentMethodLabel(recharge.paymentMethod)}</TableCell>
-                        <TableCell>{getStatusBadge(recharge.status)}</TableCell>
-                        <TableCell>
-                          {new Date(recharge.createdAt).toLocaleDateString('es-ES', {
-                            day: '2-digit',
-                            month: '2-digit',
-                            year: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          })}
-                        </TableCell>
-                        <TableCell>
-                          {recharge.metadata?.paymentDetails && (
-                            <div className="text-sm text-muted-foreground max-w-xs truncate">
-                              {recharge.metadata.paymentDetails}
-                            </div>
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          {recharge.status === 'pending' && (
-                            <div className="flex gap-2">
-                              <Button
-                                size="sm"
-                                onClick={() => handleApprove(recharge)}
-                                variant="default"
-                              >
-                                <CheckCircle className="h-4 w-4 mr-1" />
-                                Aprobar
-                              </Button>
-                              <Button
-                                size="sm"
-                                onClick={() => handleReject(recharge)}
-                                variant="destructive"
-                              >
-                                <XCircle className="h-4 w-4 mr-1" />
-                                Rechazar
-                              </Button>
-                            </div>
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  )}
+                  ))}
                 </TableBody>
               </Table>
 

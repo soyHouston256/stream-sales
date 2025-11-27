@@ -12,6 +12,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { DataTable, Column } from '@/components/admin/DataTable';
+import { EnhancedStatsCard } from '@/components/ui/enhanced-stats-card';
+import { EmptyState } from '@/components/ui/empty-state';
 import { usePurchases } from '@/lib/hooks/usePurchases';
 import { Purchase, PurchasesFilters } from '@/types/seller';
 import { CategoryBadge } from '@/components/provider/CategoryBadge';
@@ -19,7 +21,6 @@ import { PurchaseDetailsDialog } from '@/components/seller';
 import { formatCurrency } from '@/lib/utils/seller';
 import { format } from 'date-fns';
 import { ShoppingBag, DollarSign, TrendingDown, Eye } from 'lucide-react';
-import { StatsCard } from '@/components/admin/StatsCard';
 import { ProductCategory } from '@/types/provider';
 import { useLanguage } from '@/contexts/LanguageContext';
 import {
@@ -154,25 +155,28 @@ export default function PurchasesPage() {
 
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-3">
-        <StatsCard
+        <EnhancedStatsCard
           title={t('purchases.page.totalPurchases')}
           value={stats.totalPurchases}
           description={t('purchases.page.allTimePurchases')}
           icon={ShoppingBag}
+          variant="info"
           isLoading={isLoading && purchases.length === 0}
         />
-        <StatsCard
+        <EnhancedStatsCard
           title={t('purchases.page.totalSpent')}
           value={formatCurrency(stats.totalSpent)}
           description={t('purchases.page.totalAmountSpent')}
           icon={DollarSign}
+          variant="warning"
           isLoading={isLoading && purchases.length === 0}
         />
-        <StatsCard
+        <EnhancedStatsCard
           title={t('purchases.page.averagePrice')}
           value={formatCurrency(stats.averagePrice)}
           description={t('purchases.page.averagePurchasePrice')}
           icon={TrendingDown}
+          variant="success"
           isLoading={isLoading && purchases.length === 0}
         />
       </div>
@@ -283,6 +287,14 @@ export default function PurchasesPage() {
             columns={columns}
             isLoading={isLoading}
             emptyMessage={t('purchases.page.noPurchasesFound')}
+            emptyState={{
+              icon: ShoppingBag,
+              title: filters.category || filters.status ? t('purchases.page.noPurchasesFiltered') : t('purchases.page.noPurchasesFound'),
+              description: filters.category || filters.status
+                ? t('purchases.page.tryDifferentFilters')
+                : t('purchases.page.startBuyingProducts'),
+              variant: filters.category || filters.status ? 'search' : 'default',
+            }}
           />
 
           {/* Pagination */}

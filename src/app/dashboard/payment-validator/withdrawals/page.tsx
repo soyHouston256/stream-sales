@@ -13,10 +13,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
-import { CheckCircle, XCircle, DollarSign } from 'lucide-react';
+import { CheckCircle, XCircle, DollarSign, ArrowUpRight } from 'lucide-react';
 import { tokenManager } from '@/lib/utils/tokenManager';
 import { useToast } from '@/hooks/use-toast';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { EmptyState } from '@/components/ui/empty-state';
 
 interface User {
   id: string;
@@ -268,6 +269,19 @@ export default function PaymentValidatorWithdrawalsPage() {
                 <Skeleton key={i} className="h-16 w-full" />
               ))}
             </div>
+          ) : withdrawalsData?.data.length === 0 ? (
+            <EmptyState
+              icon={ArrowUpRight}
+              title={statusFilter === 'pending'
+                ? t('paymentValidator.withdrawals.noPendingWithdrawals') || 'No pending withdrawals'
+                : t('paymentValidator.withdrawals.noWithdrawals') || 'No withdrawals found'
+              }
+              description={statusFilter === 'pending'
+                ? t('paymentValidator.withdrawals.noPendingWithdrawalsDesc') || 'No pending withdrawal requests at the moment'
+                : t('paymentValidator.withdrawals.noWithdrawalsDesc') || 'No withdrawal requests found with the current filters'
+              }
+              variant="default"
+            />
           ) : (
             <>
               <Table>

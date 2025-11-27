@@ -17,6 +17,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { EnhancedStatsCard } from '@/components/ui/enhanced-stats-card';
 import { Users, DollarSign, TrendingUp, ArrowRight, AlertCircle } from 'lucide-react';
 import {
   useAffiliateInfo,
@@ -176,85 +177,41 @@ export default function AffiliateDashboard() {
 
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t('affiliate.totalReferrals')}</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            {statsLoading ? (
-              <Skeleton className="h-8 w-16" />
-            ) : (
-              <>
-                <div className="text-2xl font-bold">{stats?.totalReferrals || 0}</div>
-                <p className="text-xs text-muted-foreground">
-                  {stats?.activeReferrals || 0} {t('affiliate.active')}
-                </p>
-              </>
-            )}
-          </CardContent>
-        </Card>
+        <EnhancedStatsCard
+          title={t('affiliate.totalReferrals')}
+          value={stats?.totalReferrals || 0}
+          description={`${stats?.activeReferrals || 0} ${t('affiliate.active')}`}
+          icon={Users}
+          variant="info"
+          isLoading={statsLoading}
+        />
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t('affiliate.activeReferrals')}</CardTitle>
-            <Users className="h-4 w-4 text-green-600" />
-          </CardHeader>
-          <CardContent>
-            {statsLoading ? (
-              <Skeleton className="h-8 w-16" />
-            ) : (
-              <>
-                <div className="text-2xl font-bold text-green-600">
-                  {stats?.activeReferrals || 0}
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  {stats?.thisMonthReferrals || 0} {t('affiliate.thisMonth')}
-                </p>
-              </>
-            )}
-          </CardContent>
-        </Card>
+        <EnhancedStatsCard
+          title={t('affiliate.activeReferrals')}
+          value={stats?.activeReferrals || 0}
+          description={`${stats?.thisMonthReferrals || 0} ${t('affiliate.thisMonth')}`}
+          icon={Users}
+          variant="success"
+          isLoading={statsLoading}
+        />
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t('affiliate.totalEarned')}</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            {statsLoading ? (
-              <Skeleton className="h-8 w-24" />
-            ) : (
-              <>
-                <div className="text-2xl font-bold">
-                  {formatCommissionAmount(stats?.totalCommissionEarned || '0')}
-                </div>
-                <p className="text-xs text-muted-foreground">{t('affiliate.allTime')}</p>
-              </>
-            )}
-          </CardContent>
-        </Card>
+        <EnhancedStatsCard
+          title={t('affiliate.totalEarned')}
+          value={formatCommissionAmount(stats?.totalCommissionEarned || '0')}
+          description={t('affiliate.allTime')}
+          icon={DollarSign}
+          variant="info"
+          isLoading={statsLoading}
+        />
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t('affiliate.availableBalance')}</CardTitle>
-            <TrendingUp className="h-4 w-4 text-green-600" />
-          </CardHeader>
-          <CardContent>
-            {statsLoading ? (
-              <Skeleton className="h-8 w-24" />
-            ) : (
-              <>
-                <div className="text-2xl font-bold text-green-600">
-                  {formatCommissionAmount(stats?.availableBalance || '0')}
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  {formatCommissionAmount(stats?.thisMonthEarned || '0')} {t('affiliate.thisMonth')}
-                </p>
-              </>
-            )}
-          </CardContent>
-        </Card>
+        <EnhancedStatsCard
+          title={t('affiliate.availableBalance')}
+          value={formatCommissionAmount(stats?.availableBalance || '0')}
+          description={`${formatCommissionAmount(stats?.thisMonthEarned || '0')} ${t('affiliate.thisMonth')}`}
+          icon={TrendingUp}
+          variant="success"
+          isLoading={statsLoading}
+        />
       </div>
 
       {/* Referrals Chart */}

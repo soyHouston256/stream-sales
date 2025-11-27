@@ -19,7 +19,7 @@ import { ProductStatusBadge } from '@/components/provider/ProductStatusBadge';
 import { CategoryBadge } from '@/components/provider/CategoryBadge';
 import { useProducts, useDeleteProduct } from '@/lib/hooks/useProducts';
 import { Product, ProductCategory, ProductStatus } from '@/types/provider';
-import { Edit, Trash2, Search } from 'lucide-react';
+import { Edit, Trash2, Search, Package } from 'lucide-react';
 import { format } from 'date-fns';
 import { useLanguage } from '@/contexts/LanguageContext';
 
@@ -236,7 +236,16 @@ export default function ProductsPage() {
               }
             : undefined
         }
-        emptyMessage={t('provider.products.noProducts')}
+        emptyState={{
+          icon: Package,
+          title: search
+            ? t('provider.products.noProductsFound') || 'No products found'
+            : t('provider.products.noProducts') || 'No products yet',
+          description: search
+            ? t('provider.products.noProductsFoundDesc') || `No products match "${search}"`
+            : t('provider.products.noProductsDesc') || 'Create your first product to get started',
+          variant: search ? 'search' : 'default',
+        }}
       />
 
       {editingProduct && (

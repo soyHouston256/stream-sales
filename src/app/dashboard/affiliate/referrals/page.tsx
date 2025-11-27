@@ -22,6 +22,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
+import { EnhancedStatsCard } from '@/components/ui/enhanced-stats-card';
+import { EmptyState } from '@/components/ui/empty-state';
 import { Users, Eye, Search, Filter } from 'lucide-react';
 import { useReferrals } from '@/lib/hooks';
 import { ReferralFilters } from '@/types/affiliate';
@@ -87,70 +89,44 @@ export default function ReferralsPage() {
 
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t('affiliate.referrals.totalReferrals')}</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <Skeleton className="h-8 w-16" />
-            ) : (
-              <div className="text-2xl font-bold">{totalReferrals}</div>
-            )}
-          </CardContent>
-        </Card>
+        <EnhancedStatsCard
+          title={t('affiliate.referrals.totalReferrals')}
+          value={totalReferrals}
+          icon={Users}
+          variant="info"
+          isLoading={isLoading}
+        />
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t('affiliate.referrals.active')}</CardTitle>
-            <Users className="h-4 w-4 text-green-600" />
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <Skeleton className="h-8 w-16" />
-            ) : (
-              <div className="text-2xl font-bold text-green-600">{activeReferrals}</div>
-            )}
-          </CardContent>
-        </Card>
+        <EnhancedStatsCard
+          title={t('affiliate.referrals.active')}
+          value={activeReferrals}
+          icon={Users}
+          variant="success"
+          isLoading={isLoading}
+        />
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t('affiliate.referrals.inactive')}</CardTitle>
-            <Users className="h-4 w-4 text-gray-500" />
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <Skeleton className="h-8 w-16" />
-            ) : (
-              <div className="text-2xl font-bold text-gray-500">{inactiveReferrals}</div>
-            )}
-          </CardContent>
-        </Card>
+        <EnhancedStatsCard
+          title={t('affiliate.referrals.inactive')}
+          value={inactiveReferrals}
+          icon={Users}
+          variant="warning"
+          isLoading={isLoading}
+        />
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t('affiliate.referrals.thisMonth')}</CardTitle>
-            <Users className="h-4 w-4 text-blue-600" />
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <Skeleton className="h-8 w-16" />
-            ) : (
-              <div className="text-2xl font-bold text-blue-600">
-                {data?.data.filter((r: any) => {
-                  const createdDate = new Date(r.createdAt);
-                  const now = new Date();
-                  return (
-                    createdDate.getMonth() === now.getMonth() &&
-                    createdDate.getFullYear() === now.getFullYear()
-                  );
-                }).length || 0}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+        <EnhancedStatsCard
+          title={t('affiliate.referrals.thisMonth')}
+          value={data?.data.filter((r: any) => {
+            const createdDate = new Date(r.createdAt);
+            const now = new Date();
+            return (
+              createdDate.getMonth() === now.getMonth() &&
+              createdDate.getFullYear() === now.getFullYear()
+            );
+          }).length || 0}
+          icon={Users}
+          variant="info"
+          isLoading={isLoading}
+        />
       </div>
 
       {/* Filters and Table */}
@@ -290,9 +266,16 @@ export default function ReferralsPage() {
               )}
             </>
           ) : (
-            <div className="py-8 text-center text-muted-foreground">
-              {t('affiliate.referrals.noReferrals')}
-            </div>
+            <EmptyState
+              icon={Users}
+              title={filters.search || filters.status || filters.role ? t('affiliate.referrals.noReferralsFiltered') : t('affiliate.referrals.noReferrals')}
+              description={
+                filters.search || filters.status || filters.role
+                  ? t('affiliate.referrals.tryDifferentFilters')
+                  : t('affiliate.referrals.startReferring')
+              }
+              variant={filters.search || filters.status || filters.role ? 'search' : 'default'}
+            />
           )}
         </CardContent>
       </Card>

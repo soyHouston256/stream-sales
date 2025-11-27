@@ -22,6 +22,8 @@ import {
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { EnhancedStatsCard } from '@/components/ui/enhanced-stats-card';
+import { EmptyState } from '@/components/ui/empty-state';
 import { DollarSign, TrendingUp, Clock, ArrowUpRight, Filter } from 'lucide-react';
 import {
   useAffiliateCommissions,
@@ -93,83 +95,41 @@ export default function CommissionsPage() {
 
       {/* Balance Cards */}
       <div className="grid gap-4 md:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t('affiliate.availableBalance')}</CardTitle>
-            <DollarSign className="h-4 w-4 text-green-600" />
-          </CardHeader>
-          <CardContent>
-            {balanceLoading ? (
-              <Skeleton className="h-8 w-24" />
-            ) : (
-              <>
-                <div className={`text-2xl font-bold ${getBalanceColorClass(balance?.availableBalance || '0')}`}>
-                  {formatCommissionAmount(balance?.availableBalance || '0')}
-                </div>
-                <p className="text-xs text-muted-foreground">{t('affiliate.commissions.readyToWithdraw')}</p>
-              </>
-            )}
-          </CardContent>
-        </Card>
+        <EnhancedStatsCard
+          title={t('affiliate.availableBalance')}
+          value={formatCommissionAmount(balance?.availableBalance || '0')}
+          description={t('affiliate.commissions.readyToWithdraw')}
+          icon={DollarSign}
+          variant="success"
+          isLoading={balanceLoading}
+        />
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t('affiliate.totalEarned')}</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            {balanceLoading ? (
-              <Skeleton className="h-8 w-24" />
-            ) : (
-              <>
-                <div className="text-2xl font-bold">
-                  {formatCommissionAmount(balance?.totalEarned || '0')}
-                </div>
-                <p className="text-xs text-muted-foreground">{t('affiliate.commissions.lifetimeEarnings')}</p>
-              </>
-            )}
-          </CardContent>
-        </Card>
+        <EnhancedStatsCard
+          title={t('affiliate.totalEarned')}
+          value={formatCommissionAmount(balance?.totalEarned || '0')}
+          description={t('affiliate.commissions.lifetimeEarnings')}
+          icon={TrendingUp}
+          variant="info"
+          isLoading={balanceLoading}
+        />
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t('affiliate.thisMonth')}</CardTitle>
-            <DollarSign className="h-4 w-4 text-blue-600" />
-          </CardHeader>
-          <CardContent>
-            {balanceLoading ? (
-              <Skeleton className="h-8 w-24" />
-            ) : (
-              <>
-                <div className="text-2xl font-bold text-blue-600">
-                  {formatCommissionAmount(balance?.thisMonthEarned || '0')}
-                </div>
-                <p className="text-xs text-muted-foreground">{t('affiliate.commissions.currentMonth')}</p>
-              </>
-            )}
-          </CardContent>
-        </Card>
+        <EnhancedStatsCard
+          title={t('affiliate.thisMonth')}
+          value={formatCommissionAmount(balance?.thisMonthEarned || '0')}
+          description={t('affiliate.commissions.currentMonth')}
+          icon={DollarSign}
+          variant="info"
+          isLoading={balanceLoading}
+        />
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t('affiliate.commissions.pendingPayments')}</CardTitle>
-            <Clock className="h-4 w-4 text-yellow-600" />
-          </CardHeader>
-          <CardContent>
-            {balanceLoading ? (
-              <Skeleton className="h-8 w-24" />
-            ) : (
-              <>
-                <div className="text-2xl font-bold text-yellow-600">
-                  {balance?.pendingPayments || 0}
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  {formatCommissionAmount(balance?.pendingPaymentsAmount || '0')}
-                </p>
-              </>
-            )}
-          </CardContent>
-        </Card>
+        <EnhancedStatsCard
+          title={t('affiliate.commissions.pendingPayments')}
+          value={balance?.pendingPayments || 0}
+          description={formatCommissionAmount(balance?.pendingPaymentsAmount || '0')}
+          icon={Clock}
+          variant="warning"
+          isLoading={balanceLoading}
+        />
       </div>
 
       {/* Commissions Table */}
@@ -283,9 +243,16 @@ export default function CommissionsPage() {
               )}
             </>
           ) : (
-            <div className="py-8 text-center text-muted-foreground">
-              {t('affiliate.commissions.noCommissions')}
-            </div>
+            <EmptyState
+              icon={DollarSign}
+              title={filters.type ? t('affiliate.commissions.noCommissionsFiltered') : t('affiliate.commissions.noCommissions')}
+              description={
+                filters.type
+                  ? t('affiliate.commissions.tryDifferentFilter')
+                  : t('affiliate.commissions.commissionsAppearHere')
+              }
+              variant={filters.type ? 'search' : 'default'}
+            />
           )}
         </CardContent>
       </Card>

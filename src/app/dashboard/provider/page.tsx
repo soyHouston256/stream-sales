@@ -4,7 +4,7 @@ import { useAuth } from '@/lib/auth/useAuth';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Package, DollarSign, Wallet, ShoppingCart } from 'lucide-react';
-import { StatsCard } from '@/components/admin/StatsCard';
+import { EnhancedStatsCard } from '@/components/ui/enhanced-stats-card';
 import { SalesByCategoryChart } from '@/components/provider/SalesByCategoryChart';
 import { CreateProductDialog } from '@/components/provider/CreateProductDialog';
 import { DataTable, Column } from '@/components/admin/DataTable';
@@ -105,33 +105,37 @@ export default function ProviderDashboard() {
       />
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <StatsCard
+        <EnhancedStatsCard
           title={t('provider.totalProducts')}
           value={stats?.totalProducts ?? 0}
           description={`${stats?.availableProducts ?? 0} ${t('provider.availableProducts')}, ${stats?.soldProducts ?? 0} ${t('provider.soldProducts')}`}
           icon={Package}
           isLoading={statsLoading}
+          variant="info"
         />
-        <StatsCard
+        <EnhancedStatsCard
           title={t('provider.totalEarnings')}
           value={stats ? `$${parseFloat(stats.totalEarnings).toFixed(2)}` : '$0.00'}
           description={t('provider.lifetimeEarnings')}
           icon={DollarSign}
           isLoading={statsLoading}
+          variant="success"
         />
-        <StatsCard
+        <EnhancedStatsCard
           title={t('provider.thisMonth')}
           value={stats ? `$${parseFloat(stats.thisMonthEarnings).toFixed(2)}` : '$0.00'}
           description={`${stats?.thisMonthSales ?? 0} ${t('provider.salesThisMonth')}`}
           icon={ShoppingCart}
           isLoading={statsLoading}
+          variant="info"
         />
-        <StatsCard
+        <EnhancedStatsCard
           title={t('provider.pendingBalance')}
           value={stats ? `$${parseFloat(stats.pendingBalance).toFixed(2)}` : '$0.00'}
           description={t('provider.availableForWithdrawal')}
           icon={Wallet}
           isLoading={statsLoading}
+          variant="warning"
         />
       </div>
 
