@@ -72,8 +72,10 @@ export async function GET(request: NextRequest) {
 
     const profile = user.affiliateProfile;
 
-    // 4. Build referral link
-    const baseUrl = request.headers.get('origin') || 'http://localhost:3000';
+    // 4. Build referral link with proper host detection
+    const host = request.headers.get('x-forwarded-host') || request.headers.get('host') || 'localhost:3000';
+    const protocol = request.headers.get('x-forwarded-proto') || (host.includes('localhost') ? 'http' : 'https');
+    const baseUrl = `${protocol}://${host}`;
     const referralLink = `${baseUrl}/register?ref=${profile.referralCode}`;
 
     // 5. Return affiliate info

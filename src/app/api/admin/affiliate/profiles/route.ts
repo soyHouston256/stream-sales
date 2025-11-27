@@ -175,8 +175,10 @@ export async function GET(request: NextRequest) {
     const totalReferrals = allProfiles.reduce((sum: number, p: any) => sum + p.totalReferrals, 0);
     const activeReferrals = allProfiles.reduce((sum: number, p: any) => sum + p.activeReferrals, 0);
 
-    // 10. Get base URL for referral links
-    const baseUrl = request.headers.get('origin') || 'http://localhost:3000';
+    // 10. Get base URL for referral links with proper host detection
+    const host = request.headers.get('x-forwarded-host') || request.headers.get('host') || 'localhost:3000';
+    const protocol = request.headers.get('x-forwarded-proto') || (host.includes('localhost') ? 'http' : 'https');
+    const baseUrl = `${protocol}://${host}`;
 
     // 11. Transform to response format with calculated metrics
     const data = affiliateProfiles.map((profile: any) => {
