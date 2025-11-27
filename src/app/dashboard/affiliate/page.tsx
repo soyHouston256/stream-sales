@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { format } from 'date-fns';
+import { useState } from 'react';
 import { useAuth } from '@/lib/auth/useAuth';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -29,12 +30,19 @@ import {
   ReferralStatusBadge,
 } from '@/components/affiliate';
 import { formatCommissionAmount } from '@/lib/utils/affiliate';
+import { WalletBalanceCard } from '@/components/wallet/WalletBalanceCard';
+import { useAffiliateWalletBalance } from '@/hooks/useWalletBalance';
+import { PaymentRequestDialog } from '@/components/affiliate/PaymentRequestDialog';
+import { useRouter } from 'next/navigation';
 
 export default function AffiliateDashboard() {
   const { user } = useAuth();
   const { t } = useLanguage();
+  const router = useRouter();
+  const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
   const { data: affiliateInfo, isLoading: infoLoading, error: infoError } = useAffiliateInfo();
   const { data: stats, isLoading: statsLoading } = useAffiliateStats();
+  const { data: walletBalance, isLoading: walletLoading } = useAffiliateWalletBalance();
   const { data: chartData, isLoading: chartLoading } = useReferralsByMonth(6);
   const { data: recentReferrals, isLoading: referralsLoading } = useReferrals({
     page: 1,
@@ -136,6 +144,25 @@ export default function AffiliateDashboard() {
           {t('dashboard.welcome')}, {user?.name || user?.email}
         </p>
       </div>
+
+      {/* Prominent Wallet Balance Card - MOST VISIBLE ELEMENT */}
+      <WalletBalanceCard
+        balance={walletBalance?.balance ?? stats?.availableBalance ?? 0}
+        currency={walletBalance?.currency ?? 'USD'}
+        lastUpdated={walletBalance?.lastUpdated ? new Date(walletBalance.lastUpdated) : undefined}
+        pendingAmount={walletBalance?.pendingAmount ?? 0}
+        isLoading={walletLoading}
+        variant="affiliate"
+        onWithdraw={() => setPaymentDialogOpen(true)}
+        onViewTransactions={() => router.push('/dashboard/affiliate/commissions')}
+      />
+
+      {/* Payment Request Dialog */}
+      <PaymentRequestDialog
+        availableBalance={String(walletBalance?.balance ?? stats?.availableBalance ?? 0)}
+        isOpen={paymentDialogOpen}
+        onClose={() => setPaymentDialogOpen(false)}
+      />
 
       {/* Referral Code Card */}
       {infoLoading ? (

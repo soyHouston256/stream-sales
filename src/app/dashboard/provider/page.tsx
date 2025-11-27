@@ -13,11 +13,17 @@ import { useProviderSales } from '@/lib/hooks/useProviderSales';
 import { ProviderSale } from '@/types/provider';
 import { CategoryBadge } from '@/components/provider/CategoryBadge';
 import { format } from 'date-fns';
+import { WalletBalanceCard } from '@/components/wallet/WalletBalanceCard';
+import { useProviderWalletBalance } from '@/hooks/useWalletBalance';
+import { WithdrawalRequestDialog } from '@/components/provider/WithdrawalRequestDialog';
+import { useRouter } from 'next/navigation';
 
 export default function ProviderDashboard() {
   const { user } = useAuth();
   const { t } = useLanguage();
+  const router = useRouter();
   const { data: stats, isLoading: statsLoading } = useProviderStats();
+  const { data: walletBalance, isLoading: walletLoading } = useProviderWalletBalance();
   const { data: salesData, isLoading: salesLoading } = useProviderSales({
     page: 1,
     limit: 5,
@@ -76,6 +82,27 @@ export default function ProviderDashboard() {
         </div>
         <CreateProductDialog />
       </div>
+
+      {/* Prominent Wallet Balance Card - MOST VISIBLE ELEMENT */}
+      <WalletBalanceCard
+        balance={walletBalance?.balance ?? stats?.pendingBalance ?? 0}
+        currency={walletBalance?.currency ?? 'USD'}
+        lastUpdated={walletBalance?.lastUpdated ? new Date(walletBalance.lastUpdated) : undefined}
+        pendingAmount={walletBalance?.pendingAmount ?? 0}
+        isLoading={walletLoading}
+        variant="provider"
+        onWithdraw={() => {
+          // Trigger the WithdrawalDialog via a hidden button click
+          document.getElementById('withdrawal-trigger-btn')?.click();
+        }}
+        onViewTransactions={() => router.push('/dashboard/provider/earnings')}
+      />
+
+      {/* WithdrawalRequestDialog */}
+      <WithdrawalRequestDialog
+        availableBalance={Number(walletBalance?.balance ?? stats?.pendingBalance ?? 0)}
+        trigger={<button id="withdrawal-trigger-btn" style={{ display: 'none' }} />}
+      />
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatsCard

@@ -609,7 +609,14 @@
     "type": "Tipo",
     "credit": "Crédito",
     "debit": "Débito",
-    "transfer": "Transferencia"
+    "transfer": "Transferencia",
+    "balanceCard": "Tarjeta de Saldo de Billetera",
+    "availableBalance": "Saldo Disponible",
+    "pending": "Pendiente",
+    "lastUpdated": "Última actualización",
+    "justNow": "justo ahora",
+    "recharge": "Agregar Fondos",
+    "viewHistory": "Ver Historial"
   },
   "purchases": {
     "title": "Compras",

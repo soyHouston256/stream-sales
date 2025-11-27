@@ -17,14 +17,19 @@ import { PurchaseStatusBadge, ProductCard, ProductDetailsDialog, RechargeDialog 
 import { formatCurrency } from '@/lib/utils/seller';
 import { format } from 'date-fns';
 import Link from 'next/link';
+import { WalletBalanceCard } from '@/components/wallet/WalletBalanceCard';
+import { useSellerWalletBalance } from '@/hooks/useWalletBalance';
+import { useRouter } from 'next/navigation';
 
 export default function SellerDashboard() {
   const { user } = useAuth();
   const { t } = useLanguage();
+  const router = useRouter();
   const [selectedProduct, setSelectedProduct] = useState<MarketplaceProduct | null>(null);
   const [showProductDetails, setShowProductDetails] = useState(false);
 
   const { data: stats, isLoading: statsLoading } = useSellerStats();
+  const { data: walletBalance, isLoading: walletLoading } = useSellerWalletBalance();
   const { data: marketplaceData, isLoading: marketplaceLoading } = useMarketplace({
     page: 1,
     limit: 6,
@@ -87,8 +92,28 @@ export default function SellerDashboard() {
             {t('dashboard.welcome')}, {user?.name || user?.email}
           </p>
         </div>
-        <RechargeDialog currentBalance={stats?.walletBalance} />
       </div>
+
+      {/* Prominent Wallet Balance Card - MOST VISIBLE ELEMENT */}
+      <WalletBalanceCard
+        balance={walletBalance?.balance ?? stats?.walletBalance ?? 0}
+        currency={walletBalance?.currency ?? 'USD'}
+        lastUpdated={walletBalance?.lastUpdated ? new Date(walletBalance.lastUpdated) : undefined}
+        pendingAmount={walletBalance?.pendingAmount ?? 0}
+        isLoading={walletLoading}
+        variant="seller"
+        onRecharge={() => {
+          // Trigger the RechargeDialog via a hidden button click
+          document.getElementById('recharge-trigger-btn')?.click();
+        }}
+        onViewTransactions={() => router.push('/dashboard/seller/wallet')}
+      />
+
+      {/* RechargeDialog */}
+      <RechargeDialog
+        currentBalance={String(walletBalance?.balance ?? stats?.walletBalance ?? 0)}
+        trigger={<button id="recharge-trigger-btn" style={{ display: 'none' }} />}
+      />
 
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">

@@ -609,7 +609,14 @@
     "type": "Type",
     "credit": "Credit",
     "debit": "Debit",
-    "transfer": "Transfer"
+    "transfer": "Transfer",
+    "balanceCard": "Wallet Balance Card",
+    "availableBalance": "Available Balance",
+    "pending": "Pending",
+    "lastUpdated": "Last updated",
+    "justNow": "just now",
+    "recharge": "Add Funds",
+    "viewHistory": "View History"
   },
   "purchases": {
     "title": "Purchases",
