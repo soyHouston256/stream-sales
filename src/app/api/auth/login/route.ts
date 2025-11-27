@@ -110,9 +110,10 @@ export async function POST(request: NextRequest) {
       { identifier: clientIp, userId: result.user.id, metadata: { email: result.user.email } }
     );
 
-    // SECURITY: Don't send token in response body, only in httpOnly cookie
+    // Send token in both response body (for client-side API calls) and httpOnly cookie (for SSR/middleware)
     const response = NextResponse.json({
       user: result.user,
+      token: token, // Send token so frontend can use it in Authorization headers
       success: true,
     });
 
