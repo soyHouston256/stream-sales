@@ -19,23 +19,23 @@ model User {
   email     String   @unique
   password  String
   name      String?
-  role      String   @default("user") // admin, provider, seller, affiliate, conciliator
+  role      String   @default("user") // admin, provider, seller, affiliate, conciliator, payment_validator
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   // Relations
-  wallet                Wallet?
-  affiliateProfile      AffiliateProfile?
-  productsAsProvider    Product[]     @relation("ProviderProducts")
-  purchasesAsSeller     Purchase[]    @relation("SellerPurchases")
-  purchasesAsProvider   Purchase[]    @relation("ProviderPurchases")
-  affiliationsAsAffiliate  Affiliation[] @relation("AffiliateAffiliations")
-  affiliationsAsReferred   Affiliation?  @relation("ReferredAffiliation")
-  disputesAsSeller      Dispute[]     @relation("SellerDisputes")
-  disputesAsProvider    Dispute[]     @relation("ProviderDisputes")
-  disputesAsConciliator Dispute[]     @relation("ConciliatorDisputes")
-  disputeMessages       DisputeMessage[]
-  processedWithdrawals  Withdrawal[]  @relation("ProcessedWithdrawals")
+  wallet                  Wallet?
+  affiliateProfile        AffiliateProfile?
+  productsAsProvider      Product[]         @relation("ProviderProducts")
+  purchasesAsSeller       Purchase[]        @relation("SellerPurchases")
+  purchasesAsProvider     Purchase[]        @relation("ProviderPurchases")
+  affiliationsAsAffiliate Affiliation[]     @relation("AffiliateAffiliations")
+  affiliationsAsReferred  Affiliation?      @relation("ReferredAffiliation")
+  disputesAsSeller        Dispute[]         @relation("SellerDisputes")
+  disputesAsProvider      Dispute[]         @relation("ProviderDisputes")
+  disputesAsConciliator   Dispute[]         @relation("ConciliatorDisputes")
+  disputeMessages         DisputeMessage[]
+  processedWithdrawals    Withdrawal[]      @relation("ProcessedWithdrawals")
 
   @@map("users")
 }
@@ -50,11 +50,11 @@ model Wallet {
   updatedAt DateTime @updatedAt
 
   // Relations
-  user                    User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  transactionsAsSource    Transaction[] @relation("SourceWallet")
+  user                      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactionsAsSource      Transaction[] @relation("SourceWallet")
   transactionsAsDestination Transaction[] @relation("DestinationWallet")
-  recharges               Recharge[]
-  withdrawals             Withdrawal[]
+  recharges                 Recharge[]
+  withdrawals               Withdrawal[]
 
   @@index([userId])
   @@map("wallets")
@@ -66,14 +66,14 @@ model Wallet {
 
 model Transaction {
   id                  String   @id @default(cuid())
-  type                String   // credit, debit, transfer
+  type                String // credit, debit, transfer
   amount              Decimal  @db.Decimal(19, 4)
   sourceWalletId      String?
   destinationWalletId String?
-  relatedEntityType   String?  // Purchase, Recharge, AffiliateCommission
+  relatedEntityType   String? // Purchase, Recharge, AffiliateCommission
   relatedEntityId     String?
   description         String
-  metadata            Json?    // Datos adicionales
+  metadata            Json? // Datos adicionales
   idempotencyKey      String   @unique // Prevenir duplicados
   createdAt           DateTime @default(now())
 
@@ -92,8 +92,8 @@ model Recharge {
   id                    String    @id @default(cuid())
   walletId              String
   amount                Decimal   @db.Decimal(19, 4)
-  paymentMethod         String    // credit_card, paypal, bank_transfer, crypto, mock
-  paymentGateway        String    // stripe, paypal, etc
+  paymentMethod         String // credit_card, paypal, bank_transfer, crypto, mock
+  paymentGateway        String // stripe, paypal, etc
   externalTransactionId String?   @unique
   status                String    @default("pending") // pending, completed, failed, cancelled
   metadata              Json?
@@ -112,20 +112,20 @@ model Withdrawal {
   id              String    @id @default(cuid())
   walletId        String
   amount          Decimal   @db.Decimal(19, 4)
-  paymentMethod   String    // paypal, bank_transfer, crypto
-  paymentDetails  String    // Email, account number, wallet address
+  paymentMethod   String // paypal, bank_transfer, crypto
+  paymentDetails  String // Email, account number, wallet address
   status          String    @default("pending") // pending, approved, rejected, completed
   notes           String?   @db.Text // Provider notes
   rejectionReason String?   @db.Text // Admin rejection reason
-  transactionId   String?   // ID of the debit transaction when completed
+  transactionId   String? // ID of the debit transaction when completed
   requestedAt     DateTime  @default(now())
   processedAt     DateTime?
-  processedBy     String?   // Admin user ID
+  processedBy     String? // Admin user ID
   completedAt     DateTime?
 
   // Relations
-  wallet      Wallet @relation(fields: [walletId], references: [id])
-  processedByUser User? @relation("ProcessedWithdrawals", fields: [processedBy], references: [id])
+  wallet          Wallet @relation(fields: [walletId], references: [id])
+  processedByUser User?  @relation("ProcessedWithdrawals", fields: [processedBy], references: [id])
 
   @@index([walletId])
   @@index([status])
@@ -140,14 +140,14 @@ model Withdrawal {
 model Product {
   id              String    @id @default(cuid())
   providerId      String
-  category        String    // netflix, spotify, hbo, disney, prime, youtube, other
+  category        String // netflix, spotify, hbo, disney, prime, youtube, other
   name            String
   description     String    @db.Text
   price           Decimal   @db.Decimal(19, 4)
-  imageUrl        String?   // URL de la imagen del producto
+  imageUrl        String? // URL de la imagen del producto
   accountEmail    String
-  accountPassword String    // DEBE estar encriptado
-  accountDetails  Json?     // Datos adicionales (plan, perfil, etc)
+  accountPassword String // DEBE estar encriptado
+  accountDetails  Json? // Datos adicionales (plan, perfil, etc)
   status          String    @default("available") // available, reserved, sold
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
@@ -171,13 +171,13 @@ model Purchase {
   id               String    @id @default(cuid())
   sellerId         String
   productId        String    @unique // Un producto solo se vende UNA vez
-  providerId       String    // Denormalizado para queries
+  providerId       String // Denormalizado para queries
   amount           Decimal   @db.Decimal(19, 4)
   providerEarnings Decimal   @db.Decimal(19, 4) // amount - commission
   adminCommission  Decimal   @db.Decimal(19, 4)
   commissionRate   Decimal   @db.Decimal(5, 2) // Snapshot del % en el momento (ej. 5.50)
   status           String    @default("pending") // pending, completed, failed, refunded
-  transactionIds   Json?     // Array de IDs de transacciones generadas
+  transactionIds   Json? // Array de IDs de transacciones generadas
   createdAt        DateTime  @default(now())
   completedAt      DateTime?
   refundedAt       DateTime?
@@ -201,7 +201,7 @@ model Purchase {
 
 model CommissionConfig {
   id            String   @id @default(cuid())
-  type          String   // sale, registration
+  type          String // sale, registration
   rate          Decimal  @db.Decimal(5, 2) // 0-100 (ej. 5.50 = 5.5%)
   isActive      Boolean  @default(true)
   effectiveFrom DateTime @default(now())
@@ -217,18 +217,18 @@ model CommissionConfig {
 // ============================================
 
 model Affiliation {
-  id              String    @id @default(cuid())
-  affiliateId     String
-  referredUserId  String    @unique // Un usuario solo puede ser referido UNA vez
-  referralCode    String
-  status          String    @default("active") // active, inactive, suspended
-  commissionPaid  Boolean   @default(false)
+  id               String   @id @default(cuid())
+  affiliateId      String
+  referredUserId   String   @unique // Un usuario solo puede ser referido UNA vez
+  referralCode     String
+  status           String   @default("active") // active, inactive, suspended
+  commissionPaid   Boolean  @default(false)
   commissionAmount Decimal? @db.Decimal(19, 4) // Snapshot del monto cobrado
-  createdAt       DateTime  @default(now())
+  createdAt        DateTime @default(now())
 
   // Relations
-  affiliate     User @relation("AffiliateAffiliations", fields: [affiliateId], references: [id])
-  referredUser  User @relation("ReferredAffiliation", fields: [referredUserId], references: [id])
+  affiliate    User @relation("AffiliateAffiliations", fields: [affiliateId], references: [id])
+  referredUser User @relation("ReferredAffiliation", fields: [referredUserId], references: [id])
 
   @@index([affiliateId])
   @@index([referredUserId])
@@ -237,22 +237,22 @@ model Affiliation {
 }
 
 model AffiliateProfile {
-  id                 String   @id @default(cuid())
-  userId             String   @unique
-  referralCode       String   @unique
-  status             String   @default("pending") // pending, approved, active, suspended, rejected
-  tier               String   @default("bronze") // bronze, silver, gold, platinum
-  totalEarnings      Decimal  @default(0) @db.Decimal(19, 4)
-  pendingBalance     Decimal  @default(0) @db.Decimal(19, 4)
-  paidBalance        Decimal  @default(0) @db.Decimal(19, 4)
-  totalReferrals     Int      @default(0)
-  activeReferrals    Int      @default(0)
-  applicationNote    String?  @db.Text // Nota del afiliado al aplicar
-  rejectionReason    String?  @db.Text // Razón de rechazo
-  approvedBy         String?  // Admin user ID que aprobó
-  approvedAt         DateTime?
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+  id              String    @id @default(cuid())
+  userId          String    @unique
+  referralCode    String    @unique
+  status          String    @default("pending") // pending, approved, active, suspended, rejected
+  tier            String    @default("bronze") // bronze, silver, gold, platinum
+  totalEarnings   Decimal   @default(0) @db.Decimal(19, 4)
+  pendingBalance  Decimal   @default(0) @db.Decimal(19, 4)
+  paidBalance     Decimal   @default(0) @db.Decimal(19, 4)
+  totalReferrals  Int       @default(0)
+  activeReferrals Int       @default(0)
+  applicationNote String?   @db.Text // Nota del afiliado al aplicar
+  rejectionReason String?   @db.Text // Razón de rechazo
+  approvedBy      String? // Admin user ID que aprobó
+  approvedAt      DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 
   // Relations
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -270,14 +270,14 @@ model AffiliateProfile {
 model Dispute {
   id                      String    @id @default(cuid())
   purchaseId              String    @unique
-  sellerId                String    // Denormalizado
-  providerId              String    // Denormalizado
+  sellerId                String // Denormalizado
+  providerId              String // Denormalizado
   conciliatorId           String?
-  openedBy                String    // seller, provider
+  openedBy                String // seller, provider
   reason                  String    @db.Text
   status                  String    @default("open") // open, under_review, resolved, closed
   resolution              String?   @db.Text
-  resolutionType          String?   // refund_seller, favor_provider, partial_refund, no_action
+  resolutionType          String? // refund_seller, favor_provider, partial_refund, no_action
   partialRefundPercentage Decimal?  @db.Decimal(5, 2) // 0-100, solo para partial_refund
   createdAt               DateTime  @default(now())
   assignedAt              DateTime?
@@ -301,7 +301,7 @@ model DisputeMessage {
   disputeId   String
   senderId    String
   message     String   @db.Text
-  attachments Json?    // URLs de archivos adjuntos
+  attachments Json? // URLs de archivos adjuntos
   isInternal  Boolean  @default(false) // Notas internas del conciliator
   createdAt   DateTime @default(now())
 

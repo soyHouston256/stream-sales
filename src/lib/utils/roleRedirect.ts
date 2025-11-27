@@ -9,6 +9,7 @@ const ROLE_DASHBOARD_MAP: Record<UserRole, string> = {
   seller: '/dashboard/seller',
   affiliate: '/dashboard/affiliate',
   conciliator: '/dashboard/conciliator',
+  payment_validator: '/dashboard/payment-validator',
 };
 
 /**
