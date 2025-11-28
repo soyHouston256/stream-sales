@@ -18,37 +18,35 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { EnhancedStatsCard } from '@/components/ui/enhanced-stats-card';
-import { Users, DollarSign, TrendingUp, ArrowRight, AlertCircle } from 'lucide-react';
+import { Users, Clock, CheckCircle, XCircle, ArrowRight, AlertCircle, Wallet } from 'lucide-react';
 import {
   useAffiliateInfo,
   useAffiliateStats,
-  useReferralsByMonth,
   useReferrals,
 } from '@/lib/hooks';
 import {
   ReferralCodeCard,
-  ReferralsChart,
-  ReferralStatusBadge,
+  ReferralApprovalStatusBadge,
 } from '@/components/affiliate';
-import { formatCommissionAmount } from '@/lib/utils/affiliate';
-import { WalletBalanceCard } from '@/components/wallet/WalletBalanceCard';
-import { useAffiliateWalletBalance } from '@/hooks/useWalletBalance';
-import { PaymentRequestDialog } from '@/components/affiliate/PaymentRequestDialog';
+import { useAffiliateWalletBalance } from '@/lib/hooks/useAffiliateWallet';
 import { useRouter } from 'next/navigation';
 
 export default function AffiliateDashboard() {
   const { user } = useAuth();
   const { t } = useLanguage();
   const router = useRouter();
-  const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
   const { data: affiliateInfo, isLoading: infoLoading, error: infoError } = useAffiliateInfo();
   const { data: stats, isLoading: statsLoading } = useAffiliateStats();
   const { data: walletBalance, isLoading: walletLoading } = useAffiliateWalletBalance();
-  const { data: chartData, isLoading: chartLoading } = useReferralsByMonth(6);
-  const { data: recentReferrals, isLoading: referralsLoading } = useReferrals({
+  const { data: allReferrals, isLoading: referralsLoading } = useReferrals({
     page: 1,
-    limit: 5,
+    limit: 10,
   });
+
+  // Calculate approval status counts
+  const pendingReferrals = allReferrals?.data?.filter((r: any) => r.approvalStatus === 'pending') || [];
+  const approvedReferrals = allReferrals?.data?.filter((r: any) => r.approvalStatus === 'approved') || [];
+  const rejectedReferrals = allReferrals?.data?.filter((r: any) => r.approvalStatus === 'rejected') || [];
 
   // Handle different affiliate status states
   if (infoError) {
@@ -146,24 +144,36 @@ export default function AffiliateDashboard() {
         </p>
       </div>
 
-      {/* Prominent Wallet Balance Card - MOST VISIBLE ELEMENT */}
-      <WalletBalanceCard
-        balance={walletBalance?.balance ?? stats?.availableBalance ?? 0}
-        currency={walletBalance?.currency ?? 'USD'}
-        lastUpdated={walletBalance?.lastUpdated ? new Date(walletBalance.lastUpdated) : undefined}
-        pendingAmount={walletBalance?.pendingAmount ?? 0}
-        isLoading={walletLoading}
-        variant="affiliate"
-        onWithdraw={() => setPaymentDialogOpen(true)}
-        onViewTransactions={() => router.push('/dashboard/affiliate/commissions')}
-      />
-
-      {/* Payment Request Dialog */}
-      <PaymentRequestDialog
-        availableBalance={String(walletBalance?.balance ?? stats?.availableBalance ?? 0)}
-        isOpen={paymentDialogOpen}
-        onClose={() => setPaymentDialogOpen(false)}
-      />
+      {/* Wallet Balance - For Approval Fees */}
+      <Card className="relative border-2 shadow-lg hover:shadow-xl transition-all overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-green-500 via-emerald-500 to-teal-500 opacity-5 rounded-lg pointer-events-none" />
+        <CardHeader className="relative">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="p-2.5 rounded-xl bg-gradient-to-br from-green-500 via-emerald-500 to-teal-500 shadow-md">
+              <Wallet className="h-6 w-6 text-white" />
+            </div>
+            <CardDescription className="text-base font-medium">
+              {t('affiliate.dashboard.availableBalance')}
+            </CardDescription>
+          </div>
+          <CardTitle className="text-5xl font-bold bg-gradient-to-br from-green-500 via-emerald-500 to-teal-500 bg-clip-text text-transparent">
+            {walletLoading ? '...' : `$${walletBalance?.balance || '0.00'}`}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="relative">
+          <p className="text-sm text-muted-foreground mb-4">
+            {t('affiliate.dashboard.balanceDescription')}
+          </p>
+          <div className="flex gap-2">
+            <Button onClick={() => router.push('/dashboard/affiliate/wallet')} variant="outline" size="sm">
+              {t('affiliate.dashboard.viewTransactions')}
+            </Button>
+            <Button onClick={() => router.push('/dashboard/affiliate/wallet')} size="sm">
+              {t('affiliate.dashboard.rechargeBalance')}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Referral Code Card */}
       {infoLoading ? (
@@ -175,59 +185,78 @@ export default function AffiliateDashboard() {
         />
       ) : null}
 
-      {/* Stats Cards */}
+      {/* Stats Cards - Approval Status */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <EnhancedStatsCard
-          title={t('affiliate.totalReferrals')}
+          title={t('affiliate.dashboard.totalReferrals')}
           value={stats?.totalReferrals || 0}
-          description={`${stats?.activeReferrals || 0} ${t('affiliate.active')}`}
+          description={t('affiliate.dashboard.registeredWithCode')}
           icon={Users}
           variant="info"
           isLoading={statsLoading}
         />
 
         <EnhancedStatsCard
-          title={t('affiliate.activeReferrals')}
-          value={stats?.activeReferrals || 0}
-          description={`${stats?.thisMonthReferrals || 0} ${t('affiliate.thisMonth')}`}
-          icon={Users}
-          variant="success"
-          isLoading={statsLoading}
+          title={t('affiliate.dashboard.pendingApproval')}
+          value={pendingReferrals.length}
+          description={t('affiliate.dashboard.awaitingDecision')}
+          icon={Clock}
+          variant="warning"
+          isLoading={referralsLoading}
         />
 
         <EnhancedStatsCard
-          title={t('affiliate.totalEarned')}
-          value={formatCommissionAmount(stats?.totalCommissionEarned || '0')}
-          description={t('affiliate.allTime')}
-          icon={DollarSign}
-          variant="info"
-          isLoading={statsLoading}
+          title={t('affiliate.dashboard.approvedReferrals')}
+          value={approvedReferrals.length}
+          description={t('affiliate.dashboard.activeSellers')}
+          icon={CheckCircle}
+          variant="success"
+          isLoading={referralsLoading}
         />
 
         <EnhancedStatsCard
-          title={t('affiliate.availableBalance')}
-          value={formatCommissionAmount(stats?.availableBalance || '0')}
-          description={`${formatCommissionAmount(stats?.thisMonthEarned || '0')} ${t('affiliate.thisMonth')}`}
-          icon={TrendingUp}
-          variant="success"
-          isLoading={statsLoading}
+          title={t('affiliate.dashboard.rejectedReferrals')}
+          value={rejectedReferrals.length}
+          description={t('affiliate.dashboard.notApproved')}
+          icon={XCircle}
+          variant="danger"
+          isLoading={referralsLoading}
         />
       </div>
 
-      {/* Referrals Chart */}
-      <ReferralsChart data={chartData} isLoading={chartLoading} />
+      {/* Quick Actions */}
+      {pendingReferrals.length > 0 && (
+        <Alert className="border-amber-200 bg-amber-50">
+          <Clock className="h-4 w-4 text-amber-600" />
+          <AlertDescription className="flex items-center justify-between">
+            <span className="text-amber-800">
+              {pendingReferrals.length === 1
+                ? t('affiliate.dashboard.pendingAlert').replace('{count}', pendingReferrals.length.toString())
+                : t('affiliate.dashboard.pendingAlertPlural').replace('{count}', pendingReferrals.length.toString())
+              }
+            </span>
+            <Button
+              variant="default"
+              size="sm"
+              onClick={() => router.push('/dashboard/affiliate/referrals-pending')}
+            >
+              {t('affiliate.dashboard.reviewNow')}
+            </Button>
+          </AlertDescription>
+        </Alert>
+      )}
 
       {/* Recent Referrals */}
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle>{t('affiliate.recentReferrals')}</CardTitle>
-              <CardDescription>{t('affiliate.mostRecentReferrals')}</CardDescription>
+              <CardTitle>{t('affiliate.dashboard.myReferrals')}</CardTitle>
+              <CardDescription>{t('affiliate.dashboard.latestSellers')}</CardDescription>
             </div>
             <Button variant="outline" size="sm" asChild>
               <Link href="/dashboard/affiliate/referrals">
-                {t('affiliate.viewAll')}
+                {t('affiliate.dashboard.viewAll')}
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
@@ -240,20 +269,19 @@ export default function AffiliateDashboard() {
                 <Skeleton key={i} className="h-12 w-full" />
               ))}
             </div>
-          ) : recentReferrals && recentReferrals.data.length > 0 ? (
+          ) : allReferrals && allReferrals.data.length > 0 ? (
             <div className="rounded-md border">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>{t('affiliate.user')}</TableHead>
-                    <TableHead>{t('affiliate.role')}</TableHead>
-                    <TableHead>{t('affiliate.status')}</TableHead>
-                    <TableHead>{t('affiliate.registered')}</TableHead>
-                    <TableHead className="text-right">{t('affiliate.commission')}</TableHead>
+                    <TableHead>{t('affiliate.dashboard.user')}</TableHead>
+                    <TableHead>{t('affiliate.dashboard.role')}</TableHead>
+                    <TableHead>{t('affiliate.dashboard.approvalStatus')}</TableHead>
+                    <TableHead>{t('affiliate.dashboard.registrationDate')}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {recentReferrals.data.map((referral: any) => (
+                  {allReferrals.data.map((referral: any) => (
                     <TableRow key={referral.id}>
                       <TableCell>
                         <div>
@@ -267,13 +295,10 @@ export default function AffiliateDashboard() {
                         <span className="capitalize">{referral.referredUser.role}</span>
                       </TableCell>
                       <TableCell>
-                        <ReferralStatusBadge status={referral.status} />
+                        <ReferralApprovalStatusBadge status={referral.approvalStatus} />
                       </TableCell>
                       <TableCell>
                         {format(new Date(referral.createdAt), 'PP')}
-                      </TableCell>
-                      <TableCell className="text-right font-medium">
-                        {formatCommissionAmount(referral.totalCommissionEarned)}
                       </TableCell>
                     </TableRow>
                   ))}
@@ -282,7 +307,9 @@ export default function AffiliateDashboard() {
             </div>
           ) : (
             <div className="py-8 text-center text-muted-foreground">
-              {t('affiliate.noReferrals')}
+              <Users className="mx-auto h-12 w-12 mb-3 opacity-50" />
+              <p className="font-medium">{t('affiliate.dashboard.noReferralsYet')}</p>
+              <p className="text-sm mt-1">{t('affiliate.dashboard.shareCode')}</p>
             </div>
           )}
         </CardContent>

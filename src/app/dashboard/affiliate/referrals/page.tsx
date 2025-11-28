@@ -24,14 +24,13 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { EnhancedStatsCard } from '@/components/ui/enhanced-stats-card';
 import { EmptyState } from '@/components/ui/empty-state';
-import { Users, Eye, Search, Filter } from 'lucide-react';
+import { Users, Eye, Search, Filter, Clock, CheckCircle, XCircle } from 'lucide-react';
 import { useReferrals } from '@/lib/hooks';
 import { ReferralFilters } from '@/types/affiliate';
 import {
-  ReferralStatusBadge,
+  ReferralApprovalStatusBadge,
   ReferralDetailsDialog,
 } from '@/components/affiliate';
-import { formatCommissionAmount } from '@/lib/utils/affiliate';
 
 export default function ReferralsPage() {
   const { t } = useLanguage();
@@ -74,8 +73,9 @@ export default function ReferralsPage() {
   };
 
   const totalReferrals = data?.pagination.total || 0;
-  const activeReferrals = data?.data.filter((r: any) => r.status === 'active').length || 0;
-  const inactiveReferrals = data?.data.filter((r: any) => r.status === 'inactive').length || 0;
+  const pendingReferrals = data?.data.filter((r: any) => r.approvalStatus === 'pending').length || 0;
+  const approvedReferrals = data?.data.filter((r: any) => r.approvalStatus === 'approved').length || 0;
+  const rejectedReferrals = data?.data.filter((r: any) => r.approvalStatus === 'rejected').length || 0;
 
   return (
     <div className="space-y-6">
@@ -90,41 +90,38 @@ export default function ReferralsPage() {
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-4">
         <EnhancedStatsCard
-          title={t('affiliate.referrals.totalReferrals')}
+          title="Total Referidos"
           value={totalReferrals}
+          description="Registrados con tu código"
           icon={Users}
           variant="info"
           isLoading={isLoading}
         />
 
         <EnhancedStatsCard
-          title={t('affiliate.referrals.active')}
-          value={activeReferrals}
-          icon={Users}
-          variant="success"
-          isLoading={isLoading}
-        />
-
-        <EnhancedStatsCard
-          title={t('affiliate.referrals.inactive')}
-          value={inactiveReferrals}
-          icon={Users}
+          title="Pendientes"
+          value={pendingReferrals}
+          description="Esperando aprobación"
+          icon={Clock}
           variant="warning"
           isLoading={isLoading}
         />
 
         <EnhancedStatsCard
-          title={t('affiliate.referrals.thisMonth')}
-          value={data?.data.filter((r: any) => {
-            const createdDate = new Date(r.createdAt);
-            const now = new Date();
-            return (
-              createdDate.getMonth() === now.getMonth() &&
-              createdDate.getFullYear() === now.getFullYear()
-            );
-          }).length || 0}
-          icon={Users}
-          variant="info"
+          title="Aprobados"
+          value={approvedReferrals}
+          description="Vendedores activos"
+          icon={CheckCircle}
+          variant="success"
+          isLoading={isLoading}
+        />
+
+        <EnhancedStatsCard
+          title="Rechazados"
+          value={rejectedReferrals}
+          description="No aprobados"
+          icon={XCircle}
+          variant="danger"
           isLoading={isLoading}
         />
       </div>
@@ -194,9 +191,8 @@ export default function ReferralsPage() {
                     <TableRow>
                       <TableHead>{t('affiliate.referrals.user')}</TableHead>
                       <TableHead>{t('affiliate.referrals.role')}</TableHead>
-                      <TableHead>{t('affiliate.referrals.status')}</TableHead>
-                      <TableHead>{t('affiliate.referrals.registered')}</TableHead>
-                      <TableHead className="text-right">{t('affiliate.referrals.commissionEarned')}</TableHead>
+                      <TableHead>{t('affiliate.dashboard.approvalStatus')}</TableHead>
+                      <TableHead>{t('affiliate.dashboard.registrationDate')}</TableHead>
                       <TableHead className="text-right">{t('affiliate.referrals.actions')}</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -215,13 +211,10 @@ export default function ReferralsPage() {
                           <span className="capitalize">{referral.referredUser.role}</span>
                         </TableCell>
                         <TableCell>
-                          <ReferralStatusBadge status={referral.status} />
+                          <ReferralApprovalStatusBadge status={referral.approvalStatus} />
                         </TableCell>
                         <TableCell>
                           {format(new Date(referral.createdAt), 'PP')}
-                        </TableCell>
-                        <TableCell className="text-right font-medium">
-                          {formatCommissionAmount(referral.totalCommissionEarned)}
                         </TableCell>
                         <TableCell className="text-right">
                           <Button

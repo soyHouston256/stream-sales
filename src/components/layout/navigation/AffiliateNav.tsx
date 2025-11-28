@@ -1,9 +1,9 @@
 import {
   LayoutDashboard,
   Users,
-  DollarSign,
   Megaphone,
   Clock,
+  Wallet,
 } from 'lucide-react';
 import type { NavItem } from '../Sidebar';
 
@@ -27,10 +27,10 @@ export const getAffiliateNavItems = (t: (key: string) => string): NavItem[] => [
     description: t('navigation.referredUsers'),
   },
   {
-    title: t('navigation.commissions'),
-    href: '/dashboard/affiliate/commissions',
-    icon: DollarSign,
-    description: t('navigation.earnedCommissions'),
+    title: 'Mi Saldo',
+    href: '/dashboard/affiliate/wallet',
+    icon: Wallet,
+    description: 'Gestiona tu saldo y recargas',
   },
   {
     title: t('navigation.marketing'),

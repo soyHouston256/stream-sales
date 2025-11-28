@@ -25,6 +25,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useCreateRecharge } from '@/lib/hooks/useSellerWallet';
+import { useCreateAffiliateRecharge } from '@/lib/hooks/useAffiliateWallet';
 import { rechargeSchema, RechargeInput } from '@/lib/validations/seller';
 import { Plus, Wallet } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils/seller';
@@ -32,12 +33,16 @@ import { formatCurrency } from '@/lib/utils/seller';
 interface RechargeDialogProps {
   currentBalance?: string;
   trigger?: React.ReactNode;
+  role?: 'seller' | 'affiliate';
 }
 
-export function RechargeDialog({ currentBalance, trigger }: RechargeDialogProps) {
+export function RechargeDialog({ currentBalance, trigger, role = 'seller' }: RechargeDialogProps) {
   const { t } = useLanguage();
   const [open, setOpen] = useState(false);
-  const createRecharge = useCreateRecharge();
+  const createSellerRecharge = useCreateRecharge();
+  const createAffiliateRecharge = useCreateAffiliateRecharge();
+
+  const createRecharge = role === 'affiliate' ? createAffiliateRecharge : createSellerRecharge;
 
   const {
     register,

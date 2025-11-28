@@ -41,7 +41,9 @@ export function ReferralApprovalStatusBadge({
     },
   };
 
-  const { label, icon: Icon, className: statusClassName } = config[status];
+  // Fallback to pending if status is invalid or undefined
+  const currentStatus = status && config[status] ? status : 'pending';
+  const { label, icon: Icon, className: statusClassName } = config[currentStatus];
 
   return (
     <Badge className={`${statusClassName} ${className || ''}`}>

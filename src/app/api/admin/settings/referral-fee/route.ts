@@ -8,9 +8,10 @@ export const dynamic = 'force-dynamic';
  * GET /api/admin/settings/referral-fee
  *
  * Get the current active referral approval fee configuration.
+ * Accessible by authenticated users (affiliates need to see the fee amount).
  *
  * Headers:
- * - Authorization: Bearer <token> (must be admin)
+ * - Authorization: Bearer <token> (any authenticated user)
  *
  * Response 200:
  * {
@@ -28,7 +29,7 @@ export const dynamic = 'force-dynamic';
  */
 export async function GET(request: NextRequest) {
   try {
-    // 1. Verify JWT token
+    // 1. Verify JWT token (any authenticated user can read)
     const authHeader = request.headers.get('authorization');
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -45,18 +46,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
     }
 
-    // 2. Verify admin role
-    const user = await prisma.user.findUnique({
-      where: { id: payload.userId },
-      select: { role: true },
-    });
-
-    if (!user || user.role !== 'admin') {
-      return NextResponse.json(
-        { error: 'Unauthorized. Admin access required.' },
-        { status: 403 }
-      );
-    }
+    // 2. No need to verify admin role for GET (read-only)
+    // Affiliates need to see the approval fee amount
 
     // 3. Get active configuration
     const config = await prisma.referralApprovalConfig.findFirst({

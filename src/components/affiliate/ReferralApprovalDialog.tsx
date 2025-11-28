@@ -15,6 +15,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, CheckCircle, XCircle, AlertTriangle, Wallet } from 'lucide-react';
 import { Referral, ApproveReferralResponse } from '@/types/affiliate';
 import { useToast } from '@/hooks/use-toast';
+import { tokenManager } from '@/lib/utils/tokenManager';
 
 interface ReferralApprovalDialogProps {
   referral: Referral | null;
@@ -71,7 +72,7 @@ export function ReferralApprovalDialog({
     setError(null);
 
     try {
-      const token = localStorage.getItem('token');
+      const token = tokenManager.getToken();
       const response = await fetch(`/api/affiliate/referrals/${referral.id}/approve`, {
         method: 'POST',
         headers: {
@@ -112,7 +113,7 @@ export function ReferralApprovalDialog({
     setError(null);
 
     try {
-      const token = localStorage.getItem('token');
+      const token = tokenManager.getToken();
       const response = await fetch(`/api/affiliate/referrals/${referral.id}/reject`, {
         method: 'POST',
         headers: {

@@ -56,8 +56,21 @@ export class JwtService {
       // SECURITY: Explicitly specify allowed algorithms to prevent algorithm confusion attacks
       return jwt.verify(token, this.secret, { algorithms: ['HS256'] }) as JwtPayload;
     } catch (error) {
-      if (error instanceof Error && error.message === 'Token has been revoked') {
-        throw error;
+      if (error instanceof Error) {
+        // Token revocation error - pass through
+        if (error.message === 'Token has been revoked') {
+          throw error;
+        }
+        // JWT specific errors - provide more context
+        if (error.name === 'TokenExpiredError') {
+          throw new Error('Token has expired');
+        }
+        if (error.name === 'JsonWebTokenError') {
+          console.error('JWT verification failed:', error.message);
+          throw new Error('Invalid token: ' + error.message);
+        }
+        // Log other errors for debugging
+        console.error('JWT verification error:', error);
       }
       throw new Error('Invalid token');
     }

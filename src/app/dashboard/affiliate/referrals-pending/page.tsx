@@ -22,6 +22,7 @@ import { ReferralFilters, Referral } from '@/types/affiliate';
 import { ReferralApprovalStatusBadge, ReferralApprovalDialog } from '@/components/affiliate';
 import { useQuery } from '@tanstack/react-query';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { tokenManager } from '@/lib/utils/tokenManager';
 
 export default function ReferralsPendingPage() {
   const { t } = useLanguage();
@@ -42,7 +43,7 @@ export default function ReferralsPendingPage() {
   const { data: approvalFeeData, isLoading: isLoadingFee } = useQuery({
     queryKey: ['referral-approval-fee'],
     queryFn: async () => {
-      const token = localStorage.getItem('token');
+      const token = tokenManager.getToken();
       const response = await fetch('/api/admin/settings/referral-fee', {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -62,8 +63,8 @@ export default function ReferralsPendingPage() {
   const { data: walletData, isLoading: isLoadingWallet } = useQuery({
     queryKey: ['affiliate-wallet-balance'],
     queryFn: async () => {
-      const token = localStorage.getItem('token');
-      const response = await fetch('/api/seller/wallet/balance', {
+      const token = tokenManager.getToken();
+      const response = await fetch('/api/affiliate/wallet/balance', {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -78,7 +79,7 @@ export default function ReferralsPendingPage() {
   });
 
   const approvalFee = approvalFeeData?.data?.approvalFee || '0.00';
-  const affiliateBalance = walletData?.data?.balance || '0.00';
+  const affiliateBalance = walletData?.balance || '0.00';
   const pendingReferrals = referralsData?.data || [];
 
   const handleApprove = (referral: Referral) => {
@@ -99,16 +100,16 @@ export default function ReferralsPendingPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold">Referidos Pendientes de Aprobación</h1>
+        <h1 className="text-3xl font-bold">{t('affiliate.pendingReferrals.title')}</h1>
         <p className="text-muted-foreground mt-2">
-          Gestiona los vendedores que se registraron con tu código de referido.
+          {t('affiliate.pendingReferrals.subtitle')}
         </p>
       </div>
 
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-3">
         <EnhancedStatsCard
-          title="Referidos Pendientes"
+          title={t('affiliate.pendingReferrals.pendingReferralsCount')}
           value={pendingReferrals.length}
           icon={Clock}
           variant="warning"
@@ -116,7 +117,7 @@ export default function ReferralsPendingPage() {
         />
 
         <EnhancedStatsCard
-          title="Costo por Aprobación"
+          title={t('affiliate.pendingReferrals.approvalCost')}
           value={`$${approvalFee} USD`}
           icon={CheckCircle}
           variant="info"
@@ -124,7 +125,7 @@ export default function ReferralsPendingPage() {
         />
 
         <EnhancedStatsCard
-          title="Tu Saldo Disponible"
+          title={t('affiliate.pendingReferrals.yourBalance')}
           value={`$${affiliateBalance} USD`}
           icon={Wallet}
           variant="success"
@@ -135,18 +136,17 @@ export default function ReferralsPendingPage() {
       {/* Info Alert */}
       <Alert>
         <AlertDescription>
-          <strong>Cómo funciona:</strong> Cuando apruebas un referido, se te cobrará ${approvalFee}{' '}
-          USD de tu wallet. Este monto se transfiere al administrador. Asegúrate de tener saldo
-          suficiente antes de aprobar.
+          <strong>{t('affiliate.pendingReferrals.howItWorksTitle')}</strong>{' '}
+          {t('affiliate.pendingReferrals.howItWorksDescription').replace('{fee}', `$${approvalFee}`)}
         </AlertDescription>
       </Alert>
 
       {/* Pending Referrals Table */}
       <Card>
         <CardHeader>
-          <CardTitle>Referidos Esperando Tu Aprobación</CardTitle>
+          <CardTitle>{t('affiliate.pendingReferrals.waitingApproval')}</CardTitle>
           <CardDescription>
-            Revisa y decide si deseas aprobar o rechazar cada referido.
+            {t('affiliate.pendingReferrals.reviewDecide')}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -161,11 +161,11 @@ export default function ReferralsPendingPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Usuario</TableHead>
-                    <TableHead>Rol</TableHead>
-                    <TableHead>Fecha de Registro</TableHead>
-                    <TableHead>Estado</TableHead>
-                    <TableHead className="text-right">Acciones</TableHead>
+                    <TableHead>{t('affiliate.pendingReferrals.user')}</TableHead>
+                    <TableHead>{t('affiliate.pendingReferrals.role')}</TableHead>
+                    <TableHead>{t('affiliate.pendingReferrals.registrationDate')}</TableHead>
+                    <TableHead>{t('affiliate.pendingReferrals.status')}</TableHead>
+                    <TableHead className="text-right">{t('affiliate.pendingReferrals.actions')}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -194,7 +194,7 @@ export default function ReferralsPendingPage() {
                             onClick={() => handleApprove(referral)}
                           >
                             <CheckCircle className="mr-2 h-4 w-4" />
-                            Aprobar
+                            {t('affiliate.pendingReferrals.approve')}
                           </Button>
                           <Button
                             variant="outline"
@@ -202,7 +202,7 @@ export default function ReferralsPendingPage() {
                             onClick={() => handleReject(referral)}
                           >
                             <XCircle className="mr-2 h-4 w-4" />
-                            Rechazar
+                            {t('affiliate.pendingReferrals.reject')}
                           </Button>
                         </div>
                       </TableCell>
@@ -214,8 +214,8 @@ export default function ReferralsPendingPage() {
           ) : (
             <EmptyState
               icon={Clock}
-              title="No hay referidos pendientes"
-              description="Todos tus referidos han sido aprobados o rechazados."
+              title={t('affiliate.pendingReferrals.noPending')}
+              description={t('affiliate.pendingReferrals.allReviewed')}
               variant="default"
             />
           )}

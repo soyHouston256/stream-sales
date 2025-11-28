@@ -10,6 +10,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Settings, Loader2, CheckCircle, AlertTriangle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { tokenManager } from '@/lib/utils/tokenManager';
 
 export default function AdminSettingsPage() {
   const [approvalFee, setApprovalFee] = useState<string>('');
@@ -21,7 +22,7 @@ export default function AdminSettingsPage() {
   const { data, isLoading, error } = useQuery({
     queryKey: ['referral-approval-fee'],
     queryFn: async () => {
-      const token = localStorage.getItem('token');
+      const token = tokenManager.getToken();
       const response = await fetch('/api/admin/settings/referral-fee', {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -49,7 +50,7 @@ export default function AdminSettingsPage() {
   // Update approval fee mutation
   const updateMutation = useMutation({
     mutationFn: async (newFee: string) => {
-      const token = localStorage.getItem('token');
+      const token = tokenManager.getToken();
       const response = await fetch('/api/admin/settings/referral-fee', {
         method: 'POST',
         headers: {
