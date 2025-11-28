@@ -33,6 +33,8 @@ import {
 } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { EnhancedStatsCard } from '@/components/ui/enhanced-stats-card';
+import { EmptyState } from '@/components/ui/empty-state';
 
 interface AffiliateApplication {
   id: string;
@@ -197,46 +199,32 @@ export default function AdminAffiliatesPage() {
 
       {/* Stats */}
       <div className="grid gap-4 md:grid-cols-3">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t('admin.affiliates.pendingApplications')}</CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{pendingCount}</div>
-            <p className="text-xs text-muted-foreground">
-              {t('admin.affiliates.awaitingReview')}
-            </p>
-          </CardContent>
-        </Card>
+        <EnhancedStatsCard
+          title={t('admin.affiliates.pendingApplications')}
+          value={pendingCount}
+          description={t('admin.affiliates.awaitingReview')}
+          icon={Clock}
+          variant="warning"
+          isLoading={isLoading}
+        />
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t('admin.affiliates.approved')}</CardTitle>
-            <CheckCircle className="h-4 w-4 text-green-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {applications.filter(app => app.status === 'approved').length}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              {t('admin.affiliates.activeAffiliates')}
-            </p>
-          </CardContent>
-        </Card>
+        <EnhancedStatsCard
+          title={t('admin.affiliates.approved')}
+          value={applications.filter(app => app.status === 'approved').length}
+          description={t('admin.affiliates.activeAffiliates')}
+          icon={CheckCircle}
+          variant="success"
+          isLoading={isLoading}
+        />
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t('admin.affiliates.totalApplications')}</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{applications.length}</div>
-            <p className="text-xs text-muted-foreground">
-              {t('admin.affiliates.allTime')}
-            </p>
-          </CardContent>
-        </Card>
+        <EnhancedStatsCard
+          title={t('admin.affiliates.totalApplications')}
+          value={applications.length}
+          description={t('admin.affiliates.allTime')}
+          icon={Users}
+          variant="info"
+          isLoading={isLoading}
+        />
       </div>
 
       {error && (
@@ -256,9 +244,12 @@ export default function AdminAffiliatesPage() {
         </CardHeader>
         <CardContent>
           {applications.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              {t('admin.affiliates.noApplications')}
-            </div>
+            <EmptyState
+              icon={Users}
+              title={t('admin.affiliates.noApplications')}
+              description="No se han recibido solicitudes de afiliados aún"
+              variant="default"
+            />
           ) : (
             <Table>
               <TableHeader>

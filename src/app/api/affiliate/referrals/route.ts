@@ -87,6 +87,7 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get('page') || '1', 10);
     const limit = Math.min(parseInt(searchParams.get('limit') || '10', 10), 50);
     const status = searchParams.get('status') || undefined;
+    const approvalStatus = searchParams.get('approvalStatus') || undefined;
     const role = searchParams.get('role') || undefined;
     const search = searchParams.get('search') || undefined;
     const dateFrom = searchParams.get('dateFrom') || undefined;
@@ -99,6 +100,10 @@ export async function GET(request: NextRequest) {
 
     if (status) {
       where.status = status;
+    }
+
+    if (approvalStatus) {
+      where.approvalStatus = approvalStatus;
     }
 
     if (dateFrom || dateTo) {
@@ -160,6 +165,10 @@ export async function GET(request: NextRequest) {
         role: aff.referredUser.role,
       },
       status: aff.status,
+      approvalStatus: aff.approvalStatus,
+      approvalFee: aff.approvalFee?.toString() || null,
+      approvedAt: aff.approvedAt?.toISOString() || null,
+      rejectedAt: aff.rejectedAt?.toISOString() || null,
       commissionPaid: aff.commissionPaid,
       commissionAmount: aff.commissionAmount?.toString() || '0.00',
       totalCommissionEarned: aff.commissionAmount?.toString() || '0.00', // TODO: Calculate from commissions table

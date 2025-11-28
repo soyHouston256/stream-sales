@@ -4,6 +4,7 @@ import { useAuth } from '@/lib/auth/useAuth';
 import { Wallet, CheckCircle, XCircle, Clock, TrendingUp } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { EnhancedStatsCard } from '@/components/ui/enhanced-stats-card';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { apiClient } from '@/lib/api/client';
@@ -31,42 +32,6 @@ interface PaymentValidatorStats {
     withdrawalsProcessed: number;
     totalProcessed: number;
   };
-}
-
-function StatsCard({
-  title,
-  value,
-  icon: Icon,
-  description,
-  variant = 'default',
-}: {
-  title: string;
-  value: string | number;
-  icon: any;
-  description?: string;
-  variant?: 'default' | 'warning' | 'success' | 'destructive';
-}) {
-  const variants = {
-    default: 'bg-blue-500',
-    warning: 'bg-yellow-500',
-    success: 'bg-green-500',
-    destructive: 'bg-red-500',
-  };
-
-  return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium">{title}</CardTitle>
-        <Icon className={`h-4 w-4 text-white p-1 rounded ${variants[variant]}`} />
-      </CardHeader>
-      <CardContent>
-        <div className="text-2xl font-bold">{value}</div>
-        {description && (
-          <p className="text-xs text-muted-foreground mt-1">{description}</p>
-        )}
-      </CardContent>
-    </Card>
-  );
 }
 
 export default function PaymentValidatorDashboard() {
@@ -114,33 +79,37 @@ export default function PaymentValidatorDashboard() {
       <div>
         <h2 className="text-xl font-semibold mb-4">{t('paymentValidator.pendingValidations')}</h2>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <StatsCard
+          <EnhancedStatsCard
             title={t('paymentValidator.pendingRecharges')}
             value={stats?.recharges.pending ?? 0}
             icon={Clock}
             description={`${t('paymentValidator.totalAmount')}: $${stats?.recharges.totalPendingAmount ?? '0.00'}`}
             variant="warning"
+            isLoading={isLoading}
           />
-          <StatsCard
+          <EnhancedStatsCard
             title={t('paymentValidator.pendingWithdrawals')}
             value={stats?.withdrawals.pending ?? 0}
             icon={Clock}
             description={`${t('paymentValidator.totalAmount')}: $${stats?.withdrawals.totalPendingAmount ?? '0.00'}`}
             variant="warning"
+            isLoading={isLoading}
           />
-          <StatsCard
+          <EnhancedStatsCard
             title={t('paymentValidator.approvedWithdrawals')}
             value={stats?.withdrawals.approved ?? 0}
             icon={CheckCircle}
             description={t('paymentValidator.waitingCompletion')}
             variant="success"
+            isLoading={isLoading}
           />
-          <StatsCard
+          <EnhancedStatsCard
             title={t('paymentValidator.myTotalProcessed')}
             value={stats?.myActivity.totalProcessed ?? 0}
             icon={TrendingUp}
             description={t('paymentValidator.validationActivity')}
-            variant="default"
+            variant="info"
+            isLoading={isLoading}
           />
         </div>
       </div>

@@ -43,6 +43,10 @@ export interface Referral {
     role: UserRole;
   };
   status: 'active' | 'inactive' | 'suspended';
+  approvalStatus: 'pending' | 'approved' | 'rejected'; // Nuevo workflow de aprobación
+  approvalFee?: string | null; // Monto cobrado al aprobar
+  approvedAt?: string | null; // Timestamp de aprobación
+  rejectedAt?: string | null; // Timestamp de rechazo
   commissionPaid: boolean;
   commissionAmount?: string; // Snapshot del monto de comisión de registro
   totalCommissionEarned: string; // Total de todas las comisiones de este referido
@@ -103,6 +107,7 @@ export interface MarketingStats {
 
 export interface ReferralFilters {
   status?: 'active' | 'inactive' | 'suspended';
+  approvalStatus?: 'pending' | 'approved' | 'rejected'; // Nuevo filtro por estado de aprobación
   role?: UserRole;
   search?: string;
   dateFrom?: string;
@@ -161,3 +166,59 @@ export type PaymentMethod = 'paypal' | 'bank_transfer' | 'crypto';
 export type CommissionType = 'registration' | 'sale' | 'bonus';
 export type AffiliateStatus = 'pending' | 'approved' | 'active' | 'suspended' | 'rejected';
 export type CommissionStatus = 'pending' | 'paid' | 'rejected';
+export type ReferralApprovalStatus = 'pending' | 'approved' | 'rejected';
+
+/**
+ * Configuración del fee de aprobación de referidos
+ */
+export interface ReferralApprovalConfig {
+  id: string;
+  approvalFee: string; // Monto fijo en USD
+  isActive: boolean;
+  effectiveFrom: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * Respuesta de aprobar un referido
+ */
+export interface ApproveReferralResponse {
+  affiliation: {
+    id: string;
+    affiliateId: string;
+    referredUserId: string;
+    approvalStatus: string;
+    approvalFee: string;
+    approvedAt: string;
+  };
+  transaction: {
+    id: string;
+    type: string;
+    amount: string;
+    description: string;
+  };
+  affiliateWallet: {
+    id: string;
+    previousBalance: string;
+    newBalance: string;
+  };
+  adminWallet: {
+    id: string;
+    previousBalance: string;
+    newBalance: string;
+  };
+}
+
+/**
+ * Respuesta de rechazar un referido
+ */
+export interface RejectReferralResponse {
+  affiliation: {
+    id: string;
+    affiliateId: string;
+    referredUserId: string;
+    approvalStatus: string;
+    rejectedAt: string;
+  };
+}

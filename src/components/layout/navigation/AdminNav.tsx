@@ -6,6 +6,7 @@ import {
   ArrowLeftRight,
   Wallet,
   UserCheck,
+  Cog,
 } from 'lucide-react';
 import type { NavItem } from '../Sidebar';
 
@@ -45,5 +46,11 @@ export const getAdminNavItems = (t: (key: string) => string): NavItem[] => [
     href: '/dashboard/admin/transactions',
     icon: ArrowLeftRight,
     description: t('navigation.transactionMonitoring'),
+  },
+  {
+    title: 'Configuración',
+    href: '/dashboard/admin/settings',
+    icon: Cog,
+    description: 'Configuración del sistema',
   },
 ];

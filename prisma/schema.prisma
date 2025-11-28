@@ -212,19 +212,36 @@ model CommissionConfig {
   @@map("commission_configs")
 }
 
+model ReferralApprovalConfig {
+  id            String   @id @default(cuid())
+  approvalFee   Decimal  @db.Decimal(19, 4) // Monto fijo que se cobra al afiliado al aprobar un referido
+  isActive      Boolean  @default(true) // Solo debe haber 1 registro activo
+  effectiveFrom DateTime @default(now())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([isActive])
+  @@map("referral_approval_configs")
+}
+
 // ============================================
 // AFFILIATION (Referral System)
 // ============================================
 
 model Affiliation {
-  id               String   @id @default(cuid())
+  id               String    @id @default(cuid())
   affiliateId      String
-  referredUserId   String   @unique // Un usuario solo puede ser referido UNA vez
+  referredUserId   String    @unique // Un usuario solo puede ser referido UNA vez
   referralCode     String
-  status           String   @default("active") // active, inactive, suspended
-  commissionPaid   Boolean  @default(false)
-  commissionAmount Decimal? @db.Decimal(19, 4) // Snapshot del monto cobrado
-  createdAt        DateTime @default(now())
+  status           String    @default("active") // active, inactive, suspended
+  approvalStatus   String    @default("pending") // pending, approved, rejected - Workflow de aprobación
+  approvalFee      Decimal?  @db.Decimal(19, 4) // Monto fijo cobrado al aprobar
+  approvedAt       DateTime? // Timestamp de aprobación
+  rejectedAt       DateTime? // Timestamp de rechazo
+  approvalTransactionId String? // ID de transacción del fee de aprobación
+  commissionPaid   Boolean   @default(false)
+  commissionAmount Decimal?  @db.Decimal(19, 4) // Snapshot del monto cobrado
+  createdAt        DateTime  @default(now())
 
   // Relations
   affiliate    User @relation("AffiliateAffiliations", fields: [affiliateId], references: [id])
@@ -233,6 +250,7 @@ model Affiliation {
   @@index([affiliateId])
   @@index([referredUserId])
   @@index([referralCode])
+  @@index([approvalStatus]) // Para filtrar por estado de aprobación
   @@map("affiliations")
 }
 
