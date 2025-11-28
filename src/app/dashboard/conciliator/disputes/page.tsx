@@ -10,7 +10,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { AlertCircle, CheckCircle, Clock, Inbox, Search } from 'lucide-react';
 import { useDisputes } from '@/lib/hooks/useDisputes';
 import { DisputesTable } from '@/components/conciliator/DisputesTable';
-import { StatsCard } from '@/components/conciliator/StatsCard';
+import { EnhancedStatsCard } from '@/components/ui/enhanced-stats-card';
+import { EmptyState } from '@/components/ui/empty-state';
 import { DisputeStatus } from '@/types/conciliator';
 import { useLanguage } from '@/contexts/LanguageContext';
 
@@ -76,29 +77,37 @@ export default function DisputesQueuePage() {
         </div>
       ) : quickStats ? (
         <div className="grid gap-4 md:grid-cols-4">
-          <StatsCard
+          <EnhancedStatsCard
             title={t('conciliator.disputes.totalOpen')}
             value={quickStats.open}
             description={t('conciliator.disputes.awaitingAssignment')}
             icon={Inbox}
+            variant="warning"
+            isLoading={isLoading}
           />
-          <StatsCard
+          <EnhancedStatsCard
             title={t('conciliator.disputes.underReview')}
             value={quickStats.underReview}
             description={t('conciliator.disputes.beingReviewed')}
             icon={Clock}
+            variant="info"
+            isLoading={isLoading}
           />
-          <StatsCard
+          <EnhancedStatsCard
             title={t('conciliator.disputes.resolved')}
             value={quickStats.resolved}
             description={t('conciliator.disputes.thisPage')}
             icon={CheckCircle}
+            variant="success"
+            isLoading={isLoading}
           />
-          <StatsCard
+          <EnhancedStatsCard
             title={t('conciliator.disputes.totalDisputes')}
             value={quickStats.total}
             description={t('conciliator.disputes.allTime')}
             icon={AlertCircle}
+            variant="info"
+            isLoading={isLoading}
           />
         </div>
       ) : null}
@@ -174,9 +183,16 @@ export default function DisputesQueuePage() {
               showConciliator={true}
             />
           ) : (
-            <p className="text-sm text-muted-foreground text-center py-8">
-              {t('conciliator.disputes.noDisputes')}
-            </p>
+            <EmptyState
+              icon={AlertCircle}
+              title={status !== 'all' || searchQuery ? t('conciliator.disputes.noDisputesFiltered') : t('conciliator.disputes.noDisputes')}
+              description={
+                status !== 'all' || searchQuery
+                  ? t('conciliator.disputes.tryDifferentFilters')
+                  : t('conciliator.disputes.noDisputesDescription')
+              }
+              variant={status !== 'all' || searchQuery ? 'search' : 'default'}
+            />
           )}
         </CardContent>
       </Card>

@@ -18,7 +18,7 @@ import { CategoryBadge } from '@/components/provider/CategoryBadge';
 import { useProviderSales } from '@/lib/hooks/useProviderSales';
 import { ProviderSale } from '@/types/provider';
 import { format } from 'date-fns';
-import { TrendingUp, DollarSign, AlertCircle } from 'lucide-react';
+import { TrendingUp, DollarSign, AlertCircle, ShoppingBag } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function SalesPage() {
@@ -306,7 +306,16 @@ export default function SalesPage() {
               }
             : undefined
         }
-        emptyMessage={t('provider.sales.noSales')}
+        emptyState={{
+          icon: ShoppingBag,
+          title: startDate || endDate || status !== 'all'
+            ? t('provider.sales.noSalesFound') || 'No sales found'
+            : t('provider.sales.noSales') || 'No sales yet',
+          description: startDate || endDate || status !== 'all'
+            ? t('provider.sales.noSalesFoundDesc') || 'No sales found with the current filters'
+            : t('provider.sales.noSalesDesc') || 'Your sold products will appear here',
+          variant: 'default',
+        }}
       />
     </div>
   );

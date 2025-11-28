@@ -4,7 +4,7 @@ import { useAuth } from '@/lib/auth/useAuth';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Package, DollarSign, Wallet, ShoppingCart } from 'lucide-react';
-import { StatsCard } from '@/components/admin/StatsCard';
+import { EnhancedStatsCard } from '@/components/ui/enhanced-stats-card';
 import { SalesByCategoryChart } from '@/components/provider/SalesByCategoryChart';
 import { CreateProductDialog } from '@/components/provider/CreateProductDialog';
 import { DataTable, Column } from '@/components/admin/DataTable';
@@ -13,11 +13,17 @@ import { useProviderSales } from '@/lib/hooks/useProviderSales';
 import { ProviderSale } from '@/types/provider';
 import { CategoryBadge } from '@/components/provider/CategoryBadge';
 import { format } from 'date-fns';
+import { WalletBalanceCard } from '@/components/wallet/WalletBalanceCard';
+import { useProviderWalletBalance } from '@/hooks/useWalletBalance';
+import { WithdrawalRequestDialog } from '@/components/provider/WithdrawalRequestDialog';
+import { useRouter } from 'next/navigation';
 
 export default function ProviderDashboard() {
   const { user } = useAuth();
   const { t } = useLanguage();
+  const router = useRouter();
   const { data: stats, isLoading: statsLoading } = useProviderStats();
+  const { data: walletBalance, isLoading: walletLoading } = useProviderWalletBalance();
   const { data: salesData, isLoading: salesLoading } = useProviderSales({
     page: 1,
     limit: 5,
@@ -77,34 +83,59 @@ export default function ProviderDashboard() {
         <CreateProductDialog />
       </div>
 
+      {/* Prominent Wallet Balance Card - MOST VISIBLE ELEMENT */}
+      <WalletBalanceCard
+        balance={walletBalance?.balance ?? stats?.pendingBalance ?? 0}
+        currency={walletBalance?.currency ?? 'USD'}
+        lastUpdated={walletBalance?.lastUpdated ? new Date(walletBalance.lastUpdated) : undefined}
+        pendingAmount={walletBalance?.pendingAmount ?? 0}
+        isLoading={walletLoading}
+        variant="provider"
+        onWithdraw={() => {
+          // Trigger the WithdrawalDialog via a hidden button click
+          document.getElementById('withdrawal-trigger-btn')?.click();
+        }}
+        onViewTransactions={() => router.push('/dashboard/provider/earnings')}
+      />
+
+      {/* WithdrawalRequestDialog */}
+      <WithdrawalRequestDialog
+        availableBalance={Number(walletBalance?.balance ?? stats?.pendingBalance ?? 0)}
+        trigger={<button id="withdrawal-trigger-btn" style={{ display: 'none' }} />}
+      />
+
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <StatsCard
+        <EnhancedStatsCard
           title={t('provider.totalProducts')}
           value={stats?.totalProducts ?? 0}
           description={`${stats?.availableProducts ?? 0} ${t('provider.availableProducts')}, ${stats?.soldProducts ?? 0} ${t('provider.soldProducts')}`}
           icon={Package}
           isLoading={statsLoading}
+          variant="info"
         />
-        <StatsCard
+        <EnhancedStatsCard
           title={t('provider.totalEarnings')}
           value={stats ? `$${parseFloat(stats.totalEarnings).toFixed(2)}` : '$0.00'}
           description={t('provider.lifetimeEarnings')}
           icon={DollarSign}
           isLoading={statsLoading}
+          variant="success"
         />
-        <StatsCard
+        <EnhancedStatsCard
           title={t('provider.thisMonth')}
           value={stats ? `$${parseFloat(stats.thisMonthEarnings).toFixed(2)}` : '$0.00'}
           description={`${stats?.thisMonthSales ?? 0} ${t('provider.salesThisMonth')}`}
           icon={ShoppingCart}
           isLoading={statsLoading}
+          variant="info"
         />
-        <StatsCard
+        <EnhancedStatsCard
           title={t('provider.pendingBalance')}
           value={stats ? `$${parseFloat(stats.pendingBalance).toFixed(2)}` : '$0.00'}
           description={t('provider.availableForWithdrawal')}
           icon={Wallet}
           isLoading={statsLoading}
+          variant="warning"
         />
       </div>
 

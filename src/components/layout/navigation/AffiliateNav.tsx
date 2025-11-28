@@ -1,8 +1,9 @@
 import {
   LayoutDashboard,
   Users,
-  DollarSign,
   Megaphone,
+  Clock,
+  Wallet,
 } from 'lucide-react';
 import type { NavItem } from '../Sidebar';
 
@@ -14,16 +15,22 @@ export const getAffiliateNavItems = (t: (key: string) => string): NavItem[] => [
     description: t('navigation.overviewStats'),
   },
   {
+    title: 'Referidos Pendientes',
+    href: '/dashboard/affiliate/referrals-pending',
+    icon: Clock,
+    description: 'Aprobar o rechazar referidos',
+  },
+  {
     title: t('navigation.referrals'),
     href: '/dashboard/affiliate/referrals',
     icon: Users,
     description: t('navigation.referredUsers'),
   },
   {
-    title: t('navigation.commissions'),
-    href: '/dashboard/affiliate/commissions',
-    icon: DollarSign,
-    description: t('navigation.earnedCommissions'),
+    title: 'Mi Saldo',
+    href: '/dashboard/affiliate/wallet',
+    icon: Wallet,
+    description: 'Gestiona tu saldo y recargas',
   },
   {
     title: t('navigation.marketing'),

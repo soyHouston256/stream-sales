@@ -41,30 +41,31 @@ export async function POST(request: NextRequest) {
         });
 
         if (affiliateProfile) {
-          // Create affiliation record
+          // Create affiliation record in PENDING status
+          // The affiliate must approve the referral before any fees are charged
           await prisma.affiliation.create({
             data: {
               affiliateId: affiliateProfile.userId,
               referredUserId: result.user.id,
               referralCode: referralCode.trim().toUpperCase(),
-              status: 'active',
+              status: 'active', // Legacy field
+              approvalStatus: 'pending', // NEW: Requires affiliate approval
               commissionPaid: false,
-              commissionAmount: 10.00, // Default registration commission
+              commissionAmount: 0, // No commission until approved
             },
           });
 
-          // Update affiliate profile stats
+          // Update ONLY totalReferrals count (not earnings until approved)
           await prisma.affiliateProfile.update({
             where: { id: affiliateProfile.id },
             data: {
               totalReferrals: { increment: 1 },
-              activeReferrals: { increment: 1 },
-              totalEarnings: { increment: 10.00 }, // Add registration commission
-              pendingBalance: { increment: 10.00 },
+              // activeReferrals will increment when affiliate approves
             },
           });
 
-          console.log(`✅ Affiliation created: User ${result.user.id} referred by ${affiliateProfile.userId}`);
+          console.log(`✅ Affiliation created in PENDING status: User ${result.user.id} referred by ${affiliateProfile.userId}`);
+          console.log(`⏳ Waiting for affiliate approval...`);
         } else {
           console.warn(`⚠️ Invalid referral code: ${referralCode}`);
         }

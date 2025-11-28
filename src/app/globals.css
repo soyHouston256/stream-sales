@@ -57,3 +57,148 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Micro-interactions and animations */
+@layer utilities {
+  /* Button hover scale effect */
+  .button-scale {
+    @apply transition-transform duration-200 ease-out;
+  }
+  .button-scale:hover {
+    @apply scale-[1.02];
+  }
+  .button-scale:active {
+    @apply scale-[0.98];
+  }
+
+  /* Card hover effects */
+  .card-hover {
+    @apply transition-all duration-300 ease-out;
+  }
+  .card-hover:hover {
+    @apply shadow-lg -translate-y-1;
+  }
+
+  /* Smooth fade in animation */
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-fade-in {
+    animation: fade-in 0.3s ease-out;
+  }
+
+  /* Pulse animation for loading states */
+  @keyframes pulse-subtle {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.7;
+    }
+  }
+
+  .animate-pulse-subtle {
+    animation: pulse-subtle 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  /* Success checkmark animation */
+  @keyframes check-bounce {
+    0% {
+      transform: scale(0);
+    }
+    50% {
+      transform: scale(1.1);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+
+  .animate-check-bounce {
+    animation: check-bounce 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+
+  /* Slide in from left */
+  @keyframes slide-in-left {
+    from {
+      transform: translateX(-100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  .animate-slide-in-left {
+    animation: slide-in-left 0.3s ease-out;
+  }
+
+  /* Skeleton loading shimmer */
+  @keyframes shimmer {
+    0% {
+      background-position: -1000px 0;
+    }
+    100% {
+      background-position: 1000px 0;
+    }
+  }
+
+  .animate-shimmer {
+    background: linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0) 0%,
+      rgba(255, 255, 255, 0.2) 50%,
+      rgba(255, 255, 255, 0) 100%
+    );
+    background-size: 1000px 100%;
+    animation: shimmer 2s infinite;
+  }
+
+  /* Focus ring enhancement */
+  .focus-ring {
+    @apply focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-shadow duration-200;
+  }
+
+  /* Interactive link underline */
+  .link-hover {
+    @apply relative;
+  }
+  .link-hover::after {
+    @apply absolute bottom-0 left-0 w-0 h-0.5 bg-current transition-all duration-300;
+    content: '';
+  }
+  .link-hover:hover::after {
+    @apply w-full;
+  }
+}
+
+/* Component-specific enhancements */
+@layer components {
+  /* Enhanced button interactions */
+  .btn-primary {
+    @apply button-scale focus-ring;
+  }
+
+  /* Enhanced card with hover effect */
+  .card-interactive {
+    @apply card-hover cursor-pointer;
+  }
+
+  /* Smooth transitions for all interactive elements */
+  button,
+  a,
+  input,
+  select,
+  textarea {
+    @apply transition-colors duration-200;
+  }
+}

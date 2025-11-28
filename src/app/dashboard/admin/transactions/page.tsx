@@ -14,7 +14,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Download, ArrowRight } from 'lucide-react';
+import { Download, ArrowRight, Receipt } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
@@ -202,7 +202,15 @@ export default function TransactionsPage() {
                   }
                 : undefined
             }
-            emptyMessage="No se encontraron transacciones"
+            emptyState={{
+              icon: Receipt,
+              title: 'No hay transacciones',
+              description:
+                typeFilter !== 'all'
+                  ? `No hay transacciones de tipo ${typeLabels[typeFilter] || typeFilter}.`
+                  : 'No se han registrado transacciones en el sistema todavía.',
+              variant: 'default',
+            }}
           />
         </CardContent>
       </Card>

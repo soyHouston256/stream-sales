@@ -14,7 +14,7 @@ export function DashboardLayout({ children, navItems }: DashboardLayoutProps) {
       <Header />
       <div className="flex flex-1">
         <Sidebar items={navItems} />
-        <main className="flex-1 p-6 overflow-auto">
+        <main className="flex-1 p-4 md:p-6 overflow-auto pt-16 md:pt-6">
           {children}
         </main>
       </div>

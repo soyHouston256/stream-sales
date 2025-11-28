@@ -5,3 +5,5 @@ export { ReferralsChart } from './ReferralsChart';
 export { ReferralTextTemplate } from './ReferralTextTemplate';
 export { ReferralDetailsDialog } from './ReferralDetailsDialog';
 export { PaymentRequestDialog } from './PaymentRequestDialog';
+export { ReferralApprovalStatusBadge } from './ReferralApprovalStatusBadge';
+export { ReferralApprovalDialog } from './ReferralApprovalDialog';

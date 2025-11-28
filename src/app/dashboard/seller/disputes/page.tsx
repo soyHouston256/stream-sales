@@ -8,7 +8,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AlertCircle, FileQuestion, Eye } from 'lucide-react';
+import { EmptyState } from '@/components/ui/empty-state';
+import { AlertCircle, Eye } from 'lucide-react';
 import { format } from 'date-fns';
 import { formatCurrency } from '@/lib/utils/seller';
 
@@ -102,15 +103,12 @@ export default function SellerDisputesPage() {
 
       {/* Empty State */}
       {!isLoading && data?.disputes && data.disputes.length === 0 && (
-        <Card>
-          <CardContent className="flex flex-col items-center justify-center py-12">
-            <FileQuestion className="h-16 w-16 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-semibold mb-2">{t('disputes.noDisputes')}</h3>
-            <p className="text-sm text-muted-foreground text-center max-w-md">
-              {t('disputes.noDisputesDescription')}
-            </p>
-          </CardContent>
-        </Card>
+        <EmptyState
+          icon={AlertCircle}
+          title={t('disputes.noDisputes')}
+          description={t('disputes.noDisputesDescription')}
+          variant="default"
+        />
       )}
 
       {/* Disputes List */}

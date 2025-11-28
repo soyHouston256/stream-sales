@@ -3,7 +3,7 @@
 import { useAuth } from '@/lib/auth/useAuth';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Users, DollarSign, AlertCircle, TrendingUp, Wallet } from 'lucide-react';
-import { StatsCard } from '@/components/admin/StatsCard';
+import { EnhancedStatsCard } from '@/components/ui/enhanced-stats-card';
 import { SalesChart } from '@/components/admin/SalesChart';
 import { useAdminStats, useSalesData } from '@/lib/hooks/useAdminStats';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -26,45 +26,51 @@ export default function AdminDashboard() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <StatsCard
+        <EnhancedStatsCard
           title={t('admin.totalUsers')}
           value={stats?.totalUsers ?? 0}
           icon={Users}
           isLoading={statsLoading}
+          variant="info"
+          showTrend={!!stats?.usersGrowth}
           trend={
             stats?.usersGrowth
               ? {
-                  value: stats.usersGrowth,
-                  isPositive: stats.usersGrowth > 0,
+                  value: `${stats.usersGrowth > 0 ? '+' : ''}${stats.usersGrowth}%`,
+                  direction: stats.usersGrowth > 0 ? 'up' : 'down',
                 }
               : undefined
           }
         />
-        <StatsCard
+        <EnhancedStatsCard
           title={t('admin.totalSales')}
           value={`$${stats?.totalSales ? Number(stats.totalSales).toFixed(2) : '0.00'}`}
           icon={DollarSign}
           isLoading={statsLoading}
+          variant="success"
+          showTrend={!!stats?.salesGrowth}
           trend={
             stats?.salesGrowth
               ? {
-                  value: stats.salesGrowth,
-                  isPositive: stats.salesGrowth > 0,
+                  value: `${stats.salesGrowth > 0 ? '+' : ''}${stats.salesGrowth}%`,
+                  direction: stats.salesGrowth > 0 ? 'up' : 'down',
                 }
               : undefined
           }
         />
-        <StatsCard
+        <EnhancedStatsCard
           title={t('admin.commissionsGenerated')}
           value={`$${stats?.totalCommissions ? Number(stats.totalCommissions).toFixed(2) : '0.00'}`}
           icon={TrendingUp}
           isLoading={statsLoading}
+          variant="success"
         />
-        <StatsCard
+        <EnhancedStatsCard
           title={t('admin.activeDisputes')}
           value={stats?.activeDisputes ?? 0}
           icon={AlertCircle}
           isLoading={statsLoading}
+          variant={stats?.activeDisputes && stats.activeDisputes > 0 ? 'warning' : 'default'}
         />
       </div>
 

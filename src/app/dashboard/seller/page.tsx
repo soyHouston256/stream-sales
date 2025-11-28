@@ -6,7 +6,8 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Wallet, ShoppingBag, DollarSign, TrendingUp } from 'lucide-react';
-import { StatsCard } from '@/components/admin/StatsCard';
+import { EnhancedStatsCard } from '@/components/ui/enhanced-stats-card';
+import { EmptyState } from '@/components/ui/empty-state';
 import { DataTable, Column } from '@/components/admin/DataTable';
 import { useSellerStats } from '@/lib/hooks/useSellerStats';
 import { useMarketplace } from '@/lib/hooks/useMarketplace';
@@ -87,37 +88,41 @@ export default function SellerDashboard() {
             {t('dashboard.welcome')}, {user?.name || user?.email}
           </p>
         </div>
-        <RechargeDialog currentBalance={stats?.walletBalance} />
+        <RechargeDialog currentBalance={stats ? stats.walletBalance.toString() : '0'} />
       </div>
 
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <StatsCard
+        <EnhancedStatsCard
           title={t('seller.walletBalance')}
           value={stats ? formatCurrency(stats.walletBalance) : '$0.00'}
           description={t('seller.availableBalance')}
           icon={Wallet}
+          variant="success"
           isLoading={statsLoading}
         />
-        <StatsCard
+        <EnhancedStatsCard
           title={t('seller.totalPurchases')}
           value={stats?.totalPurchases ?? 0}
           description={t('seller.lifetimePurchases')}
           icon={ShoppingBag}
+          variant="info"
           isLoading={statsLoading}
         />
-        <StatsCard
+        <EnhancedStatsCard
           title={t('seller.totalSpent')}
           value={stats ? formatCurrency(stats.totalSpent) : '$0.00'}
           description={t('seller.lifetimeSpending')}
           icon={DollarSign}
+          variant="warning"
           isLoading={statsLoading}
         />
-        <StatsCard
+        <EnhancedStatsCard
           title={t('seller.thisMonth')}
           value={stats?.thisMonthPurchases ?? 0}
           description={stats ? `${formatCurrency(stats.thisMonthSpent)} ${t('seller.spent')}` : `$0.00 ${t('seller.spent')}`}
           icon={TrendingUp}
+          variant="info"
           isLoading={statsLoading}
         />
       </div>
@@ -177,6 +182,12 @@ export default function SellerDashboard() {
               columns={purchaseColumns}
               isLoading={purchasesLoading}
               emptyMessage={t('seller.noPurchases')}
+              emptyState={{
+                icon: ShoppingBag,
+                title: t('seller.noPurchases'),
+                description: t('seller.noPurchasesDescription'),
+                variant: 'default',
+              }}
             />
           </CardContent>
         </Card>

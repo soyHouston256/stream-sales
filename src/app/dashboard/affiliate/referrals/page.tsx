@@ -22,14 +22,15 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Users, Eye, Search, Filter } from 'lucide-react';
+import { EnhancedStatsCard } from '@/components/ui/enhanced-stats-card';
+import { EmptyState } from '@/components/ui/empty-state';
+import { Users, Eye, Search, Filter, Clock, CheckCircle, XCircle } from 'lucide-react';
 import { useReferrals } from '@/lib/hooks';
 import { ReferralFilters } from '@/types/affiliate';
 import {
-  ReferralStatusBadge,
+  ReferralApprovalStatusBadge,
   ReferralDetailsDialog,
 } from '@/components/affiliate';
-import { formatCommissionAmount } from '@/lib/utils/affiliate';
 
 export default function ReferralsPage() {
   const { t } = useLanguage();
@@ -72,8 +73,9 @@ export default function ReferralsPage() {
   };
 
   const totalReferrals = data?.pagination.total || 0;
-  const activeReferrals = data?.data.filter((r: any) => r.status === 'active').length || 0;
-  const inactiveReferrals = data?.data.filter((r: any) => r.status === 'inactive').length || 0;
+  const pendingReferrals = data?.data.filter((r: any) => r.approvalStatus === 'pending').length || 0;
+  const approvedReferrals = data?.data.filter((r: any) => r.approvalStatus === 'approved').length || 0;
+  const rejectedReferrals = data?.data.filter((r: any) => r.approvalStatus === 'rejected').length || 0;
 
   return (
     <div className="space-y-6">
@@ -87,70 +89,41 @@ export default function ReferralsPage() {
 
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t('affiliate.referrals.totalReferrals')}</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <Skeleton className="h-8 w-16" />
-            ) : (
-              <div className="text-2xl font-bold">{totalReferrals}</div>
-            )}
-          </CardContent>
-        </Card>
+        <EnhancedStatsCard
+          title="Total Referidos"
+          value={totalReferrals}
+          description="Registrados con tu código"
+          icon={Users}
+          variant="info"
+          isLoading={isLoading}
+        />
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t('affiliate.referrals.active')}</CardTitle>
-            <Users className="h-4 w-4 text-green-600" />
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <Skeleton className="h-8 w-16" />
-            ) : (
-              <div className="text-2xl font-bold text-green-600">{activeReferrals}</div>
-            )}
-          </CardContent>
-        </Card>
+        <EnhancedStatsCard
+          title="Pendientes"
+          value={pendingReferrals}
+          description="Esperando aprobación"
+          icon={Clock}
+          variant="warning"
+          isLoading={isLoading}
+        />
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t('affiliate.referrals.inactive')}</CardTitle>
-            <Users className="h-4 w-4 text-gray-500" />
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <Skeleton className="h-8 w-16" />
-            ) : (
-              <div className="text-2xl font-bold text-gray-500">{inactiveReferrals}</div>
-            )}
-          </CardContent>
-        </Card>
+        <EnhancedStatsCard
+          title="Aprobados"
+          value={approvedReferrals}
+          description="Vendedores activos"
+          icon={CheckCircle}
+          variant="success"
+          isLoading={isLoading}
+        />
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t('affiliate.referrals.thisMonth')}</CardTitle>
-            <Users className="h-4 w-4 text-blue-600" />
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <Skeleton className="h-8 w-16" />
-            ) : (
-              <div className="text-2xl font-bold text-blue-600">
-                {data?.data.filter((r: any) => {
-                  const createdDate = new Date(r.createdAt);
-                  const now = new Date();
-                  return (
-                    createdDate.getMonth() === now.getMonth() &&
-                    createdDate.getFullYear() === now.getFullYear()
-                  );
-                }).length || 0}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+        <EnhancedStatsCard
+          title="Rechazados"
+          value={rejectedReferrals}
+          description="No aprobados"
+          icon={XCircle}
+          variant="danger"
+          isLoading={isLoading}
+        />
       </div>
 
       {/* Filters and Table */}
@@ -218,9 +191,8 @@ export default function ReferralsPage() {
                     <TableRow>
                       <TableHead>{t('affiliate.referrals.user')}</TableHead>
                       <TableHead>{t('affiliate.referrals.role')}</TableHead>
-                      <TableHead>{t('affiliate.referrals.status')}</TableHead>
-                      <TableHead>{t('affiliate.referrals.registered')}</TableHead>
-                      <TableHead className="text-right">{t('affiliate.referrals.commissionEarned')}</TableHead>
+                      <TableHead>{t('affiliate.dashboard.approvalStatus')}</TableHead>
+                      <TableHead>{t('affiliate.dashboard.registrationDate')}</TableHead>
                       <TableHead className="text-right">{t('affiliate.referrals.actions')}</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -239,13 +211,10 @@ export default function ReferralsPage() {
                           <span className="capitalize">{referral.referredUser.role}</span>
                         </TableCell>
                         <TableCell>
-                          <ReferralStatusBadge status={referral.status} />
+                          <ReferralApprovalStatusBadge status={referral.approvalStatus} />
                         </TableCell>
                         <TableCell>
                           {format(new Date(referral.createdAt), 'PP')}
-                        </TableCell>
-                        <TableCell className="text-right font-medium">
-                          {formatCommissionAmount(referral.totalCommissionEarned)}
                         </TableCell>
                         <TableCell className="text-right">
                           <Button
@@ -290,9 +259,16 @@ export default function ReferralsPage() {
               )}
             </>
           ) : (
-            <div className="py-8 text-center text-muted-foreground">
-              {t('affiliate.referrals.noReferrals')}
-            </div>
+            <EmptyState
+              icon={Users}
+              title={filters.search || filters.status || filters.role ? t('affiliate.referrals.noReferralsFiltered') : t('affiliate.referrals.noReferrals')}
+              description={
+                filters.search || filters.status || filters.role
+                  ? t('affiliate.referrals.tryDifferentFilters')
+                  : t('affiliate.referrals.startReferring')
+              }
+              variant={filters.search || filters.status || filters.role ? 'search' : 'default'}
+            />
           )}
         </CardContent>
       </Card>

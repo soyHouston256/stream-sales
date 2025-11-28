@@ -7,6 +7,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { DataTable, Column } from '@/components/admin/DataTable';
+import { EnhancedStatsCard } from '@/components/ui/enhanced-stats-card';
+import { EmptyState } from '@/components/ui/empty-state';
 import { WithdrawalRequestDialog } from '@/components/provider/WithdrawalRequestDialog';
 import {
   useProviderBalance,
@@ -175,73 +177,41 @@ export default function EarningsPage() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              {t('provider.earnings.availableBalance')}
-            </CardTitle>
-            <Wallet className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              ${balance ? parseFloat(balance.balance).toFixed(2) : '0.00'}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              {t('provider.earnings.readyForWithdrawal')}
-            </p>
-          </CardContent>
-        </Card>
+        <EnhancedStatsCard
+          title={t('provider.earnings.availableBalance')}
+          value={balance ? `$${parseFloat(balance.balance).toFixed(2)}` : '$0.00'}
+          description={t('provider.earnings.readyForWithdrawal')}
+          icon={Wallet}
+          variant="success"
+          isLoading={balanceLoading}
+        />
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              {t('provider.earnings.totalEarnings')}
-            </CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              ${balance ? parseFloat(balance.totalEarnings).toFixed(2) : '0.00'}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              {t('provider.earnings.lifetimeEarnings')}
-            </p>
-          </CardContent>
-        </Card>
+        <EnhancedStatsCard
+          title={t('provider.earnings.totalEarnings')}
+          value={balance ? `$${parseFloat(balance.totalEarnings).toFixed(2)}` : '$0.00'}
+          description={t('provider.earnings.lifetimeEarnings')}
+          icon={TrendingUp}
+          variant="info"
+          isLoading={balanceLoading}
+        />
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              {t('provider.earnings.totalWithdrawn')}
-            </CardTitle>
-            <TrendingDown className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              ${balance ? parseFloat(balance.totalWithdrawals).toFixed(2) : '0.00'}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              {t('provider.earnings.successfullyWithdrawn')}
-            </p>
-          </CardContent>
-        </Card>
+        <EnhancedStatsCard
+          title={t('provider.earnings.totalWithdrawn')}
+          value={balance ? `$${parseFloat(balance.totalWithdrawals).toFixed(2)}` : '$0.00'}
+          description={t('provider.earnings.successfullyWithdrawn')}
+          icon={TrendingDown}
+          variant="warning"
+          isLoading={balanceLoading}
+        />
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              {t('provider.earnings.pendingWithdrawals')}
-            </CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              ${balance ? parseFloat(balance.pendingWithdrawals).toFixed(2) : '0.00'}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              {t('provider.earnings.awaitingApproval')}
-            </p>
-          </CardContent>
-        </Card>
+        <EnhancedStatsCard
+          title={t('provider.earnings.pendingWithdrawals')}
+          value={balance ? `$${parseFloat(balance.pendingWithdrawals).toFixed(2)}` : '$0.00'}
+          description={t('provider.earnings.awaitingApproval')}
+          icon={DollarSign}
+          variant="warning"
+          isLoading={balanceLoading}
+        />
       </div>
 
       <Card>
@@ -308,6 +278,14 @@ export default function EarningsPage() {
                   : undefined
               }
               emptyMessage={t('provider.earnings.noTransactions')}
+              emptyState={{
+                icon: DollarSign,
+                title: startDate || endDate ? t('provider.earnings.noTransactionsFiltered') : t('provider.earnings.noTransactions'),
+                description: startDate || endDate
+                  ? t('provider.earnings.tryDifferentFilters')
+                  : t('provider.earnings.transactionsAppearHere'),
+                variant: startDate || endDate ? 'search' : 'default',
+              }}
             />
           </div>
         </CardContent>
@@ -324,6 +302,12 @@ export default function EarningsPage() {
             columns={withdrawalColumns}
             isLoading={withdrawalsLoading}
             emptyMessage={t('provider.earnings.noWithdrawals')}
+            emptyState={{
+              icon: Wallet,
+              title: t('provider.earnings.noWithdrawals'),
+              description: t('provider.earnings.withdrawalsAppearHere'),
+              variant: 'default',
+            }}
           />
         </CardContent>
       </Card>

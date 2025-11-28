@@ -9,7 +9,8 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, LucideIcon } from 'lucide-react';
+import { EmptyState } from '@/components/ui/empty-state';
 
 export interface Column<T> {
   key: string;
@@ -30,6 +31,16 @@ interface DataTableProps<T> {
   };
   onRowClick?: (item: T) => void;
   emptyMessage?: string;
+  emptyState?: {
+    icon?: LucideIcon;
+    title: string;
+    description: string;
+    action?: {
+      label: string;
+      onClick: () => void;
+    };
+    variant?: 'default' | 'search' | 'error';
+  };
 }
 
 export function DataTable<T extends Record<string, any>>({
@@ -39,6 +50,7 @@ export function DataTable<T extends Record<string, any>>({
   pagination,
   onRowClick,
   emptyMessage = 'No hay datos disponibles',
+  emptyState,
 }: DataTableProps<T>) {
   if (isLoading) {
     return (
@@ -70,6 +82,11 @@ export function DataTable<T extends Record<string, any>>({
   }
 
   if (data.length === 0) {
+    // Use EmptyState component if provided, otherwise fallback to simple message
+    if (emptyState) {
+      return <EmptyState {...emptyState} />;
+    }
+
     return (
       <div className="rounded-md border">
         <Table>

@@ -10,7 +10,8 @@ import { Badge } from '@/components/ui/badge';
 import { CheckCircle, Clock, TrendingUp, Eye } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useConciliatorPerformance, useMyHistory } from '@/lib/hooks/useConciliatorPerformance';
-import { StatsCard } from '@/components/conciliator/StatsCard';
+import { EnhancedStatsCard } from '@/components/ui/enhanced-stats-card';
+import { EmptyState } from '@/components/ui/empty-state';
 import { ResolutionStatsChart } from '@/components/conciliator/ResolutionStatsChart';
 import { ResolutionTypeBadge } from '@/components/conciliator/ResolutionTypeBadge';
 import { calculateResolutionTime, formatResolutionTime } from '@/lib/utils/conciliator';
@@ -49,29 +50,37 @@ export default function ConciliatorHistoryPage() {
         </div>
       ) : performance ? (
         <div className="grid gap-4 md:grid-cols-4">
-          <StatsCard
+          <EnhancedStatsCard
             title={t('conciliator.history.totalResolved')}
             value={performance.totalResolved}
             description={t('conciliator.history.allTime')}
             icon={CheckCircle}
+            variant="success"
+            isLoading={performanceLoading}
           />
-          <StatsCard
+          <EnhancedStatsCard
             title={t('conciliator.history.avgResolutionTime')}
             value={`${parseFloat(String(performance.averageResolutionTimeHours)).toFixed(1)}h`}
             description={t('conciliator.history.averageTime')}
             icon={Clock}
+            variant="info"
+            isLoading={performanceLoading}
           />
-          <StatsCard
+          <EnhancedStatsCard
             title={t('conciliator.history.refundRate')}
             value={`${parseFloat(String(performance.refundRate)).toFixed(0)}%`}
             description={t('conciliator.history.refundRateDesc')}
             icon={TrendingUp}
+            variant="warning"
+            isLoading={performanceLoading}
           />
-          <StatsCard
+          <EnhancedStatsCard
             title={t('conciliator.history.thisWeek')}
             value={performance.thisWeekResolved}
             description={t('conciliator.history.resolvedThisWeek')}
             icon={CheckCircle}
+            variant="success"
+            isLoading={performanceLoading}
           />
         </div>
       ) : null}
@@ -191,9 +200,12 @@ export default function ConciliatorHistoryPage() {
               </Table>
             </div>
           ) : (
-            <p className="text-sm text-muted-foreground text-center py-8">
-              {t('conciliator.history.noResolvedDisputes')}
-            </p>
+            <EmptyState
+              icon={CheckCircle}
+              title={t('conciliator.history.noResolvedDisputes')}
+              description={t('conciliator.history.noResolvedDisputesDescription')}
+              variant="default"
+            />
           )}
         </CardContent>
       </Card>

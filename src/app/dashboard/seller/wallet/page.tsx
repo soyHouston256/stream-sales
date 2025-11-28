@@ -12,6 +12,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { DataTable, Column } from '@/components/admin/DataTable';
+import { EnhancedStatsCard } from '@/components/ui/enhanced-stats-card';
+import { EmptyState } from '@/components/ui/empty-state';
 import {
   useWalletBalance,
   useWalletTransactions,
@@ -25,8 +27,7 @@ import {
 } from '@/components/seller';
 import { formatCurrency } from '@/lib/utils/seller';
 import { format } from 'date-fns';
-import { Wallet, TrendingUp, TrendingDown, Clock } from 'lucide-react';
-import { StatsCard } from '@/components/admin/StatsCard';
+import { Wallet, TrendingUp, Clock, Receipt } from 'lucide-react';
 
 export default function WalletPage() {
   const { t } = useLanguage();
@@ -175,36 +176,45 @@ export default function WalletPage() {
 
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="col-span-2">
-          <CardHeader className="pb-3">
-            <CardDescription>{t('seller.wallet.currentBalance')}</CardDescription>
-            <CardTitle className="text-4xl">
+        <Card className="col-span-2 overflow-hidden relative border-2 shadow-lg hover:shadow-xl transition-all">
+          <div className="absolute inset-0 bg-gradient-to-br from-green-500 via-emerald-500 to-teal-500 opacity-5" />
+          <CardHeader className="pb-3 relative">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="p-2.5 rounded-xl bg-gradient-to-br from-green-500 via-emerald-500 to-teal-500 shadow-md">
+                <Wallet className="h-6 w-6 text-white" />
+              </div>
+              <CardDescription className="text-base font-medium">
+                {t('seller.wallet.currentBalance')}
+              </CardDescription>
+            </div>
+            <CardTitle className="text-5xl font-bold bg-gradient-to-br from-green-500 via-emerald-500 to-teal-500 bg-clip-text text-transparent">
               {balance ? formatCurrency(balance.balance) : '$0.00'}
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="relative">
             <div className="flex items-center gap-2">
-              <Wallet className="h-4 w-4 text-muted-foreground" />
-              <span className="text-xs text-muted-foreground">
+              <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
                 {balance?.currency || 'USD'} • {balance?.status || 'active'}
               </span>
             </div>
           </CardContent>
         </Card>
 
-        <StatsCard
+        <EnhancedStatsCard
           title={t('seller.wallet.totalRecharged')}
           value={formatCurrency(totalRecharged.toFixed(2))}
           description={t('seller.wallet.lifetimeRecharges')}
           icon={TrendingUp}
+          variant="success"
           isLoading={rechargesLoading}
         />
 
-        <StatsCard
+        <EnhancedStatsCard
           title={t('seller.wallet.pendingRecharges')}
           value={pendingRecharges.length}
           description={formatCurrency(pendingAmount.toFixed(2))}
           icon={Clock}
+          variant="warning"
           isLoading={rechargesLoading}
         />
       </div>
@@ -251,6 +261,14 @@ export default function WalletPage() {
             columns={transactionColumns}
             isLoading={transactionsLoading}
             emptyMessage={t('seller.wallet.noTransactions')}
+            emptyState={{
+              icon: Receipt,
+              title: filters.type ? t('seller.wallet.noTransactionsFiltered') : t('seller.wallet.noTransactions'),
+              description: filters.type
+                ? t('seller.wallet.tryDifferentFilter')
+                : t('seller.wallet.transactionsAppearHere'),
+              variant: filters.type ? 'search' : 'default',
+            }}
           />
 
           {/* Pagination */}
@@ -296,6 +314,12 @@ export default function WalletPage() {
             columns={rechargeColumns}
             isLoading={rechargesLoading}
             emptyMessage={t('seller.wallet.noRecharges')}
+            emptyState={{
+              icon: Wallet,
+              title: t('seller.wallet.noRecharges'),
+              description: t('seller.wallet.rechargesAppearHere'),
+              variant: 'default',
+            }}
           />
         </CardContent>
       </Card>

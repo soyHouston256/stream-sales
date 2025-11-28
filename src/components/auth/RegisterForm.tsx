@@ -34,7 +34,7 @@ const registerSchema = z.object({
   password: z
     .string()
     .min(6, 'La contraseña debe tener al menos 6 caracteres'),
-  role: z.enum(['admin', 'provider', 'seller', 'affiliate', 'conciliator'], {
+  role: z.enum(['admin', 'provider', 'seller', 'affiliate', 'conciliator', 'payment_validator'], {
     required_error: 'Debes seleccionar un rol',
   }),
   referralCode: z.string().optional(),
@@ -62,6 +62,11 @@ const roleOptions: { value: UserRole; label: string; description: string }[] = [
     value: 'conciliator',
     label: 'Validador',
     description: 'Valida pagos y transacciones',
+  },
+  {
+    value: 'payment_validator',
+    label: 'Validador de Pagos',
+    description: 'Valida recargas y retiros de dinero',
   },
   {
     value: 'admin',
