@@ -64,22 +64,15 @@ export async function GET(request: NextRequest) {
     // 3. Get total users
     const totalUsers = await prisma.user.count();
 
-    // 4. Get total sales (completed purchases)
-    const totalSales = await prisma.purchase.count({
-      where: { status: 'completed' },
+    // 4. Get total sales (completed orders)
+    const totalSales = await prisma.order.count({
+      where: { status: 'paid' },
     });
 
-    // 5. Get total commissions (sum of adminCommission from purchases)
-    const commissionsAgg = await prisma.purchase.aggregate({
-      where: { status: 'completed' },
-      _sum: {
-        adminCommission: true,
-      },
-    });
-
-    const totalCommissions = commissionsAgg._sum.adminCommission
-      ? commissionsAgg._sum.adminCommission.toString()
-      : '0.00';
+    // 5. Get total commissions
+    // TODO: Implement commission calculation using Transaction/Ledger system
+    // As Order model doesn't store adminCommission directly anymore
+    const totalCommissions = '0.00';
 
     // 6. Get active disputes (if table exists, otherwise return 0)
     // For now, return 0 as disputes table may not exist yet
@@ -91,16 +84,16 @@ export async function GET(request: NextRequest) {
     const sixtyDaysAgo = new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000);
 
     // Sales growth
-    const recentSales = await prisma.purchase.count({
+    const recentSales = await prisma.order.count({
       where: {
-        status: 'completed',
+        status: 'paid',
         createdAt: { gte: thirtyDaysAgo },
       },
     });
 
-    const previousSales = await prisma.purchase.count({
+    const previousSales = await prisma.order.count({
       where: {
-        status: 'completed',
+        status: 'paid',
         createdAt: {
           gte: sixtyDaysAgo,
           lt: thirtyDaysAgo,
@@ -112,8 +105,8 @@ export async function GET(request: NextRequest) {
       previousSales > 0
         ? ((recentSales - previousSales) / previousSales) * 100
         : recentSales > 0
-        ? 100
-        : 0;
+          ? 100
+          : 0;
 
     // Users growth
     const recentUsers = await prisma.user.count({
@@ -135,8 +128,8 @@ export async function GET(request: NextRequest) {
       previousUsers > 0
         ? ((recentUsers - previousUsers) / previousUsers) * 100
         : recentUsers > 0
-        ? 100
-        : 0;
+          ? 100
+          : 0;
 
     // 8. Return stats
     return NextResponse.json({
