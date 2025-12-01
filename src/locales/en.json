@@ -457,6 +457,19 @@
       "cancel": "Cancel",
       "requesting": "Requesting...",
       "requestRecharge": "Request Recharge"
+    },
+    "hero": {
+      "automatedDelivery": "Automated Delivery in 30 seconds",
+      "subscriptionsAnd": "Subscriptions &",
+      "licenses": "Licenses",
+      "saveUpTo": "Save up to 80%",
+      "flashOffer": "Flash Offer",
+      "endsIn": "Ends in 04:23:12",
+      "exampleProduct": {
+        "name": "Netflix 4K",
+        "description": "Private Profile + PIN"
+      },
+      "buyFor": "Buy for $3.90"
     }
   },
   "affiliate": {
