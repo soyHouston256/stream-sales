@@ -61,16 +61,26 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // 3. Get completed purchases with product details
-    const purchases = await prisma.purchase.findMany({
+    // 3. Get completed sales with product details (replacing purchases)
+    const soldItems = await prisma.orderItem.findMany({
       where: {
-        providerId: user.id,
-        status: 'completed',
+        variant: {
+          product: {
+            providerId: user.id,
+          },
+        },
+        order: {
+          status: 'paid',
+        },
       },
       include: {
-        product: {
-          select: {
-            category: true,
+        variant: {
+          include: {
+            product: {
+              select: {
+                category: true,
+              },
+            },
           },
         },
       },
@@ -82,8 +92,11 @@ export async function GET(request: NextRequest) {
       { count: number; totalAmount: number; totalEarnings: number }
     >();
 
-    for (const purchase of purchases) {
-      const category = purchase.product.category;
+    for (const item of soldItems) {
+      const category = item.variant.product.category;
+      const amount = item.variant.price.toNumber();
+      const earnings = amount; // TODO: Handle commission
+
       const existing = categoryMap.get(category) || {
         count: 0,
         totalAmount: 0,
@@ -92,9 +105,8 @@ export async function GET(request: NextRequest) {
 
       categoryMap.set(category, {
         count: existing.count + 1,
-        totalAmount: existing.totalAmount + Number(purchase.amount),
-        totalEarnings:
-          existing.totalEarnings + Number(purchase.providerEarnings),
+        totalAmount: existing.totalAmount + amount,
+        totalEarnings: existing.totalEarnings + earnings,
       });
     }
 

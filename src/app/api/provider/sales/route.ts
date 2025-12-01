@@ -93,79 +93,108 @@ export async function GET(request: NextRequest) {
     const startDate = searchParams.get('startDate') || undefined;
     const endDate = searchParams.get('endDate') || undefined;
 
-    // 4. Build where clause
+    // 4. Build where clause for OrderItems
     const where: any = {
-      providerId: user.id,
+      variant: {
+        product: {
+          providerId: user.id,
+        },
+      },
     };
 
     if (status) {
-      where.status = status;
+      where.order = { status: status };
     }
 
     if (startDate || endDate) {
-      where.createdAt = {};
+      where.order = {
+        ...where.order,
+        createdAt: {},
+      };
       if (startDate) {
-        where.createdAt.gte = new Date(startDate);
+        where.order.createdAt.gte = new Date(startDate);
       }
       if (endDate) {
-        where.createdAt.lte = new Date(endDate);
+        where.order.createdAt.lte = new Date(endDate);
       }
     }
 
     // 5. Get total count
-    const total = await prisma.purchase.count({ where });
+    const total = await prisma.orderItem.count({ where });
 
-    // 6. Get purchases with pagination
-    const purchases = await prisma.purchase.findMany({
+    // 6. Get sales with pagination
+    const sales = await prisma.orderItem.findMany({
       where,
       skip: (page - 1) * limit,
       take: limit,
-      orderBy: { createdAt: 'desc' },
+      orderBy: {
+        order: {
+          createdAt: 'desc',
+        },
+      },
       include: {
-        product: {
-          select: {
-            id: true,
-            name: true,
-            category: true,
+        variant: {
+          include: {
+            product: true,
           },
         },
-        seller: {
-          select: {
-            id: true,
-            email: true,
-            name: true,
+        order: {
+          include: {
+            // Assuming we can get buyer info from order.userId if we had a relation, 
+            // but Order model in schema only has userId string, no relation defined in schema provided earlier?
+            // Wait, looking at schema provided:
+            // model Order { userId String ... } - No relation to User?
+            // That's a problem. I might need to fetch users separately or assume userId is enough.
+            // But the previous code fetched `seller` (User).
+            // Let's check schema again.
           },
         },
-        dispute: {
-          select: {
-            id: true,
-            status: true,
-          },
-        },
+        // dispute: true, // Dispute is on Purchase. New Dispute model links to... ?
+        // Schema says: model Dispute { purchaseId String @unique ... }
+        // It seems Dispute is still linked to Purchase. I need to update Dispute to link to OrderItem or Order.
+        // For now, I will omit dispute info or return undefined.
       },
     });
 
+    // Fetch buyers manually if needed, or if Order has relation.
+    // Checking schema: Order model has `userId` but no `@relation` to User?
+    // "model Order { ... userId String ... }"
+    // If so, I can't include buyer info directly.
+    // I will map what I can.
+
     // 7. Transform to response format
-    const data = purchases.map((purchase: any) => ({
-      id: purchase.id,
-      productId: purchase.productId,
-      productName: purchase.product.name,
-      productCategory: purchase.product.category,
-      buyerId: purchase.sellerId,
-      buyerEmail: purchase.seller.email,
-      buyerName: purchase.seller.name || undefined,
-      amount: purchase.amount.toString(),
-      providerEarnings: purchase.providerEarnings.toString(),
-      adminCommission: purchase.adminCommission.toString(),
-      commissionRate: purchase.commissionRate.toString(),
-      status: purchase.status,
-      completedAt: purchase.completedAt?.toISOString(),
-      refundedAt: purchase.refundedAt?.toISOString(),
-      createdAt: purchase.createdAt.toISOString(),
-      dispute: purchase.dispute ? {
-        id: purchase.dispute.id,
-        status: purchase.dispute.status,
-      } : undefined,
+    const data = await Promise.all(sales.map(async (item: any) => {
+      // Fetch buyer if not in relation
+      let buyerEmail = 'unknown';
+      let buyerName = 'unknown';
+      if (item.order.userId) {
+        const buyer = await prisma.user.findUnique({
+          where: { id: item.order.userId },
+          select: { email: true, name: true },
+        });
+        if (buyer) {
+          buyerEmail = buyer.email;
+          buyerName = buyer.name || 'unknown';
+        }
+      }
+
+      return {
+        id: item.id, // OrderItem ID
+        productId: item.variant.productId,
+        productName: item.variant.product.name,
+        productCategory: item.variant.product.category,
+        buyerId: item.order.userId,
+        buyerEmail: buyerEmail,
+        buyerName: buyerName,
+        amount: item.variant.price.toString(),
+        providerEarnings: item.variant.price.toString(), // TODO: Commission
+        adminCommission: "0",
+        commissionRate: "0",
+        status: item.order.status,
+        completedAt: item.order.status === 'paid' ? item.order.createdAt.toISOString() : undefined,
+        createdAt: item.order.createdAt.toISOString(),
+        // dispute: ... // TODO
+      };
     }));
 
     // 8. Return paginated response

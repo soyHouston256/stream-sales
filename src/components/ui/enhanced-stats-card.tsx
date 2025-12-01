@@ -1,4 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { LineChart, Line, ResponsiveContainer } from 'recharts';
 import { LucideIcon, TrendingUp, TrendingDown } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
@@ -15,6 +16,7 @@ interface EnhancedStatsCardProps {
     direction: 'up' | 'down';
   };
   showTrend?: boolean;
+  chartData?: { value: number }[];
 }
 
 const variantStyles = {
@@ -54,6 +56,7 @@ export function EnhancedStatsCard({
   variant = 'default',
   trend,
   showTrend = false,
+  chartData,
 }: EnhancedStatsCardProps) {
   const styles = variantStyles[variant];
 
@@ -112,6 +115,23 @@ export function EnhancedStatsCard({
             >
               {trend.value}
             </span>
+          </div>
+        )}
+
+        {chartData && chartData.length > 0 && (
+          <div className="h-[40px] w-full mt-3 opacity-50">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={chartData}>
+                <Line
+                  type="monotone"
+                  dataKey="value"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                  dot={false}
+                  className={styles.icon}
+                />
+              </LineChart>
+            </ResponsiveContainer>
           </div>
         )}
       </CardContent>

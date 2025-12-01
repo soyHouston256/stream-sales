@@ -13,8 +13,8 @@ export class UserAlreadyExistsException extends DomainException {
 }
 
 export class UserNotFoundException extends DomainException {
-  constructor() {
-    super('User not found');
+  constructor(userId?: string) {
+    super(userId ? `User with ID ${userId} not found` : 'User not found');
     this.name = 'UserNotFoundException';
   }
 }
@@ -23,5 +23,12 @@ export class InvalidCredentialsException extends DomainException {
   constructor() {
     super('Invalid credentials');
     this.name = 'InvalidCredentialsException';
+  }
+}
+
+export class InvalidPasswordException extends DomainException {
+  constructor(message: string) {
+    super(message);
+    this.name = 'InvalidPasswordException';
   }
 }

@@ -4,6 +4,7 @@ import { AuthProvider } from '@/lib/auth/AuthContext';
 import { QueryProvider } from '@/lib/providers/QueryProvider';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 import { Toaster } from '@/components/ui/toaster';
+import { ThemeProvider } from '@/components/theme-provider';
 
 export const metadata: Metadata = {
   title: 'Stream Sales - Login & Dashboard',
@@ -21,8 +22,15 @@ export default function RootLayout({
         <LanguageProvider>
           <QueryProvider>
             <AuthProvider>
-              {children}
-              <Toaster />
+              <ThemeProvider
+                attribute="class"
+                defaultTheme="system"
+                enableSystem
+                disableTransitionOnChange
+              >
+                {children}
+                <Toaster />
+              </ThemeProvider>
             </AuthProvider>
           </QueryProvider>
         </LanguageProvider>

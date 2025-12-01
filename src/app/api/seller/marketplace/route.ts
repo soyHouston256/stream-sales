@@ -96,7 +96,7 @@ export async function GET(request: NextRequest) {
 
     // 4. Build where clause
     const where: any = {
-      status: 'available', // Solo productos disponibles en el marketplace
+      isActive: true, // Solo productos activos
     };
 
     if (categories.length > 0) {
@@ -104,7 +104,11 @@ export async function GET(request: NextRequest) {
     }
 
     if (maxPrice !== undefined) {
-      where.price = { lte: maxPrice };
+      where.variants = {
+        some: {
+          price: { lte: maxPrice },
+        },
+      };
     }
 
     if (search) {
@@ -131,6 +135,10 @@ export async function GET(request: NextRequest) {
             email: true,
           },
         },
+        variants: {
+          orderBy: { price: 'asc' },
+          take: 1,
+        },
       },
     });
 
@@ -142,8 +150,8 @@ export async function GET(request: NextRequest) {
       category: product.category,
       name: product.name,
       description: product.description || '',
-      price: product.price.toString(),
-      status: product.status,
+      price: product.variants[0]?.price.toString() || '0',
+      status: product.isActive ? 'available' : 'unavailable',
       createdAt: product.createdAt.toISOString(),
     }));
 

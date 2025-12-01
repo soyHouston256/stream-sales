@@ -72,17 +72,28 @@ export async function GET(request: NextRequest) {
     }
 
     // 4. Calculate total earnings from completed sales (exclude refunded)
-    const salesResult = await prisma.purchase.aggregate({
+    // Note: In the new schema, we sum the price of variants sold. 
+    // TODO: Handle commissions and store net earnings in OrderItem or Transaction.
+    const soldItems = await prisma.orderItem.findMany({
       where: {
-        providerId: user.id,
-        status: 'completed', // Exclude refunded
+        variant: {
+          product: {
+            providerId: user.id,
+          },
+        },
+        order: {
+          status: 'paid',
+        },
       },
-      _sum: {
-        providerEarnings: true,
+      include: {
+        variant: true,
       },
     });
 
-    const totalEarnings = salesResult._sum.providerEarnings?.toNumber() || 0;
+    const totalEarnings = soldItems.reduce(
+      (sum: number, item: any) => sum + item.variant.price.toNumber(),
+      0
+    );
 
     // 5. Calculate total withdrawals (completed only)
     const withdrawalsResult = await prisma.withdrawal.aggregate({

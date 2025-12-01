@@ -12,7 +12,7 @@ export interface UserProps {
 }
 
 export class User {
-  private constructor(private props: UserProps) {}
+  private constructor(private props: UserProps) { }
 
   static create(props: Omit<UserProps, 'id' | 'createdAt' | 'updatedAt'>): User {
     return new User({
@@ -57,6 +57,11 @@ export class User {
 
   updateName(name: string): void {
     this.props.name = name;
+    this.props.updatedAt = new Date();
+  }
+
+  updatePassword(password: Password): void {
+    this.props.password = password;
     this.props.updatedAt = new Date();
   }
 

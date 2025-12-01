@@ -9,3 +9,4 @@ export { RechargeDialog } from './RechargeDialog';
 export { TransactionTypeBadge } from './TransactionTypeBadge';
 export { RechargeStatusBadge } from './RechargeStatusBadge';
 export { PurchaseStatusBadge } from './PurchaseStatusBadge';
+export { MarketplaceHero } from './MarketplaceHero';

@@ -95,6 +95,9 @@ export async function GET(request: NextRequest) {
       skip: (page - 1) * limit,
       take: limit,
       orderBy: { createdAt: 'desc' },
+      include: {
+        variants: true,
+      },
     });
 
     // 7. Transform to response format
@@ -104,15 +107,18 @@ export async function GET(request: NextRequest) {
       category: product.category,
       name: product.name,
       description: product.description,
-      price: product.price.toString(),
       imageUrl: product.imageUrl,
-      accountEmail: product.accountEmail,
-      accountPassword: product.accountPassword,
-      accountDetails: product.accountDetails,
-      status: product.status,
+      isActive: product.isActive,
       createdAt: product.createdAt.toISOString(),
       updatedAt: product.updatedAt.toISOString(),
-      soldAt: product.soldAt?.toISOString(),
+      variants: product.variants.map((v: any) => ({
+        id: v.id,
+        productId: v.productId,
+        name: v.name,
+        price: v.price.toString(),
+        durationDays: v.durationDays,
+        isRenewable: v.isRenewable,
+      })),
     }));
 
     // 8. Return paginated response
@@ -154,104 +160,130 @@ export async function GET(request: NextRequest) {
  * }
  */
 const createProductSchema = z.object({
-  category: z.string().min(1, 'Category is required'),
-  name: z.string().min(1, 'Name is required'),
-  description: z.string().min(1, 'Description is required'),
-  price: z.number().positive('Price must be positive'),
-  imageUrl: z.string().url('Must be a valid URL').optional().or(z.literal('')),
-  accountEmail: z.string().email('Invalid email format'),
-  accountPassword: z.string().min(1, 'Account password is required'),
-  accountDetails: z.any().optional(),
+  name: z.string().min(1),
+  description: z.string().optional(),
+  price: z.string().or(z.number()), // Base price
+  imageUrl: z.string().optional(),
+  category: z.string(),
+
+  // Inventory Data
+  platformType: z.string().optional(),
+  accountType: z.enum(['profile', 'full']).optional(),
+  email: z.string().optional(),
+  password: z.string().optional(),
+  profiles: z.array(z.object({ name: z.string(), pin: z.string().optional() })).optional(),
+
+  licenseType: z.enum(['serial', 'email_invite']).optional(),
+  licenseKeys: z.string().optional(),
+
+  contentType: z.enum(['live_meet', 'recorded_iframe', 'ebook_drive']).optional(),
+  resourceUrl: z.string().optional(),
+  liveDate: z.string().optional(),
+  coverImageUrl: z.string().optional(),
 });
 
 export async function POST(request: NextRequest) {
   try {
-    // 1. Verify JWT token
     const authHeader = request.headers.get('authorization');
-
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return NextResponse.json(
-        { error: 'Missing or invalid authorization header' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-
     const token = authHeader.substring(7);
     const payload = verifyJWT(token);
+    if (!payload?.userId) return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
 
-    if (!payload || !payload.userId) {
-      return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
+    const user = await prisma.user.findUnique({ where: { id: payload.userId } });
+    if (!user || user.role !== 'provider') {
+      return NextResponse.json({ error: 'Provider role required' }, { status: 403 });
     }
 
-    // 2. Verify user has provider role
-    const user = await prisma.user.findUnique({
-      where: { id: payload.userId },
-    });
-
-    if (!user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
-    }
-
-    if (user.role !== 'provider') {
-      return NextResponse.json(
-        { error: 'Access denied. Provider role required.' },
-        { status: 403 }
-      );
-    }
-
-    // 3. Validate request body
     const body = await request.json();
-    const validationResult = createProductSchema.safeParse(body);
-
-    if (!validationResult.success) {
-      return NextResponse.json(
-        { error: 'Invalid request', details: validationResult.error.errors },
-        { status: 400 }
-      );
+    const validation = createProductSchema.safeParse(body);
+    if (!validation.success) {
+      return NextResponse.json({ error: 'Invalid data', details: validation.error.errors }, { status: 400 });
     }
+    const data = validation.data;
 
-    const data = validationResult.data;
+    // Transaction to create everything
+    const product = await prisma.$transaction(async (tx) => {
+      // 1. Create Product
+      const newProduct = await tx.product.create({
+        data: {
+          providerId: user.id,
+          name: data.name,
+          description: data.description,
+          category: data.category,
+          imageUrl: data.imageUrl,
+          isActive: true,
+        },
+      });
 
-    // 4. Create product
-    const product = await prisma.product.create({
-      data: {
-        providerId: user.id,
-        category: data.category,
-        name: data.name,
-        description: data.description,
-        price: data.price,
-        imageUrl: data.imageUrl || null,
-        accountEmail: data.accountEmail,
-        accountPassword: data.accountPassword, // TODO: Encrypt in production
-        accountDetails: data.accountDetails || null,
-        status: 'available',
-      },
+      // 2. Create Default Variant (for now, 1 variant per product based on wizard)
+      // In a full implementation, we'd loop through variants.
+      await tx.productVariant.create({
+        data: {
+          productId: newProduct.id,
+          name: 'Standard', // Default name
+          price: Number(data.price),
+          isRenewable: true, // Default
+        },
+      });
+
+      // 3. Create Inventory based on Category
+      if (data.category === 'streaming' || data.category === 'ai') {
+        if (data.email && data.password) {
+          const account = await tx.inventoryAccount.create({
+            data: {
+              productId: newProduct.id,
+              email: data.email!,
+              passwordHash: data.password!, // Should hash this
+              platformType: data.platformType || 'unknown',
+              totalSlots: data.accountType === 'full' ? 1 : (data.profiles?.length || 1),
+              availableSlots: data.accountType === 'full' ? 1 : (data.profiles?.length || 1),
+            },
+          });
+
+          if (data.accountType === 'profile' && data.profiles) {
+            await tx.inventorySlot.createMany({
+              data: data.profiles.map(p => ({
+                accountId: account.id,
+                profileName: p.name,
+                pinCode: p.pin,
+                status: 'available',
+              })),
+            });
+          }
+        }
+      } else if (data.category === 'license') {
+        if (data.licenseKeys) {
+          const keys = data.licenseKeys.split('\n').filter(k => k.trim());
+          await tx.inventoryLicense.createMany({
+            data: keys.map(k => ({
+              productId: newProduct.id,
+              licenseKey: k.trim(),
+              activationType: data.licenseType || 'serial',
+              status: 'available',
+            })),
+          });
+        }
+      } else if (data.category === 'course' || data.category === 'ebook') {
+        await tx.digitalContent.create({
+          data: {
+            productId: newProduct.id,
+            contentType: data.contentType || 'ebook_drive',
+            resourceUrl: data.resourceUrl,
+            liveDate: data.liveDate ? new Date(data.liveDate) : null,
+            coverImageUrl: data.coverImageUrl,
+          },
+        });
+      }
+
+      return newProduct;
     });
 
-    // 5. Return created product
-    return NextResponse.json(
-      {
-        id: product.id,
-        providerId: product.providerId,
-        category: product.category,
-        name: product.name,
-        description: product.description,
-        price: product.price.toString(),
-        imageUrl: product.imageUrl,
-        accountEmail: product.accountEmail,
-        accountPassword: product.accountPassword,
-        accountDetails: product.accountDetails,
-        status: product.status,
-        createdAt: product.createdAt.toISOString(),
-        updatedAt: product.updatedAt.toISOString(),
-      },
-      { status: 201 }
-    );
+    return NextResponse.json(product, { status: 201 });
   } catch (error: any) {
     console.error('Error creating product:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

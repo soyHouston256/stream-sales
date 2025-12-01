@@ -1,4 +1,9 @@
 export type ProductCategory =
+  | 'streaming'
+  | 'license'
+  | 'course'
+  | 'ebook'
+  | 'ai'
   | 'netflix'
   | 'spotify'
   | 'hbo'
@@ -15,33 +20,51 @@ export type WithdrawalStatus = 'pending' | 'approved' | 'rejected' | 'completed'
 
 export type PaymentMethod = 'paypal' | 'bank_transfer' | 'crypto';
 
+export interface ProductVariant {
+  id: string;
+  productId: string;
+  name: string;
+  price: string; // Decimal
+  durationDays?: number;
+  isRenewable: boolean;
+}
+
 export interface Product {
   id: string;
   providerId: string;
   category: ProductCategory;
   name: string;
   description: string;
-  price: string; // Decimal as string
-  imageUrl?: string; // Product image URL
-  accountEmail: string;
-  accountPassword: string; // Encrypted in backend
-  accountDetails?: any; // JSON
-  status: ProductStatus;
+  imageUrl?: string;
+  isActive: boolean;
   createdAt: string;
   updatedAt: string;
-  soldAt?: string;
-  purchaseId?: string; // If sold
+  variants?: ProductVariant[];
+  // Legacy fields for compatibility if needed, or remove them
+  // status: ProductStatus; // Mapped from isActive?
 }
 
 export interface CreateProductDTO {
-  category: ProductCategory;
   name: string;
-  description: string;
-  price: number;
+  description?: string;
+  price: string | number;
   imageUrl?: string;
-  accountEmail: string;
-  accountPassword: string;
-  accountDetails?: any;
+  category: ProductCategory;
+
+  // Inventory Data (Optional based on category)
+  platformType?: string;
+  accountType?: 'profile' | 'full';
+  email?: string;
+  password?: string;
+  profiles?: { name: string; pin?: string }[];
+
+  licenseType?: 'serial' | 'email_invite';
+  licenseKeys?: string;
+
+  contentType?: 'live_meet' | 'recorded_iframe' | 'ebook_drive';
+  resourceUrl?: string;
+  liveDate?: string;
+  coverImageUrl?: string;
 }
 
 export interface UpdateProductDTO {

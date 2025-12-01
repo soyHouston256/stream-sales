@@ -68,47 +68,56 @@ export async function GET(request: NextRequest) {
     const products = await prisma.product.findMany({
       where: { providerId: user.id },
       select: {
-        status: true,
+        isActive: true,
       },
     });
 
     const totalProducts = products.length;
-    const availableProducts = products.filter(
-      (p: any) => p.status === 'available'
-    ).length;
-    const reservedProducts = products.filter(
-      (p: any) => p.status === 'reserved'
-    ).length;
-    const soldProducts = products.filter((p: any) => p.status === 'sold').length;
+    const availableProducts = products.filter((p: any) => p.isActive).length;
+    const reservedProducts = products.filter((p: any) => !p.isActive).length;
+    const soldProducts = 0; // Concept changed: Products are templates now. Sales are tracked separately.
 
-    // 4. Get sales statistics from purchases
-    // IMPORTANTE: Solo contar compras completadas, NO refunded
-    const purchases = await prisma.purchase.findMany({
+    // 4. Get sales statistics from OrderItems (replacing purchases)
+    const soldItems = await prisma.orderItem.findMany({
       where: {
-        providerId: user.id,
-        status: 'completed', // Excluye refunded automáticamente
+        variant: {
+          product: {
+            providerId: user.id,
+          },
+        },
+        order: {
+          status: 'paid',
+        },
       },
       select: {
-        providerEarnings: true,
-        createdAt: true,
+        variant: {
+          select: {
+            price: true,
+          },
+        },
+        order: {
+          select: {
+            createdAt: true,
+          },
+        },
       },
     });
 
-    const totalSales = purchases.length;
-    const totalEarnings = purchases
-      .reduce((sum: number, p: any) => sum + Number(p.providerEarnings), 0)
+    const totalSales = soldItems.length;
+    const totalEarnings = soldItems
+      .reduce((sum: number, item: any) => sum + item.variant.price.toNumber(), 0)
       .toFixed(2);
 
     // 5. Get this month's statistics
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
-    const thisMonthPurchases = purchases.filter(
-      (p: any) => p.createdAt >= startOfMonth
+    const thisMonthItems = soldItems.filter(
+      (item: any) => item.order.createdAt >= startOfMonth
     );
-    const thisMonthSales = thisMonthPurchases.length;
-    const thisMonthEarnings = thisMonthPurchases
-      .reduce((sum: number, p: any) => sum + Number(p.providerEarnings), 0)
+    const thisMonthSales = thisMonthItems.length;
+    const thisMonthEarnings = thisMonthItems
+      .reduce((sum: number, item: any) => sum + item.variant.price.toNumber(), 0)
       .toFixed(2);
 
     // 6. Get wallet balance

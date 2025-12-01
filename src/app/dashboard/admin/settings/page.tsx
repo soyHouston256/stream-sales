@@ -121,6 +121,11 @@ export default function AdminSettingsPage() {
         </p>
       </div>
 
+      {/* Personal Settings */}
+      <Settings />
+
+      <div className="border-t my-8" />
+
       {/* Referral Approval Fee Settings */}
       <Card>
         <CardHeader>
