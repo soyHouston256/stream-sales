@@ -1,6 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/infrastructure/database/prisma';
+import { prisma as globalPrisma } from '@/infrastructure/database/prisma';
+import { PrismaClient } from '@prisma/client';
 import { verifyJWT } from '@/infrastructure/auth/jwt';
+
+// Define minimal OrderDelegate interface to fix type resolution
+interface OrderDelegate {
+  findMany(args?: {
+    where?: any;
+    select?: any;
+    orderBy?: any;
+  }): Promise<Array<{ createdAt: Date; totalAmount: any }>>;
+}
+
+// Force type recognition for order delegate
+const prisma = globalPrisma as unknown as PrismaClient & {
+  order: OrderDelegate;
+};
 
 export const dynamic = 'force-dynamic';
 
@@ -72,16 +87,16 @@ export async function GET(request: NextRequest) {
     const startDate = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
 
     // 5. Get sales data
-    const purchases = await prisma.purchase.findMany({
+    const purchases = await prisma.order.findMany({
       where: {
-        status: 'completed',
+        status: 'paid',
         createdAt: {
           gte: startDate,
         },
       },
       select: {
         createdAt: true,
-        amount: true,
+        totalAmount: true,
       },
       orderBy: {
         createdAt: 'asc',
@@ -104,7 +119,7 @@ export async function GET(request: NextRequest) {
       const existing = salesByDate.get(dateStr) || { sales: 0, revenue: 0 };
       salesByDate.set(dateStr, {
         sales: existing.sales + 1,
-        revenue: existing.revenue + Number(purchase.amount),
+        revenue: existing.revenue + Number(purchase.totalAmount),
       });
     }
 

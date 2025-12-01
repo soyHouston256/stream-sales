@@ -21,18 +21,24 @@ interface ProductDetailsDialogProps {
   product: MarketplaceProduct | null;
   isOpen: boolean;
   onClose: () => void;
+  isGuest?: boolean;
 }
 
 export function ProductDetailsDialog({
   product,
   isOpen,
   onClose,
+  isGuest = false,
 }: ProductDetailsDialogProps) {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
   if (!product) return null;
 
   const handlePurchaseClick = () => {
+    if (isGuest) {
+      window.location.href = '/login';
+      return;
+    }
     setShowConfirmDialog(true);
   };
 
@@ -98,17 +104,19 @@ export function ProductDetailsDialog({
             </Button>
             <Button onClick={handlePurchaseClick}>
               <ShoppingCart className="h-4 w-4 mr-2" />
-              Purchase Now
+              {isGuest ? 'Login to Purchase' : 'Purchase Now'}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      <PurchaseConfirmDialog
-        product={product}
-        isOpen={showConfirmDialog}
-        onClose={handleConfirmClose}
-      />
+      {!isGuest && (
+        <PurchaseConfirmDialog
+          product={product}
+          isOpen={showConfirmDialog}
+          onClose={handleConfirmClose}
+        />
+      )}
     </>
   );
 }

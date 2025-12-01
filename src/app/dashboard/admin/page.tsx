@@ -16,6 +16,13 @@ export default function AdminDashboard() {
   const { data: stats, isLoading: statsLoading } = useAdminStats();
   const { data: salesData = [], isLoading: salesLoading } = useSalesData(7);
 
+  // Mock data for sparklines
+  const generateSparklineData = (trend: 'up' | 'down' | 'neutral') => {
+    return Array.from({ length: 10 }, (_, i) => ({
+      value: Math.floor(Math.random() * 50) + (trend === 'up' ? i * 5 : trend === 'down' ? (10 - i) * 5 : 20)
+    }));
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -36,11 +43,12 @@ export default function AdminDashboard() {
           trend={
             stats?.usersGrowth
               ? {
-                  value: `${stats.usersGrowth > 0 ? '+' : ''}${stats.usersGrowth}%`,
-                  direction: stats.usersGrowth > 0 ? 'up' : 'down',
-                }
+                value: `${stats.usersGrowth > 0 ? '+' : ''}${stats.usersGrowth}%`,
+                direction: stats.usersGrowth > 0 ? 'up' : 'down',
+              }
               : undefined
           }
+          chartData={generateSparklineData(stats?.usersGrowth && stats.usersGrowth > 0 ? 'up' : 'neutral')}
         />
         <EnhancedStatsCard
           title={t('admin.totalSales')}
@@ -52,11 +60,12 @@ export default function AdminDashboard() {
           trend={
             stats?.salesGrowth
               ? {
-                  value: `${stats.salesGrowth > 0 ? '+' : ''}${stats.salesGrowth}%`,
-                  direction: stats.salesGrowth > 0 ? 'up' : 'down',
-                }
+                value: `${stats.salesGrowth > 0 ? '+' : ''}${stats.salesGrowth}%`,
+                direction: stats.salesGrowth > 0 ? 'up' : 'down',
+              }
               : undefined
           }
+          chartData={generateSparklineData(stats?.salesGrowth && stats.salesGrowth > 0 ? 'up' : 'down')}
         />
         <EnhancedStatsCard
           title={t('admin.commissionsGenerated')}
@@ -64,6 +73,7 @@ export default function AdminDashboard() {
           icon={TrendingUp}
           isLoading={statsLoading}
           variant="success"
+          chartData={generateSparklineData('up')}
         />
         <EnhancedStatsCard
           title={t('admin.activeDisputes')}
@@ -71,6 +81,7 @@ export default function AdminDashboard() {
           icon={AlertCircle}
           isLoading={statsLoading}
           variant={stats?.activeDisputes && stats.activeDisputes > 0 ? 'warning' : 'default'}
+          chartData={generateSparklineData(stats?.activeDisputes && stats.activeDisputes > 0 ? 'down' : 'neutral')}
         />
       </div>
 

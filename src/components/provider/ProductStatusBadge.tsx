@@ -2,12 +2,16 @@ import { Badge } from '@/components/ui/badge';
 import { ProductStatus } from '@/types/provider';
 import { cn } from '@/lib/utils';
 
+import { useLanguage } from '@/contexts/LanguageContext';
+
 interface ProductStatusBadgeProps {
   status: ProductStatus;
   className?: string;
 }
 
 export function ProductStatusBadge({ status, className }: ProductStatusBadgeProps) {
+  const { t } = useLanguage();
+
   const variants = {
     available: 'bg-green-500/10 text-green-700 hover:bg-green-500/20 border-green-500/20',
     reserved: 'bg-yellow-500/10 text-yellow-700 hover:bg-yellow-500/20 border-yellow-500/20',
@@ -15,9 +19,9 @@ export function ProductStatusBadge({ status, className }: ProductStatusBadgeProp
   };
 
   const labels = {
-    available: 'Available',
-    reserved: 'Reserved',
-    sold: 'Sold',
+    available: t('products.available'),
+    reserved: t('products.reserved'),
+    sold: t('products.sold'),
   };
 
   return (

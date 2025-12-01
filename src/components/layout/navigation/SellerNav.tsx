@@ -14,12 +14,7 @@ export const getSellerNavItems = (t: (key: string) => string): NavItem[] => [
     icon: LayoutDashboard,
     description: t('navigation.overviewStats'),
   },
-  {
-    title: t('navigation.marketplace'),
-    href: '/dashboard/seller/marketplace',
-    icon: ShoppingBag,
-    description: t('navigation.browseProducts'),
-  },
+
   {
     title: t('navigation.myPurchases'),
     href: '/dashboard/seller/purchases',

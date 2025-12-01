@@ -447,7 +447,7 @@ export class Dispute {
   toPersistence() {
     return {
       id: this.props.id,
-      purchaseId: this.props.purchaseId,
+      orderId: this.props.purchaseId,
       sellerId: this.props.sellerId,
       providerId: this.props.providerId,
       conciliatorId: this.props.conciliatorId,

@@ -77,13 +77,21 @@ export async function GET(request: Request) {
       skip: offset,
       take: limit,
       include: {
-        purchase: {
+        order: {
           include: {
-            product: {
-              select: {
-                id: true,
-                name: true,
-                category: true,
+            items: {
+              include: {
+                variant: {
+                  include: {
+                    product: {
+                      select: {
+                        id: true,
+                        name: true,
+                        category: true,
+                      },
+                    },
+                  },
+                },
               },
             },
           },
@@ -98,33 +106,38 @@ export async function GET(request: Request) {
     const total = await prisma.dispute.count({ where });
 
     // 7. Format response
-    const formattedDisputes = disputes.map((d: any) => ({
-      id: d.id,
-      purchaseId: d.purchaseId,
-      sellerId: d.sellerId,
-      providerId: d.providerId,
-      conciliatorId: d.conciliatorId,
-      openedBy: d.openedBy,
-      reason: d.reason,
-      status: d.status,
-      resolution: d.resolution,
-      resolutionType: d.resolutionType,
-      createdAt: d.createdAt.toISOString(),
-      assignedAt: d.assignedAt?.toISOString() || null,
-      resolvedAt: d.resolvedAt?.toISOString() || null,
-      purchase: d.purchase ? {
-        id: d.purchase.id,
-        amount: d.purchase.amount.toString(),
-        product: d.purchase.product ? {
-          id: d.purchase.product.id,
-          name: d.purchase.product.name,
-          category: d.purchase.product.category,
+    const formattedDisputes = disputes.map((d: any) => {
+      const firstItem = d.order?.items[0];
+      const product = firstItem?.variant.product;
+
+      return {
+        id: d.id,
+        purchaseId: d.orderId, // Keeping key for compatibility
+        sellerId: d.sellerId,
+        providerId: d.providerId,
+        conciliatorId: d.conciliatorId,
+        openedBy: d.openedBy,
+        reason: d.reason,
+        status: d.status,
+        resolution: d.resolution,
+        resolutionType: d.resolutionType,
+        createdAt: d.createdAt.toISOString(),
+        assignedAt: d.assignedAt?.toISOString() || null,
+        resolvedAt: d.resolvedAt?.toISOString() || null,
+        purchase: d.order ? {
+          id: d.order.id,
+          amount: d.order.totalAmount.toString(),
+          product: product ? {
+            id: product.id,
+            name: product.name,
+            category: product.category,
+          } : undefined,
         } : undefined,
-      } : undefined,
-      seller: d.seller,
-      provider: d.provider,
-      conciliator: d.conciliator,
-    }));
+        seller: d.seller,
+        provider: d.provider,
+        conciliator: d.conciliator,
+      };
+    });
 
     // 8. Return result
     return NextResponse.json({

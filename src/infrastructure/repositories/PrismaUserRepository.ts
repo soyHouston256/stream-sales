@@ -70,4 +70,25 @@ export class PrismaUserRepository implements IUserRepository {
 
     return count > 0;
   }
+  async update(user: User): Promise<User> {
+    const data = await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        email: user.email.value,
+        password: user.password.value,
+        name: user.name,
+        role: user.role,
+      },
+    });
+
+    return User.fromPersistence({
+      id: data.id,
+      email: Email.create(data.email),
+      password: Password.fromHash(data.password),
+      name: data.name ?? undefined,
+      role: data.role,
+      createdAt: data.createdAt,
+      updatedAt: data.updatedAt,
+    });
+  }
 }

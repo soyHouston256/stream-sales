@@ -21,7 +21,13 @@ const nextConfig = {
         protocol: 'https',
         hostname: '**.vercel-storage.com',
       },
+      {
+        protocol: 'https',
+        hostname: 'placehold.co',
+      },
     ],
+    dangerouslyAllowSVG: true,
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
 }
 

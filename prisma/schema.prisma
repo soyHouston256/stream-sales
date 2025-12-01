@@ -27,8 +27,8 @@ model User {
   wallet                  Wallet?
   affiliateProfile        AffiliateProfile?
   productsAsProvider      Product[]         @relation("ProviderProducts")
-  purchasesAsSeller       Purchase[]        @relation("SellerPurchases")
-  purchasesAsProvider     Purchase[]        @relation("ProviderPurchases")
+  // purchasesAsSeller       Purchase[]        @relation("SellerPurchases")
+  // purchasesAsProvider     Purchase[]        @relation("ProviderPurchases")
   affiliationsAsAffiliate Affiliation[]     @relation("AffiliateAffiliations")
   affiliationsAsReferred  Affiliation?      @relation("ReferredAffiliation")
   disputesAsSeller        Dispute[]         @relation("SellerDisputes")
@@ -36,6 +36,7 @@ model User {
   disputesAsConciliator   Dispute[]         @relation("ConciliatorDisputes")
   disputeMessages         DisputeMessage[]
   processedWithdrawals    Withdrawal[]      @relation("ProcessedWithdrawals")
+  orders                  Order[]
 
   @@map("users")
 }
@@ -137,63 +138,161 @@ model Withdrawal {
 // PRODUCTS (Marketplace Inventory)
 // ============================================
 
+// ============================================
+// PRODUCTS & INVENTORY (New Structure)
+// ============================================
+
 model Product {
-  id              String    @id @default(cuid())
-  providerId      String
-  category        String // netflix, spotify, hbo, disney, prime, youtube, other
-  name            String
-  description     String    @db.Text
-  price           Decimal   @db.Decimal(19, 4)
-  imageUrl        String? // URL de la imagen del producto
-  accountEmail    String
-  accountPassword String // DEBE estar encriptado
-  accountDetails  Json? // Datos adicionales (plan, perfil, etc)
-  status          String    @default("available") // available, reserved, sold
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-  soldAt          DateTime?
+  id          String   @id @default(cuid())
+  providerId  String
+  name        String
+  description String?  @db.Text
+  category    String // streaming, license, course, ebook, ai
+  imageUrl    String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   // Relations
-  provider User      @relation("ProviderProducts", fields: [providerId], references: [id])
-  purchase Purchase?
+  provider User             @relation("ProviderProducts", fields: [providerId], references: [id])
+  variants ProductVariant[]
+  
+  // Inventory Relations (Reverse lookups)
+  inventoryAccounts InventoryAccount[]
+  inventoryLicenses InventoryLicense[]
+  digitalContents   DigitalContent[]
 
   @@index([providerId])
-  @@index([status])
   @@index([category])
   @@map("products")
 }
 
-// ============================================
-// PURCHASES (Core Business Transaction)
-// ============================================
-
-model Purchase {
-  id               String    @id @default(cuid())
-  sellerId         String
-  productId        String    @unique // Un producto solo se vende UNA vez
-  providerId       String // Denormalizado para queries
-  amount           Decimal   @db.Decimal(19, 4)
-  providerEarnings Decimal   @db.Decimal(19, 4) // amount - commission
-  adminCommission  Decimal   @db.Decimal(19, 4)
-  commissionRate   Decimal   @db.Decimal(5, 2) // Snapshot del % en el momento (ej. 5.50)
-  status           String    @default("pending") // pending, completed, failed, refunded
-  transactionIds   Json? // Array de IDs de transacciones generadas
-  createdAt        DateTime  @default(now())
-  completedAt      DateTime?
-  refundedAt       DateTime?
-
+model ProductVariant {
+  id           String   @id @default(cuid())
+  productId    String
+  name         String // "1 Mes", "Licencia Vitalicia", "Acceso en Vivo"
+  price        Decimal  @db.Decimal(10, 2)
+  durationDays Int? // 30, 365, or null
+  isRenewable  Boolean  @default(false)
+  
   // Relations
-  seller   User     @relation("SellerPurchases", fields: [sellerId], references: [id])
-  provider User     @relation("ProviderPurchases", fields: [providerId], references: [id])
-  product  Product  @relation(fields: [productId], references: [id])
-  dispute  Dispute?
+  product    Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  orderItems OrderItem[]
 
-  @@index([sellerId])
-  @@index([providerId])
-  @@index([status])
-  @@index([createdAt])
-  @@map("purchases")
+  @@index([productId])
+  @@map("product_variants")
 }
+
+// --- INVENTORY: Streaming & AI ---
+model InventoryAccount {
+  id           String   @id @default(cuid())
+  productId    String
+  email        String
+  passwordHash String // Encriptada
+  totalSlots   Int      @default(1)
+  availableSlots Int    @default(1)
+  platformType String // netflix, hbo, gpt, perplexity
+  expiryDate   DateTime?
+  
+  // Relations
+  product Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  slots   InventorySlot[]
+
+  @@index([productId])
+  @@map("inventory_accounts")
+}
+
+model InventorySlot {
+  id          String   @id @default(cuid())
+  accountId   String
+  profileName String? // "Perfil 1", "Machetex"
+  pinCode     String? // Para Netflix/Disney
+  status      String   @default("available") // available, sold, blocked
+  
+  // Relations
+  account   InventoryAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  orderItem OrderItem? // The slot is assigned to an order item
+
+  @@index([accountId])
+  @@map("inventory_slots")
+}
+
+// --- INVENTORY: Licenses ---
+model InventoryLicense {
+  id             String   @id @default(cuid())
+  productId      String
+  licenseKey     String // "XXXX-XXXX-XXXX"
+  activationType String // serial, email_invite
+  status         String   @default("available") // available, sold
+  
+  // Relations
+  product   Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
+  orderItem OrderItem?
+
+  @@index([productId])
+  @@map("inventory_licenses")
+}
+
+// --- INVENTORY: Digital Content (Courses, Ebooks) ---
+model DigitalContent {
+  id            String    @id @default(cuid())
+  productId     String
+  contentType   String // live_meet, recorded_iframe, ebook_drive
+  resourceUrl   String? // Link de Meet, Iframe Code, o Drive Link
+  liveDate      DateTime? // Solo para cursos en vivo
+  coverImageUrl String? // Para Ebooks
+  
+  // Relations
+  product   Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  orderItems OrderItem[] // Content can be sold multiple times (unlimited stock usually)
+
+  @@index([productId])
+  @@map("digital_content")
+}
+
+// ============================================
+// ORDERS (Sales)
+// ============================================
+
+model Order {
+  id          String   @id @default(cuid())
+  userId      String // Buyer (Seller or End User)
+  totalAmount Decimal  @db.Decimal(10, 2)
+  status      String   @default("pending") // pending, paid, failed
+  createdAt   DateTime @default(now())
+  
+  // Relations
+  user        User        @relation(fields: [userId], references: [id])
+  items       OrderItem[]
+  dispute     Dispute?
+
+  @@index([userId])
+  @@map("orders")
+}
+
+model OrderItem {
+  id                String  @id @default(cuid())
+  orderId           String
+  productVariantId  String
+  
+  // Polymorphic relations (only one should be set)
+  assignedSlotId    String? @unique
+  assignedLicenseId String? @unique
+  assignedContentId String?
+  
+  // Relations
+  order           Order             @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  variant         ProductVariant    @relation(fields: [productVariantId], references: [id])
+  assignedSlot    InventorySlot?    @relation(fields: [assignedSlotId], references: [id])
+  assignedLicense InventoryLicense? @relation(fields: [assignedLicenseId], references: [id])
+  assignedContent DigitalContent?   @relation(fields: [assignedContentId], references: [id])
+
+  @@index([orderId])
+  @@map("order_items")
+}
+
+// Legacy Purchase model (kept for reference or migration, but commented out to force refactor)
+// model Purchase { ... }
 
 // ============================================
 // COMMISSION CONFIG (Admin Settings)
@@ -287,7 +386,7 @@ model AffiliateProfile {
 
 model Dispute {
   id                      String    @id @default(cuid())
-  purchaseId              String    @unique
+  orderId                 String    @unique
   sellerId                String // Denormalizado
   providerId              String // Denormalizado
   conciliatorId           String?
@@ -302,13 +401,13 @@ model Dispute {
   resolvedAt              DateTime?
 
   // Relations
-  purchase    Purchase         @relation(fields: [purchaseId], references: [id])
+  order       Order            @relation(fields: [orderId], references: [id])
   seller      User             @relation("SellerDisputes", fields: [sellerId], references: [id])
   provider    User             @relation("ProviderDisputes", fields: [providerId], references: [id])
   conciliator User?            @relation("ConciliatorDisputes", fields: [conciliatorId], references: [id])
   messages    DisputeMessage[]
 
-  @@index([purchaseId])
+  @@index([orderId])
   @@index([status])
   @@index([conciliatorId])
   @@map("disputes")

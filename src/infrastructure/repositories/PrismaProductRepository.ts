@@ -61,6 +61,7 @@ export class PrismaProductRepository implements IProductRepository {
    * Encripta el password usando AES-256-CBC
    */
   private encrypt(text: string): string {
+    if (!text) return '';
     const iv = crypto.randomBytes(this.IV_LENGTH);
     const cipher = crypto.createCipheriv(this.ALGORITHM, this.ENCRYPTION_KEY, iv);
     let encrypted = cipher.update(text, 'utf8', 'hex');
@@ -72,17 +73,13 @@ export class PrismaProductRepository implements IProductRepository {
 
   /**
    * Desencripta el password
-   *
-   * NOTA: Para compatibilidad con datos existentes, si el password no está
-   * en formato encriptado (iv:encrypted), se asume que es texto plano
-   * y se retorna tal cual. Esto permite migración gradual.
    */
   private decrypt(text: string): string {
+    if (!text) return '';
     const parts = text.split(':');
 
     // Si no tiene el formato esperado (iv:encrypted), asumir texto plano
     if (parts.length !== 2) {
-      console.warn('Password not in encrypted format, returning as-is. Consider re-encrypting.');
       return text;
     }
 
@@ -104,6 +101,7 @@ export class PrismaProductRepository implements IProductRepository {
 
   /**
    * Guarda un producto (create o update)
+   * Maps Domain Product -> DB Product + Variant + InventoryAccount
    */
   async save(product: Product): Promise<Product> {
     const data = product.toPersistence();
@@ -111,43 +109,98 @@ export class PrismaProductRepository implements IProductRepository {
     // Encriptar password antes de guardar
     const encryptedPassword = this.encrypt(data.accountPassword);
 
-    // Generar name y description desde la categoría (domain entity no los tiene)
+    // Generar name y description
     const name = data.category.charAt(0).toUpperCase() + data.category.slice(1) + ' Account';
     const description = `${data.category.charAt(0).toUpperCase() + data.category.slice(1)} premium account - ${data.accountEmail}`;
 
-    const savedProduct = await this.prisma.product.upsert({
-      where: { id: data.id },
-      update: {
-        name,
-        description,
-        category: data.category,
-        price: data.price,
-        imageUrl: undefined, // Domain entity no tiene imageUrl
-        accountEmail: data.accountEmail,
-        accountPassword: encryptedPassword,
-        accountDetails: undefined, // Domain entity no tiene accountDetails
-        status: data.status,
-        updatedAt: data.updatedAt,
-        soldAt: data.soldAt,
-      },
-      create: {
-        id: data.id,
-        providerId: data.providerId,
-        name,
-        description,
-        category: data.category,
-        price: data.price,
-        imageUrl: undefined,
-        accountEmail: data.accountEmail,
-        accountPassword: encryptedPassword,
-        accountDetails: undefined,
-        status: data.status,
-        createdAt: data.createdAt,
-        updatedAt: data.updatedAt,
-        soldAt: data.soldAt,
-      },
+    // Transaction to ensure consistency
+    const savedProduct = await this.prisma.$transaction(async (tx) => {
+      // 1. Upsert Product
+      const p = await tx.product.upsert({
+        where: { id: data.id },
+        update: {
+          name,
+          description,
+          category: data.category,
+          isActive: data.status === 'available', // Map status to isActive
+          updatedAt: data.updatedAt,
+        },
+        create: {
+          id: data.id,
+          providerId: data.providerId,
+          name,
+          description,
+          category: data.category,
+          isActive: data.status === 'available',
+          createdAt: data.createdAt,
+          updatedAt: data.updatedAt,
+        },
+      });
+
+      // 2. Upsert Variant (Price)
+      // Assuming 1 variant per product for now
+      // We need to find existing variant or create new
+      const existingVariant = await tx.productVariant.findFirst({
+        where: { productId: p.id },
+      });
+
+      if (existingVariant) {
+        await tx.productVariant.update({
+          where: { id: existingVariant.id },
+          data: {
+            price: data.price,
+            name: 'Standard License',
+          },
+        });
+      } else {
+        await tx.productVariant.create({
+          data: {
+            productId: p.id,
+            name: 'Standard License',
+            price: data.price,
+            durationDays: 30,
+          },
+        });
+      }
+
+      // 3. Upsert InventoryAccount (Credentials)
+      const existingAccount = await tx.inventoryAccount.findFirst({
+        where: { productId: p.id },
+      });
+
+      if (existingAccount) {
+        await tx.inventoryAccount.update({
+          where: { id: existingAccount.id },
+          data: {
+            email: data.accountEmail,
+            passwordHash: encryptedPassword,
+            platformType: data.category,
+          },
+        });
+      } else {
+        await tx.inventoryAccount.create({
+          data: {
+            productId: p.id,
+            email: data.accountEmail,
+            passwordHash: encryptedPassword,
+            platformType: data.category,
+            totalSlots: 1,
+            availableSlots: 1,
+          },
+        });
+      }
+
+      // Return full structure for toDomain
+      return tx.product.findUnique({
+        where: { id: p.id },
+        include: {
+          variants: true,
+          inventoryAccounts: true,
+        },
+      });
     });
 
+    if (!savedProduct) throw new Error('Failed to save product');
     return this.toDomain(savedProduct);
   }
 
@@ -157,6 +210,10 @@ export class PrismaProductRepository implements IProductRepository {
   async findById(id: string): Promise<Product | null> {
     const product = await this.prisma.product.findUnique({
       where: { id },
+      include: {
+        variants: true,
+        inventoryAccounts: true,
+      },
     });
 
     return product ? this.toDomain(product) : null;
@@ -169,9 +226,13 @@ export class PrismaProductRepository implements IProductRepository {
     const products = await this.prisma.product.findMany({
       where: { providerId },
       orderBy: { createdAt: 'desc' },
+      include: {
+        variants: true,
+        inventoryAccounts: true,
+      },
     });
 
-    return products.map((p: PrismaProduct) => this.toDomain(p));
+    return products.map((p: any) => this.toDomain(p));
   }
 
   /**
@@ -185,7 +246,7 @@ export class PrismaProductRepository implements IProductRepository {
     offset?: number;
   }): Promise<Product[]> {
     const where: any = {
-      status: 'available',
+      isActive: true,
     };
 
     if (filters?.category) {
@@ -193,12 +254,16 @@ export class PrismaProductRepository implements IProductRepository {
     }
 
     if (filters?.minPrice !== undefined || filters?.maxPrice !== undefined) {
-      where.price = {};
+      where.variants = {
+        some: {
+          price: {},
+        },
+      };
       if (filters.minPrice !== undefined) {
-        where.price.gte = filters.minPrice;
+        where.variants.some.price.gte = filters.minPrice;
       }
       if (filters.maxPrice !== undefined) {
-        where.price.lte = filters.maxPrice;
+        where.variants.some.price.lte = filters.maxPrice;
       }
     }
 
@@ -207,9 +272,13 @@ export class PrismaProductRepository implements IProductRepository {
       orderBy: { createdAt: 'desc' },
       take: filters?.limit,
       skip: filters?.offset,
+      include: {
+        variants: true,
+        inventoryAccounts: true,
+      },
     });
 
-    return products.map((p: PrismaProduct) => this.toDomain(p));
+    return products.map((p: any) => this.toDomain(p));
   }
 
   /**
@@ -219,21 +288,30 @@ export class PrismaProductRepository implements IProductRepository {
     const products = await this.prisma.product.findMany({
       where: { category: category.toLowerCase() },
       orderBy: { createdAt: 'desc' },
+      include: {
+        variants: true,
+        inventoryAccounts: true,
+      },
     });
 
-    return products.map((p: PrismaProduct) => this.toDomain(p));
+    return products.map((p: any) => this.toDomain(p));
   }
 
   /**
    * Busca productos por status
    */
   async findByStatus(status: ProductStatus): Promise<Product[]> {
+    const isActive = status.isAvailable();
     const products = await this.prisma.product.findMany({
-      where: { status: status.value },
+      where: { isActive },
       orderBy: { createdAt: 'desc' },
+      include: {
+        variants: true,
+        inventoryAccounts: true,
+      },
     });
 
-    return products.map((p: PrismaProduct) => this.toDomain(p));
+    return products.map((p: any) => this.toDomain(p));
   }
 
   /**
@@ -252,23 +330,19 @@ export class PrismaProductRepository implements IProductRepository {
     return this.prisma.product.count({
       where: {
         category: category.toLowerCase(),
-        status: 'available',
+        isActive: true,
       },
     });
   }
 
   /**
    * Elimina un producto
-   *
-   * Usa soft delete actualizando status.
-   * Para hard delete: this.prisma.product.delete({ where: { id } })
    */
   async delete(id: string): Promise<boolean> {
     try {
-      // Soft delete: no eliminar de BD, solo cambiar status a 'deleted'
-      // o usar Prisma soft delete nativo si está configurado
-      await this.prisma.product.delete({
+      await this.prisma.product.update({
         where: { id },
+        data: { isActive: false },
       });
       return true;
     } catch (error) {
@@ -278,29 +352,37 @@ export class PrismaProductRepository implements IProductRepository {
 
   /**
    * Convierte modelo de Prisma a entidad de dominio
-   *
-   * CRÍTICO: Desencripta el accountPassword
-   * Nota: El sistema usa USD como moneda por defecto
    */
   private toDomain(prismaProduct: any): Product {
-    // El sistema usa USD como moneda por defecto (ver Wallet schema)
-    const price = Money.fromPersistence(prismaProduct.price, 'USD');
-    const status = ProductStatus.fromPersistence(prismaProduct.status);
+    const variant = prismaProduct.variants?.[0];
+    const account = prismaProduct.inventoryAccounts?.[0];
 
-    // Desencriptar password
-    const decryptedPassword = this.decrypt(prismaProduct.accountPassword);
+    // Price fallback
+    const priceAmount = variant ? variant.price : new Prisma.Decimal(0);
+    const price = Money.fromPersistence(priceAmount, 'USD');
+
+    // Status mapping
+    // If isActive is true -> available
+    // If isActive is false -> suspended (or sold, but we don't track sold on Product anymore)
+    const statusStr = prismaProduct.isActive ? 'available' : 'suspended';
+    const status = ProductStatus.fromPersistence(statusStr);
+
+    // Credentials
+    const accountEmail = account ? account.email : '';
+    const encryptedPassword = account ? account.passwordHash : '';
+    const decryptedPassword = this.decrypt(encryptedPassword);
 
     return Product.fromPersistence({
       id: prismaProduct.id,
       providerId: prismaProduct.providerId,
       category: prismaProduct.category,
       price,
-      accountEmail: prismaProduct.accountEmail,
+      accountEmail,
       accountPassword: decryptedPassword,
       status,
       createdAt: prismaProduct.createdAt,
       updatedAt: prismaProduct.updatedAt,
-      soldAt: prismaProduct.soldAt,
+      // soldAt: null, // Not tracked on Product anymore
     });
   }
 }

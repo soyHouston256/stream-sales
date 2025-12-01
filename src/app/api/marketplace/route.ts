@@ -53,9 +53,9 @@ export async function GET(request: NextRequest) {
       : undefined;
     const search = searchParams.get('search') || undefined;
 
-    // 2. Build where clause - only show available products
+    // 2. Build where clause - only show active products
     const where: any = {
-      status: 'available',
+      isActive: true,
     };
 
     if (categories.length > 0) {
@@ -63,7 +63,11 @@ export async function GET(request: NextRequest) {
     }
 
     if (maxPrice !== undefined) {
-      where.price = { lte: maxPrice };
+      where.variants = {
+        some: {
+          price: { lte: maxPrice },
+        },
+      };
     }
 
     if (search) {
@@ -90,6 +94,10 @@ export async function GET(request: NextRequest) {
             email: true,
           },
         },
+        variants: {
+          take: 1,
+          orderBy: { price: 'asc' },
+        },
       },
     });
 
@@ -101,7 +109,7 @@ export async function GET(request: NextRequest) {
       category: product.category,
       name: product.name,
       description: product.description,
-      price: product.price.toString(),
+      price: product.variants[0]?.price.toString() || '0.00',
       imageUrl: product.imageUrl,
       createdAt: product.createdAt.toISOString(),
     }));

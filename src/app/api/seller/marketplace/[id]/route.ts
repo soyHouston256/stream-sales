@@ -72,7 +72,7 @@ export async function GET(
     const product = await prisma.product.findFirst({
       where: {
         id: params.id,
-        status: 'available', // Solo productos disponibles
+        isActive: true, // Solo productos activos
       },
       include: {
         provider: {
@@ -81,6 +81,10 @@ export async function GET(
             name: true,
             email: true,
           },
+        },
+        variants: {
+          orderBy: { price: 'asc' },
+          take: 1,
         },
       },
     });
@@ -100,8 +104,8 @@ export async function GET(
       category: product.category,
       name: product.name,
       description: product.description || '',
-      price: product.price.toString(),
-      status: product.status,
+      price: product.variants[0]?.price.toString() || '0',
+      status: product.isActive ? 'available' : 'unavailable',
       createdAt: product.createdAt.toISOString(),
     });
   } catch (error: any) {

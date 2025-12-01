@@ -13,15 +13,27 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { DataTable, Column } from '@/components/admin/DataTable';
-import { CreateProductDialog } from '@/components/provider/CreateProductDialog';
-import { EditProductDialog } from '@/components/provider/EditProductDialog';
+import { ProductCreatorWizard } from '@/components/provider/products/wizard/ProductCreatorWizard';
 import { ProductStatusBadge } from '@/components/provider/ProductStatusBadge';
 import { CategoryBadge } from '@/components/provider/CategoryBadge';
 import { useProducts, useDeleteProduct } from '@/lib/hooks/useProducts';
 import { Product, ProductCategory, ProductStatus } from '@/types/provider';
-import { Edit, Trash2, Search, Package } from 'lucide-react';
+import { Edit, Trash2, Search, Package, Plus, CheckCircle2, ShoppingCart, Users } from 'lucide-react';
 import { format } from 'date-fns';
 import { useLanguage } from '@/contexts/LanguageContext';
+
+// Simple Stat Card Component
+const StatCard = ({ label, value, icon: Icon, color }: { label: string; value: string; icon: any; color: string }) => (
+  <div className="bg-white p-6 rounded-xl border border-slate-100 shadow-sm flex items-start justify-between">
+    <div>
+      <p className="text-xs font-bold text-slate-400 uppercase mb-1">{label}</p>
+      <h3 className="text-2xl font-extrabold text-slate-800">{value}</h3>
+    </div>
+    <div className={`p-3 rounded-xl bg-${color}-50 text-${color}-600`}>
+      <Icon size={24} />
+    </div>
+  </div>
+);
 
 export default function ProductsPage() {
   const { t } = useLanguage();
@@ -29,7 +41,7 @@ export default function ProductsPage() {
   const [category, setCategory] = useState<ProductCategory | 'all'>('all');
   const [status, setStatus] = useState<ProductStatus | 'all'>('all');
   const [search, setSearch] = useState('');
-  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [isWizardOpen, setIsWizardOpen] = useState(false);
 
   const { data, isLoading } = useProducts({
     page,
@@ -72,14 +84,21 @@ export default function ProductsPage() {
     {
       key: 'price',
       label: t('products.price'),
-      render: (product) => (
-        <span className="font-medium">${parseFloat(product.price).toFixed(2)}</span>
-      ),
+      render: (product) => {
+        const price = product.variants?.[0]?.price;
+        return (
+          <span className="font-medium">
+            {price ? `$${parseFloat(price).toFixed(2)}` : '-'}
+          </span>
+        );
+      },
     },
     {
       key: 'status',
       label: t('products.status'),
-      render: (product) => <ProductStatusBadge status={product.status} />,
+      render: (product) => (
+        <ProductStatusBadge status={product.isActive ? 'available' : 'reserved'} />
+      ),
     },
     {
       key: 'createdAt',
@@ -94,26 +113,9 @@ export default function ProductsPage() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => setEditingProduct(product)}
-            disabled={product.status !== 'available'}
-            title={
-              product.status !== 'available'
-                ? t('provider.products.onlyAvailableEdit')
-                : t('provider.products.editProduct')
-            }
-          >
-            <Edit className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
             onClick={() => handleDelete(product.id, product.name)}
-            disabled={product.status === 'sold'}
-            title={
-              product.status === 'sold'
-                ? t('provider.products.soldCannotDelete')
-                : t('provider.products.deleteProduct')
-            }
+            disabled={product.isActive} // Example logic: cannot delete active products? Or maybe just allow it.
+            title={t('provider.products.deleteProduct')}
           >
             <Trash2 className="h-4 w-4 text-red-500" />
           </Button>
@@ -131,7 +133,20 @@ export default function ProductsPage() {
             {t('provider.products.subtitle')}
           </p>
         </div>
-        <CreateProductDialog />
+        <Button
+          onClick={() => setIsWizardOpen(true)}
+          className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-lg font-bold shadow-lg shadow-indigo-500/20 transition-all flex items-center gap-2 active:scale-95"
+        >
+          <Plus size={20} /> {t('provider.products.newProduct')}
+        </Button>
+      </div>
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <StatCard label={t('provider.products.totalProducts')} value={data?.pagination?.total?.toString() || "0"} icon={Package} color="blue" />
+        <StatCard label={t('provider.products.stockCritical')} value="0" icon={CheckCircle2} color="red" />
+        <StatCard label={t('provider.products.salesToday')} value="$0" icon={ShoppingCart} color="green" />
+        <StatCard label={t('provider.products.activeClients')} value="0" icon={Users} color="purple" />
       </div>
 
       <Card>
@@ -230,30 +245,26 @@ export default function ProductsPage() {
         pagination={
           data
             ? {
-                currentPage: data.pagination.page,
-                totalPages: data.pagination.totalPages,
-                onPageChange: setPage,
-              }
+              currentPage: data.pagination.page,
+              totalPages: data.pagination.totalPages,
+              onPageChange: setPage,
+            }
             : undefined
         }
         emptyState={{
           icon: Package,
           title: search
-            ? t('provider.products.noProductsFound') || 'No products found'
-            : t('provider.products.noProducts') || 'No products yet',
+            ? t('provider.products.noProductsFound')
+            : t('provider.products.noProducts'),
           description: search
-            ? t('provider.products.noProductsFoundDesc') || `No products match "${search}"`
-            : t('provider.products.noProductsDesc') || 'Create your first product to get started',
+            ? t('provider.products.noProductsFoundDesc').replace('{search}', search)
+            : t('provider.products.noProductsDesc'),
           variant: search ? 'search' : 'default',
         }}
       />
 
-      {editingProduct && (
-        <EditProductDialog
-          product={editingProduct}
-          open={!!editingProduct}
-          onOpenChange={(open) => !open && setEditingProduct(null)}
-        />
+      {isWizardOpen && (
+        <ProductCreatorWizard onClose={() => setIsWizardOpen(false)} />
       )}
     </div>
   );

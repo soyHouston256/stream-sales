@@ -76,31 +76,40 @@ export async function GET(request: NextRequest) {
 
     const walletBalance = wallet.balance.toString();
 
-    // 4. Get purchase statistics
-    const purchases = await prisma.purchase.findMany({
-      where: { sellerId: user.id },
-      select: {
-        amount: true,
-        createdAt: true,
+    // 4. Get purchase statistics (Sales)
+    const orderItems = await prisma.orderItem.findMany({
+      where: {
+        variant: {
+          product: {
+            providerId: user.id,
+          },
+        },
+        order: {
+          status: 'paid',
+        },
+      },
+      include: {
+        variant: true,
+        order: true,
       },
     });
 
-    const totalPurchases = purchases.length;
-    const totalSpent = purchases
-      .reduce((sum: number, p: any) => sum + Number(p.amount), 0)
+    const totalPurchases = orderItems.length;
+    const totalSpent = orderItems
+      .reduce((sum: number, item: any) => sum + Number(item.variant.price), 0)
       .toFixed(2);
 
     // 5. Get this month's statistics
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
-    const thisMonthPurchases = purchases.filter(
-      (p: any) => p.createdAt >= startOfMonth
-    ).length;
+    const thisMonthItems = orderItems.filter(
+      (item: any) => item.order.createdAt >= startOfMonth
+    );
 
-    const thisMonthSpent = purchases
-      .filter((p: any) => p.createdAt >= startOfMonth)
-      .reduce((sum: number, p: any) => sum + Number(p.amount), 0)
+    const thisMonthPurchases = thisMonthItems.length;
+    const thisMonthSpent = thisMonthItems
+      .reduce((sum: number, item: any) => sum + Number(item.variant.price), 0)
       .toFixed(2);
 
     // 6. Get pending recharges statistics

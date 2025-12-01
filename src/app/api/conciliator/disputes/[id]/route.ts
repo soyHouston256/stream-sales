@@ -38,15 +38,22 @@ export async function GET(
     const dispute = await prisma.dispute.findUnique({
       where: { id: params.id },
       include: {
-        purchase: {
+        order: {
           include: {
-            product: {
-              select: {
-                id: true,
-                name: true,
-                category: true,
-                description: true,
-                price: true,
+            items: {
+              include: {
+                variant: {
+                  include: {
+                    product: {
+                      select: {
+                        id: true,
+                        name: true,
+                        category: true,
+                        description: true,
+                      },
+                    },
+                  },
+                },
               },
             },
           },
@@ -99,10 +106,15 @@ export async function GET(
 
     const messageCount = messages.length;
 
+    // Helper to extract product info from order items
+    const firstItem = dispute.order.items[0];
+    const product = firstItem?.variant.product;
+    const variant = firstItem?.variant;
+
     // 6. Formatear respuesta
     const formattedDispute = {
       id: dispute.id,
-      purchaseId: dispute.purchaseId,
+      purchaseId: dispute.orderId, // Keeping key for frontend compatibility
       sellerId: dispute.sellerId,
       providerId: dispute.providerId,
       conciliatorId: dispute.conciliatorId,
@@ -115,16 +127,16 @@ export async function GET(
       assignedAt: dispute.assignedAt?.toISOString() || null,
       resolvedAt: dispute.resolvedAt?.toISOString() || null,
       purchase: {
-        id: dispute.purchase.id,
-        amount: dispute.purchase.amount.toString(),
-        status: dispute.purchase.status,
-        createdAt: dispute.purchase.createdAt.toISOString(),
-        product: dispute.purchase.product ? {
-          id: dispute.purchase.product.id,
-          name: dispute.purchase.product.name,
-          category: dispute.purchase.product.category,
-          description: dispute.purchase.product.description,
-          price: dispute.purchase.product.price.toString(),
+        id: dispute.order.id,
+        amount: dispute.order.totalAmount.toString(),
+        status: dispute.order.status,
+        createdAt: dispute.order.createdAt.toISOString(),
+        product: product ? {
+          id: product.id,
+          name: product.name,
+          category: product.category,
+          description: product.description,
+          price: variant?.price.toString() || '0.00',
         } : undefined,
       },
       seller: dispute.seller,

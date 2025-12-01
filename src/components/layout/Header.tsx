@@ -4,6 +4,7 @@ import { useAuth } from '@/lib/auth/useAuth';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { LanguageSelector } from '@/components/LanguageSelector';
+import { ThemeSelector } from '@/components/ThemeSelector';
 import { LogOut, User, Wallet } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
@@ -62,6 +63,7 @@ export function Header() {
 
           <div className="flex items-center gap-2">
             <LanguageSelector />
+            <ThemeSelector />
 
             {user && (
               <>

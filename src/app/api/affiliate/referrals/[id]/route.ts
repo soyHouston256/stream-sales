@@ -1,6 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/infrastructure/database/prisma';
+import { prisma as globalPrisma } from '@/infrastructure/database/prisma';
+import { PrismaClient } from '@prisma/client';
 import { verifyJWT } from '@/infrastructure/auth/jwt';
+
+// Define minimal Delegate interfaces to fix type resolution
+interface OrderDelegate {
+  findMany(args?: { where?: any }): Promise<any[]>;
+}
+
+interface OrderItemDelegate {
+  findMany(args?: { where?: any }): Promise<any[]>;
+}
+
+// Force type recognition
+const prisma = globalPrisma as unknown as PrismaClient & {
+  order: OrderDelegate;
+  orderItem: OrderItemDelegate;
+};
 
 export const dynamic = 'force-dynamic';
 
@@ -101,11 +117,11 @@ export async function GET(
     const activitySummary: any = {};
 
     if (affiliation.referredUser.role === 'seller') {
-      // Count purchases made by this seller
-      const purchases = await prisma.purchase.findMany({
-        where: { sellerId: affiliation.referredUserId },
+      // Count purchases (orders) made by this seller
+      const orders = await prisma.order.findMany({
+        where: { userId: affiliation.referredUserId },
       });
-      activitySummary.totalPurchases = purchases.length;
+      activitySummary.totalPurchases = orders.length;
     }
 
     if (affiliation.referredUser.role === 'provider') {
@@ -113,9 +129,21 @@ export async function GET(
       const products = await prisma.product.findMany({
         where: { providerId: affiliation.referredUserId },
       });
-      const sales = await prisma.purchase.findMany({
-        where: { providerId: affiliation.referredUserId, status: 'completed' },
+
+      // Count sales (order items for this provider's products)
+      const sales = await prisma.orderItem.findMany({
+        where: {
+          variant: {
+            product: {
+              providerId: affiliation.referredUserId
+            }
+          },
+          order: {
+            status: 'paid'
+          }
+        }
       });
+
       activitySummary.totalProducts = products.length;
       activitySummary.totalSales = sales.length;
     }

@@ -74,53 +74,74 @@ export async function GET(
     }
 
     // 3. Get purchase details
-    const purchase = await prisma.purchase.findFirst({
+    // 3. Get sale details (replacing purchase)
+    const item = await prisma.orderItem.findFirst({
       where: {
         id: params.id,
-        providerId: user.id, // Only allow provider to see their own sales
-      },
-      include: {
-        product: {
-          select: {
-            id: true,
-            name: true,
-            category: true,
+        variant: {
+          product: {
+            providerId: user.id, // Only allow provider to see their own sales
           },
         },
-        seller: {
-          select: {
-            id: true,
-            email: true,
-            name: true,
+      },
+      include: {
+        variant: {
+          include: {
+            product: {
+              select: {
+                id: true,
+                name: true,
+                category: true,
+              },
+            },
+          },
+        },
+        order: {
+          include: {
+            // No direct relation to User in schema provided earlier, fetching manually if needed
           },
         },
       },
     });
 
-    if (!purchase) {
+    if (!item) {
       return NextResponse.json(
         { error: 'Sale not found or access denied' },
         { status: 404 }
       );
     }
 
+    // Fetch buyer manually
+    let buyerEmail = 'unknown';
+    let buyerName = 'unknown';
+    if (item.order.userId) {
+      const buyer = await prisma.user.findUnique({
+        where: { id: item.order.userId },
+        select: { email: true, name: true },
+      });
+      if (buyer) {
+        buyerEmail = buyer.email;
+        buyerName = buyer.name || 'unknown';
+      }
+    }
+
     // 4. Return sale details
     return NextResponse.json({
-      id: purchase.id,
-      productId: purchase.productId,
-      productName: purchase.product.name,
-      productCategory: purchase.product.category,
-      buyerId: purchase.sellerId,
-      buyerEmail: purchase.seller.email,
-      buyerName: purchase.seller.name || undefined,
-      amount: purchase.amount.toString(),
-      providerEarnings: purchase.providerEarnings.toString(),
-      adminCommission: purchase.adminCommission.toString(),
-      commissionRate: purchase.commissionRate.toString(),
-      status: purchase.status,
-      completedAt: purchase.completedAt?.toISOString(),
-      refundedAt: purchase.refundedAt?.toISOString(),
-      createdAt: purchase.createdAt.toISOString(),
+      id: item.id,
+      productId: item.variant.productId,
+      productName: item.variant.product.name,
+      productCategory: item.variant.product.category,
+      buyerId: item.order.userId,
+      buyerEmail: buyerEmail,
+      buyerName: buyerName,
+      amount: item.variant.price.toString(),
+      providerEarnings: item.variant.price.toString(), // TODO: Commission
+      adminCommission: "0",
+      commissionRate: "0",
+      status: item.order.status,
+      completedAt: item.order.status === 'paid' ? item.order.createdAt.toISOString() : undefined,
+      createdAt: item.order.createdAt.toISOString(),
+      // refundedAt: ... // Not tracked in simple Order model yet
     });
   } catch (error: any) {
     console.error('Error fetching sale details:', error);

@@ -10,7 +10,6 @@ import { EnhancedStatsCard } from '@/components/ui/enhanced-stats-card';
 import { EmptyState } from '@/components/ui/empty-state';
 import { DataTable, Column } from '@/components/admin/DataTable';
 import { useSellerStats } from '@/lib/hooks/useSellerStats';
-import { useMarketplace } from '@/lib/hooks/useMarketplace';
 import { usePurchases } from '@/lib/hooks/usePurchases';
 import { MarketplaceProduct, Purchase } from '@/types/seller';
 import { CategoryBadge } from '@/components/provider/CategoryBadge';
@@ -26,16 +25,11 @@ export default function SellerDashboard() {
   const [showProductDetails, setShowProductDetails] = useState(false);
 
   const { data: stats, isLoading: statsLoading } = useSellerStats();
-  const { data: marketplaceData, isLoading: marketplaceLoading } = useMarketplace({
-    page: 1,
-    limit: 6,
-  });
   const { data: purchasesData, isLoading: purchasesLoading } = usePurchases({
     page: 1,
     limit: 3,
   });
 
-  const featuredProducts = marketplaceData?.data || [];
   const recentPurchases = purchasesData?.data || [];
 
   const handleProductClick = (product: MarketplaceProduct) => {
@@ -129,39 +123,7 @@ export default function SellerDashboard() {
 
       {/* Featured Products & Recent Purchases */}
       <div className="grid gap-6 lg:grid-cols-2">
-        {/* Featured Products */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle>{t('seller.featuredProducts')}</CardTitle>
-                <CardDescription>{t('seller.latestProducts')}</CardDescription>
-              </div>
-              <Button variant="outline" asChild>
-                <Link href="/dashboard/seller/marketplace">{t('seller.viewAll')}</Link>
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-4 md:grid-cols-2">
-              {marketplaceLoading ? (
-                <p className="text-sm text-muted-foreground col-span-2">{t('seller.loadingProducts')}</p>
-              ) : featuredProducts.length > 0 ? (
-                featuredProducts.slice(0, 4).map((product) => (
-                  <ProductCard
-                    key={product.id}
-                    product={product}
-                    onBuyClick={handleProductClick}
-                  />
-                ))
-              ) : (
-                <p className="text-sm text-muted-foreground col-span-2">
-                  {t('seller.noProducts')}
-                </p>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+
 
         {/* Recent Purchases */}
         <Card>

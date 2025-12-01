@@ -21,7 +21,7 @@ import { ResolutionType } from '../../domain/value-objects/ResolutionType';
  * a medida que progresa por los estados (assign, resolve, close).
  */
 export class PrismaDisputeRepository implements IDisputeRepository {
-  constructor(private readonly prisma: PrismaClient) {}
+  constructor(private readonly prisma: PrismaClient) { }
 
   /**
    * Guarda o actualiza una disputa
@@ -43,7 +43,7 @@ export class PrismaDisputeRepository implements IDisputeRepository {
         resolvedAt: data.resolvedAt,
       },
       include: {
-        purchase: true,
+        order: true,
         seller: { select: { id: true, name: true, email: true } },
         provider: { select: { id: true, name: true, email: true } },
         conciliator: { select: { id: true, name: true, email: true } },
@@ -60,13 +60,21 @@ export class PrismaDisputeRepository implements IDisputeRepository {
     const dispute = await this.prisma.dispute.findUnique({
       where: { id },
       include: {
-        purchase: {
+        order: {
           include: {
-            product: {
-              select: {
-                id: true,
-                name: true,
-                category: true,
+            items: {
+              include: {
+                variant: {
+                  include: {
+                    product: {
+                      select: {
+                        id: true,
+                        name: true,
+                        category: true,
+                      },
+                    },
+                  },
+                },
               },
             },
           },
@@ -85,15 +93,23 @@ export class PrismaDisputeRepository implements IDisputeRepository {
    */
   async findByPurchaseId(purchaseId: string): Promise<Dispute | null> {
     const dispute = await this.prisma.dispute.findUnique({
-      where: { purchaseId },
+      where: { orderId: purchaseId },
       include: {
-        purchase: {
+        order: {
           include: {
-            product: {
-              select: {
-                id: true,
-                name: true,
-                category: true,
+            items: {
+              include: {
+                variant: {
+                  include: {
+                    product: {
+                      select: {
+                        id: true,
+                        name: true,
+                        category: true,
+                      },
+                    },
+                  },
+                },
               },
             },
           },
@@ -119,13 +135,21 @@ export class PrismaDisputeRepository implements IDisputeRepository {
       skip: filters?.offset || 0,
       take: filters?.limit || 20,
       include: {
-        purchase: {
+        order: {
           include: {
-            product: {
-              select: {
-                id: true,
-                name: true,
-                category: true,
+            items: {
+              include: {
+                variant: {
+                  include: {
+                    product: {
+                      select: {
+                        id: true,
+                        name: true,
+                        category: true,
+                      },
+                    },
+                  },
+                },
               },
             },
           },
@@ -156,13 +180,21 @@ export class PrismaDisputeRepository implements IDisputeRepository {
       where,
       orderBy: { createdAt: 'desc' },
       include: {
-        purchase: {
+        order: {
           include: {
-            product: {
-              select: {
-                id: true,
-                name: true,
-                category: true,
+            items: {
+              include: {
+                variant: {
+                  include: {
+                    product: {
+                      select: {
+                        id: true,
+                        name: true,
+                        category: true,
+                      },
+                    },
+                  },
+                },
               },
             },
           },
@@ -184,13 +216,21 @@ export class PrismaDisputeRepository implements IDisputeRepository {
       where: { sellerId },
       orderBy: { createdAt: 'desc' },
       include: {
-        purchase: {
+        order: {
           include: {
-            product: {
-              select: {
-                id: true,
-                name: true,
-                category: true,
+            items: {
+              include: {
+                variant: {
+                  include: {
+                    product: {
+                      select: {
+                        id: true,
+                        name: true,
+                        category: true,
+                      },
+                    },
+                  },
+                },
               },
             },
           },
@@ -212,13 +252,21 @@ export class PrismaDisputeRepository implements IDisputeRepository {
       where: { providerId },
       orderBy: { createdAt: 'desc' },
       include: {
-        purchase: {
+        order: {
           include: {
-            product: {
-              select: {
-                id: true,
-                name: true,
-                category: true,
+            items: {
+              include: {
+                variant: {
+                  include: {
+                    product: {
+                      select: {
+                        id: true,
+                        name: true,
+                        category: true,
+                      },
+                    },
+                  },
+                },
               },
             },
           },
@@ -347,7 +395,7 @@ export class PrismaDisputeRepository implements IDisputeRepository {
   private toDomain(prismaDispute: any): Dispute {
     return Dispute.fromPersistence({
       id: prismaDispute.id,
-      purchaseId: prismaDispute.purchaseId,
+      purchaseId: prismaDispute.orderId,
       sellerId: prismaDispute.sellerId,
       providerId: prismaDispute.providerId,
       conciliatorId: prismaDispute.conciliatorId,
@@ -372,16 +420,25 @@ export class PrismaDisputeRepository implements IDisputeRepository {
     const json = dispute.toJSON();
 
     // Agregar relaciones si existen
+    // Note: Order structure is different from Purchase. 
+    // We need to extract product info from OrderItems.
+    // Assuming first item for now or adapting structure.
+
+    let productInfo = undefined;
+    if (prismaDispute.order?.items?.[0]?.variant?.product) {
+      productInfo = {
+        id: prismaDispute.order.items[0].variant.product.id,
+        name: prismaDispute.order.items[0].variant.product.name,
+        category: prismaDispute.order.items[0].variant.product.category,
+      };
+    }
+
     return {
       ...json,
-      purchase: prismaDispute.purchase ? {
-        id: prismaDispute.purchase.id,
-        amount: prismaDispute.purchase.amount,
-        product: prismaDispute.purchase.product ? {
-          id: prismaDispute.purchase.product.id,
-          name: prismaDispute.purchase.product.name,
-          category: prismaDispute.purchase.product.category,
-        } : undefined,
+      purchase: prismaDispute.order ? {
+        id: prismaDispute.order.id,
+        amount: prismaDispute.order.totalAmount,
+        product: productInfo,
       } : undefined,
       seller: prismaDispute.seller || undefined,
       provider: prismaDispute.provider || undefined,
