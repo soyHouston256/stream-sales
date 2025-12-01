@@ -78,7 +78,7 @@ export async function GET(
       accountEmail: product.accountEmail,
       accountPassword: product.accountPassword,
       accountDetails: product.accountDetails,
-      status: product.status,
+      status: product.isActive ? 'available' : 'unavailable',
       createdAt: product.createdAt.toISOString(),
       updatedAt: product.updatedAt.toISOString(),
       soldAt: product.soldAt?.toISOString(),
@@ -173,10 +173,10 @@ export async function PUT(
       );
     }
 
-    // 4. Only allow updating available products
-    if (existingProduct.status !== 'available') {
+    // 4. Only allow updating active products
+    if (!existingProduct.isActive) {
       return NextResponse.json(
-        { error: 'Only available products can be edited' },
+        { error: 'Only active products can be edited' },
         { status: 400 }
       );
     }
@@ -222,7 +222,7 @@ export async function PUT(
       accountEmail: product.accountEmail,
       accountPassword: product.accountPassword,
       accountDetails: product.accountDetails,
-      status: product.status,
+      status: product.isActive ? 'available' : 'unavailable',
       createdAt: product.createdAt.toISOString(),
       updatedAt: product.updatedAt.toISOString(),
     });
@@ -297,22 +297,16 @@ export async function DELETE(
       );
     }
 
-    // 4. Only allow deleting products that are not sold
-    if (product.status === 'sold') {
-      return NextResponse.json(
-        { error: 'Sold products cannot be deleted' },
-        { status: 400 }
-      );
-    }
-
-    // 5. Delete product
-    await prisma.product.delete({
+    // 4. Soft delete (set isActive to false) instead of hard delete if it has history
+    // For now, we'll just set isActive to false to simulate deletion/archiving
+    await prisma.product.update({
       where: { id: params.id },
+      data: { isActive: false },
     });
 
     // 6. Return success
     return NextResponse.json(
-      { message: 'Product deleted successfully' },
+      { message: 'Product deactivated successfully' },
       { status: 200 }
     );
   } catch (error: any) {

@@ -44,7 +44,7 @@ export async function GET(
     }
 
     // Only show available products to public
-    if (product.status !== 'available') {
+    if (!product.isActive) {
       return NextResponse.json(
         { error: 'Product not available' },
         { status: 404 }
@@ -60,7 +60,7 @@ export async function GET(
       description: product.description,
       price: product.price.toString(),
       imageUrl: product.imageUrl,
-      status: product.status,
+      status: product.isActive ? 'available' : 'unavailable', // Map boolean to string for frontend compatibility
       createdAt: product.createdAt.toISOString(),
       updatedAt: product.updatedAt.toISOString(),
       provider: product.provider,
