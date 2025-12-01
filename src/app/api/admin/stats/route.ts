@@ -1,6 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/infrastructure/database/prisma';
+import { prisma as globalPrisma } from '@/infrastructure/database/prisma';
+import { PrismaClient } from '@prisma/client';
 import { verifyJWT } from '@/infrastructure/auth/jwt';
+
+// Define minimal OrderDelegate interface to fix type resolution
+interface OrderDelegate {
+  count(args?: { where?: any }): Promise<number>;
+}
+
+// Force type recognition for order delegate
+const prisma = globalPrisma as unknown as PrismaClient & {
+  order: OrderDelegate;
+};
 
 export const dynamic = 'force-dynamic';
 
