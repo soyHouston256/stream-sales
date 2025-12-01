@@ -40,8 +40,11 @@ export interface Product {
   createdAt: string;
   updatedAt: string;
   variants?: ProductVariant[];
-  // Legacy fields for compatibility if needed, or remove them
-  // status: ProductStatus; // Mapped from isActive?
+  // Flattened fields from API
+  price?: string;
+  accountEmail?: string;
+  accountPassword?: string;
+  accountDetails?: any;
 }
 
 export interface CreateProductDTO {

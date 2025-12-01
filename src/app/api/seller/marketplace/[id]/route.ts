@@ -82,6 +82,10 @@ export async function GET(
             email: true,
           },
         },
+        variants: {
+          orderBy: { price: 'asc' },
+          take: 1,
+        },
       },
     });
 
@@ -100,7 +104,7 @@ export async function GET(
       category: product.category,
       name: product.name,
       description: product.description || '',
-      price: product.price.toString(),
+      price: product.variants[0]?.price.toString() || '0',
       status: product.isActive ? 'available' : 'unavailable',
       createdAt: product.createdAt.toISOString(),
     });

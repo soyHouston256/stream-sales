@@ -33,6 +33,12 @@ export async function GET(
             email: true,
           },
         },
+        variants: {
+          orderBy: {
+            price: 'asc',
+          },
+          take: 1,
+        },
       },
     });
 
@@ -58,7 +64,7 @@ export async function GET(
       category: product.category,
       name: product.name,
       description: product.description,
-      price: product.price.toString(),
+      price: product.variants[0]?.price.toString() || '0',
       imageUrl: product.imageUrl,
       status: product.isActive ? 'available' : 'unavailable', // Map boolean to string for frontend compatibility
       createdAt: product.createdAt.toISOString(),

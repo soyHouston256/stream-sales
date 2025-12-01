@@ -49,7 +49,7 @@ export function EditProductDialog({
       reset({
         name: product.name,
         description: product.description,
-        price: parseFloat(product.price),
+        price: parseFloat(product.price || product.variants?.[0]?.price || '0'),
         accountEmail: product.accountEmail,
       });
     }
