@@ -67,14 +67,22 @@ export async function GET(request: Request) {
     const disputes = await prisma.dispute.findMany({
       where,
       include: {
-        purchase: {
+        order: {
           include: {
-            product: {
-              select: {
-                id: true,
-                category: true,
-                name: true,
-                description: true,
+            items: {
+              include: {
+                variant: {
+                  include: {
+                    product: {
+                      select: {
+                        id: true,
+                        category: true,
+                        name: true,
+                        description: true,
+                      },
+                    },
+                  },
+                },
               },
             },
           },
@@ -109,37 +117,42 @@ export async function GET(request: Request) {
     });
 
     // 7. Formatear respuesta
-    const formattedDisputes = disputes.map((dispute) => ({
-      id: dispute.id,
-      purchaseId: dispute.purchaseId,
-      sellerId: dispute.sellerId,
-      providerId: dispute.providerId,
-      conciliatorId: dispute.conciliatorId,
-      openedBy: dispute.openedBy,
-      reason: dispute.reason,
-      status: dispute.status,
-      resolution: dispute.resolution,
-      resolutionType: dispute.resolutionType,
-      partialRefundPercentage: dispute.partialRefundPercentage
-        ? parseFloat(dispute.partialRefundPercentage.toString())
-        : null,
-      createdAt: dispute.createdAt.toISOString(),
-      assignedAt: dispute.assignedAt?.toISOString() || null,
-      resolvedAt: dispute.resolvedAt?.toISOString() || null,
-      purchase: {
-        id: dispute.purchase.id,
-        amount: dispute.purchase.amount.toString(),
-        product: {
-          id: dispute.purchase.product.id,
-          category: dispute.purchase.product.category,
-          name: dispute.purchase.product.name,
-          description: dispute.purchase.product.description,
-        },
-      },
-      seller: dispute.seller,
-      provider: dispute.provider,
-      conciliator: dispute.conciliator || undefined,
-    }));
+    const formattedDisputes = disputes.map((dispute) => {
+      const firstItem = dispute.order?.items[0];
+      const product = firstItem?.variant.product;
+
+      return {
+        id: dispute.id,
+        purchaseId: dispute.orderId, // Compatibility
+        sellerId: dispute.sellerId,
+        providerId: dispute.providerId,
+        conciliatorId: dispute.conciliatorId,
+        openedBy: dispute.openedBy,
+        reason: dispute.reason,
+        status: dispute.status,
+        resolution: dispute.resolution,
+        resolutionType: dispute.resolutionType,
+        partialRefundPercentage: dispute.partialRefundPercentage
+          ? parseFloat(dispute.partialRefundPercentage.toString())
+          : null,
+        createdAt: dispute.createdAt.toISOString(),
+        assignedAt: dispute.assignedAt?.toISOString() || null,
+        resolvedAt: dispute.resolvedAt?.toISOString() || null,
+        purchase: dispute.order ? {
+          id: dispute.order.id,
+          amount: dispute.order.totalAmount.toString(),
+          product: product ? {
+            id: product.id,
+            category: product.category,
+            name: product.name,
+            description: product.description,
+          } : undefined,
+        } : undefined,
+        seller: dispute.seller,
+        provider: dispute.provider,
+        conciliator: dispute.conciliator || undefined,
+      };
+    });
 
     // 8. Calcular paginación
     const totalPages = Math.ceil(total / limit);
