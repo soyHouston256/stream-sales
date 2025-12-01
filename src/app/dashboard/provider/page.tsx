@@ -3,10 +3,10 @@
 import { useAuth } from '@/lib/auth/useAuth';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Package, DollarSign, Wallet, ShoppingCart } from 'lucide-react';
 import { EnhancedStatsCard } from '@/components/ui/enhanced-stats-card';
 import { SalesByCategoryChart } from '@/components/provider/SalesByCategoryChart';
-import { CreateProductDialog } from '@/components/provider/CreateProductDialog';
 import { DataTable, Column } from '@/components/admin/DataTable';
 import { useProviderStats } from '@/lib/hooks/useProviderStats';
 import { useProviderSales } from '@/lib/hooks/useProviderSales';
@@ -80,7 +80,10 @@ export default function ProviderDashboard() {
             {t('dashboard.welcome')}, {user?.name || user?.email}
           </p>
         </div>
-        <CreateProductDialog />
+        <Button onClick={() => router.push('/dashboard/provider/products')}>
+          <Package className="mr-2 h-4 w-4" />
+          {t('provider.products.title')}
+        </Button>
       </div>
 
       {/* Prominent Wallet Balance Card - MOST VISIBLE ELEMENT */}

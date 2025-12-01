@@ -20,17 +20,20 @@ export const getSellerNavItems = (t: (key: string) => string): NavItem[] => [
     href: '/dashboard/seller/purchases',
     icon: Package,
     description: t('navigation.purchaseHistory'),
+    matchSubPaths: true,
   },
   {
     title: t('navigation.myWallet'),
     href: '/dashboard/seller/wallet',
     icon: Wallet,
     description: t('navigation.balanceTransactions'),
+    matchSubPaths: true,
   },
   {
     title: t('navigation.settings'),
     href: '/dashboard/seller/settings',
     icon: Settings,
     description: t('navigation.accountSettings'),
+    matchSubPaths: true,
   },
 ];
