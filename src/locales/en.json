@@ -17,7 +17,8 @@
     "back": "Back",
     "continue": "Continue",
     "saving": "Saving...",
-    "saveProduct": "Save Product"
+    "saveProduct": "Save Product",
+    "saveChanges": "Save Changes"
   },
   "settings": {
     "title": "Settings",
@@ -177,6 +178,7 @@
     "products": {
       "title": "Products",
       "subtitle": "Manage your digital product catalog",
+      "newProduct": "New Product",
       "filters": "Filters",
       "filtersDescription": "Filter products by category, status or name",
       "searchPlaceholder": "Search products...",
@@ -198,7 +200,8 @@
       "activeClients": "Active Clients",
       "noProductsDesc": "Create your first product to get started",
       "noProductsFound": "No products found",
-      "noProductsFoundDesc": "No products match \"{search}\""
+      "noProductsFoundDesc": "No products match \"{search}\"",
+      "updateSuccess": "Product updated successfully"
     },
     "sales": {
       "title": "Sales History",
@@ -259,7 +262,11 @@
       "approved": "Approved",
       "completed": "Completed",
       "rejected": "Rejected",
-      "noWithdrawals": "No withdrawal requests yet. Request a withdrawal to get started."
+      "noWithdrawals": "No withdrawal requests yet",
+      "transactionsAppearHere": "Your transactions will appear here",
+      "withdrawalsAppearHere": "Your withdrawal requests will appear here",
+      "noTransactionsFiltered": "No transactions found",
+      "tryDifferentFilters": "Try adjusting your filters"
     },
     "wizard": {
       "newProduct": "New Product",
@@ -331,7 +338,20 @@
         "meetingLink": "Meeting Link",
         "iframeCode": "iFrame Code",
         "digitalResources": "Digital Resources",
-        "cover": "Cover"
+        "cover": "Cover",
+        "downloadLink": "Download Link",
+        "pricePlaceholder": "0.00",
+        "urlPlaceholder": "https://...",
+        "pinPlaceholder": "PIN",
+        "emailPlaceholder": "admin@netflix.com",
+        "passwordPlaceholder": "******",
+        "keysPlaceholder": "XXXX-XXXX-XXXX-001\nXXXX-XXXX-XXXX-002",
+        "meetPlaceholder": "https://meet.google.com/...",
+        "iframePlaceholder": "<iframe src='...'></iframe>",
+        "defaultProfileName": "Profile",
+        "errors": {
+          "categoryRequired": "Category is required"
+        }
       }
     }
   },

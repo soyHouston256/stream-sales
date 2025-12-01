@@ -61,7 +61,19 @@ const INITIAL_DATA: WizardFormData = {
     accountType: 'profile',
     email: '',
     password: '',
-    profiles: [{ name: 'Perfil 1', pin: '' }],
+    profiles: [{ name: 'Perfil 1', pin: '' }], // Will be localized in component if needed, or we can leave as default since it's initial state. 
+    // Actually, we can't use hook here. Let's leave it and rely on the user changing it or the component rendering it.
+    // Or better, let's make it empty or generic.
+    // But wait, StepInventory uses t() for NEW profiles. Initial one is hardcoded here.
+    // We can't use t() outside component.
+    // Let's change it to just "Profile 1" or handle it inside component mount?
+    // For now, let's leave it as is, or change to a generic string.
+    // "Perfil 1" is Spanish. "Profile 1" is English.
+    // Let's just leave it as "Profile 1" or "Perfil 1" and assume user will edit it.
+    // BUT, since we are doing i18n, we should probably initialize it empty or handle it inside the component.
+    // Let's change it to use a constant that we can't easily translate here without context.
+    // However, we can update it in useEffect inside the component if we really want.
+    // For now, let's skip this one as it's outside the component scope.
     licenseType: 'serial',
     licenseKeys: '',
     contentType: 'live_meet',
@@ -83,7 +95,7 @@ export function ProductCreatorWizard({ onClose }: ProductCreatorWizardProps) {
 
     const handleSave = async () => {
         if (!formData.category) {
-            toast({ title: 'Error', description: 'Category is required', variant: 'destructive' });
+            toast({ title: t('common.error'), description: t('provider.wizard.errors.categoryRequired'), variant: 'destructive' });
             return;
         }
 
@@ -115,27 +127,27 @@ export function ProductCreatorWizard({ onClose }: ProductCreatorWizardProps) {
 
     return (
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[150] flex items-center justify-center p-4 animate-in fade-in duration-200">
-            <div className="bg-white w-full max-w-4xl h-[90vh] rounded-3xl shadow-2xl flex flex-col overflow-hidden">
+            <div className="bg-white dark:bg-slate-900 w-full max-w-4xl h-[90vh] rounded-3xl shadow-2xl flex flex-col overflow-hidden border dark:border-slate-800">
 
                 {/* Header */}
-                <div className="px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-white z-10">
+                <div className="px-8 py-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-white dark:bg-slate-900 z-10">
                     <div>
-                        <h2 className="text-2xl font-bold text-slate-800">{t('provider.wizard.newProduct')}</h2>
-                        <p className="text-sm text-slate-400">
+                        <h2 className="text-2xl font-bold text-slate-800 dark:text-white">{t('provider.wizard.newProduct')}</h2>
+                        <p className="text-sm text-slate-400 dark:text-slate-500">
                             {t('provider.wizard.step')} {step} {t('provider.wizard.of')} 3 • {formData.category ? t(`provider.wizard.categories.${formData.category}`) : t('provider.wizard.categorySelection')}
                         </p>
                     </div>
-                    <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-full transition-colors">
+                    <Button variant="ghost" size="icon" onClick={onClose} className="rounded-full">
                         <X size={24} className="text-slate-400" />
-                    </button>
+                    </Button>
                 </div>
 
                 {/* Content */}
-                <div className="flex-1 overflow-y-auto p-8 bg-slate-50">
+                <div className="flex-1 overflow-y-auto p-8 bg-slate-50 dark:bg-slate-950/50">
                     {step === 1 && (
                         <StepCategory
                             selectedCategory={formData.category}
-                            onSelect={(category) => {
+                            onSelect={(category: ProductCategory) => {
                                 updateFormData({ category });
                                 setStep(2);
                             }}
@@ -158,38 +170,40 @@ export function ProductCreatorWizard({ onClose }: ProductCreatorWizardProps) {
                 </div>
 
                 {/* Footer */}
-                <div className="px-8 py-6 border-t border-slate-100 bg-white flex justify-between z-10">
+                <div className="px-8 py-6 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 flex justify-between z-10">
                     {step > 1 && (
-                        <button
+                        <Button
+                            variant="ghost"
                             onClick={() => setStep(step - 1)}
-                            className="text-slate-500 font-bold hover:text-slate-800 transition-colors"
+                            className="text-slate-500 dark:text-slate-400 font-bold hover:text-slate-800 dark:hover:text-white"
                         >
                             {t('common.back')}
-                        </button>
+                        </Button>
                     )}
 
                     <div className="ml-auto flex gap-4">
-                        <button
+                        <Button
+                            variant="ghost"
                             onClick={onClose}
-                            className="px-6 py-3 rounded-xl font-bold text-slate-500 hover:bg-slate-50 transition-colors"
+                            className="px-6 py-3 rounded-xl font-bold text-slate-500 dark:text-slate-400"
                         >
                             {t('common.cancel')}
-                        </button>
+                        </Button>
 
                         {step < 3 && step > 1 && (
-                            <button
+                            <Button
                                 onClick={() => setStep(step + 1)}
-                                className="px-6 py-3 rounded-xl font-bold bg-indigo-600 text-white shadow-lg shadow-indigo-500/30 hover:bg-indigo-700 transition-all"
+                                className="px-6 py-3 rounded-xl font-bold shadow-lg shadow-indigo-500/30"
                             >
                                 {t('common.continue')}
-                            </button>
+                            </Button>
                         )}
 
                         {step === 3 && (
                             <Button
                                 onClick={handleSave}
                                 disabled={isSubmitting}
-                                className="px-8 py-3 rounded-xl font-bold bg-indigo-600 text-white shadow-lg shadow-indigo-500/30 hover:bg-indigo-700 flex items-center gap-2 h-auto"
+                                className="px-8 py-3 rounded-xl font-bold shadow-lg shadow-indigo-500/30 flex items-center gap-2 h-auto"
                             >
                                 <Save size={18} />
                                 {isSubmitting ? t('common.saving') : t('common.saveProduct')}

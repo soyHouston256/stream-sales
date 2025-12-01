@@ -17,7 +17,8 @@
     "back": "Volver",
     "continue": "Continuar",
     "saving": "Guardando...",
-    "saveProduct": "Guardar Producto"
+    "saveProduct": "Guardar Producto",
+    "saveChanges": "Guardar Cambios"
   },
   "settings": {
     "title": "Configuración",
@@ -177,6 +178,7 @@
     "products": {
       "title": "Productos",
       "subtitle": "Administra tu catálogo de productos digitales",
+      "newProduct": "Nuevo Producto",
       "filters": "Filtros",
       "filtersDescription": "Filtra productos por categoría, estado o nombre",
       "searchPlaceholder": "Buscar productos...",
@@ -195,6 +197,7 @@
       "noProductsDesc": "Crea tu primer producto para comenzar",
       "noProductsFound": "No se encontraron productos",
       "noProductsFoundDesc": "No hay productos que coincidan con \"{search}\"",
+      "updateSuccess": "Producto actualizado exitosamente",
       "totalProducts": "Total Productos",
       "stockCritical": "Stock Crítico",
       "salesToday": "Ventas Hoy",
@@ -259,7 +262,11 @@
       "approved": "Aprobado",
       "completed": "Completado",
       "rejected": "Rechazado",
-      "noWithdrawals": "Aún no hay solicitudes de retiro. Solicita un retiro para comenzar."
+      "noWithdrawals": "Aún no hay solicitudes de retiro",
+      "transactionsAppearHere": "Tus transacciones aparecerán aquí",
+      "withdrawalsAppearHere": "Tus solicitudes de retiro aparecerán aquí",
+      "noTransactionsFiltered": "No se encontraron transacciones",
+      "tryDifferentFilters": "Intenta ajustar tus filtros"
     },
     "wizard": {
       "newProduct": "Nuevo Producto",
@@ -331,7 +338,20 @@
         "meetingLink": "Enlace de Reunión",
         "iframeCode": "Código iFrame",
         "digitalResources": "Recursos Digitales",
-        "cover": "Portada"
+        "cover": "Portada",
+        "downloadLink": "Enlace de Descarga",
+        "pricePlaceholder": "0.00",
+        "urlPlaceholder": "https://...",
+        "pinPlaceholder": "PIN",
+        "emailPlaceholder": "admin@netflix.com",
+        "passwordPlaceholder": "******",
+        "keysPlaceholder": "XXXX-XXXX-XXXX-001\nXXXX-XXXX-XXXX-002",
+        "meetPlaceholder": "https://meet.google.com/...",
+        "iframePlaceholder": "<iframe src='...'></iframe>",
+        "defaultProfileName": "Perfil",
+        "errors": {
+          "categoryRequired": "La categoría es requerida"
+        }
       }
     }
   },

@@ -24,18 +24,21 @@ import { useLanguage } from '@/contexts/LanguageContext';
 
 // Simple Stat Card Component
 const StatCard = ({ label, value, icon: Icon, color }: { label: string; value: string; icon: any; color: string }) => (
-  <div className="bg-white p-6 rounded-xl border border-slate-100 shadow-sm flex items-start justify-between">
+  <div className="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-100 dark:border-slate-800 shadow-sm flex items-start justify-between">
     <div>
-      <p className="text-xs font-bold text-slate-400 uppercase mb-1">{label}</p>
-      <h3 className="text-2xl font-extrabold text-slate-800">{value}</h3>
+      <p className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase mb-1">{label}</p>
+      <h3 className="text-2xl font-extrabold text-slate-800 dark:text-white">{value}</h3>
     </div>
-    <div className={`p-3 rounded-xl bg-${color}-50 text-${color}-600`}>
+    <div className={`p-3 rounded-xl bg-${color}-50 dark:bg-${color}-900/20 text-${color}-600 dark:text-${color}-400`}>
       <Icon size={24} />
     </div>
   </div>
 );
 
+import { useRouter } from 'next/navigation';
+
 export default function ProductsPage() {
+  const router = useRouter();
   const { t } = useLanguage();
   const [page, setPage] = useState(1);
   const [category, setCategory] = useState<ProductCategory | 'all'>('all');
@@ -113,6 +116,14 @@ export default function ProductsPage() {
           <Button
             variant="ghost"
             size="sm"
+            onClick={() => router.push(`/dashboard/provider/products/${product.id}`)}
+            title={t('common.edit')}
+          >
+            <Edit className="h-4 w-4 text-indigo-500" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={() => handleDelete(product.id, product.name)}
             disabled={product.isActive} // Example logic: cannot delete active products? Or maybe just allow it.
             title={t('provider.products.deleteProduct')}
@@ -135,7 +146,7 @@ export default function ProductsPage() {
         </div>
         <Button
           onClick={() => setIsWizardOpen(true)}
-          className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-lg font-bold shadow-lg shadow-indigo-500/20 transition-all flex items-center gap-2 active:scale-95"
+          className="px-6 py-2.5 rounded-lg font-bold shadow-lg shadow-indigo-500/20 transition-all flex items-center gap-2 active:scale-95"
         >
           <Plus size={20} /> {t('provider.products.newProduct')}
         </Button>

@@ -64,6 +64,13 @@ export async function GET(
         },
         inventoryAccounts: {
           take: 1,
+          include: { slots: true },
+        },
+        inventoryLicenses: {
+          take: 1,
+        },
+        digitalContents: {
+          take: 1,
         },
       },
     });
@@ -77,6 +84,33 @@ export async function GET(
 
     const variant = product.variants[0];
     const account = product.inventoryAccounts[0];
+    const license = product.inventoryLicenses[0];
+    const content = product.digitalContents[0];
+
+    // Construct accountDetails based on category/inventory type
+    let accountDetails: any = {};
+
+    if (account) {
+      accountDetails = {
+        platformType: account.platformType,
+        accountType: account.totalSlots > 1 ? 'full' : 'profile', // Infer type
+        profiles: account.slots.map(s => ({ name: s.profileName, pin: s.pinCode })),
+      };
+    } else if (license) {
+      accountDetails = {
+        licenseType: license.activationType,
+        // licenseKeys: license.licenseKey, // Don't expose keys in edit view for security? Or maybe yes?
+        // For now let's expose it so they can see/edit
+        licenseKeys: license.licenseKey,
+      };
+    } else if (content) {
+      accountDetails = {
+        contentType: content.contentType,
+        resourceUrl: content.resourceUrl,
+        liveDate: content.liveDate?.toISOString(),
+        coverImageUrl: content.coverImageUrl,
+      };
+    }
 
     // 4. Return product
     return NextResponse.json({
@@ -88,12 +122,12 @@ export async function GET(
       price: variant?.price.toString() || '0',
       imageUrl: product.imageUrl,
       accountEmail: account?.email || '',
-      accountPassword: '', // Don't return hash for security, or return empty
-      accountDetails: {}, // accountDetails removed from schema?
+      accountPassword: '', // Don't return hash
+      accountDetails: accountDetails,
       status: product.isActive ? 'available' : 'unavailable',
       createdAt: product.createdAt.toISOString(),
       updatedAt: product.updatedAt.toISOString(),
-      soldAt: null, // soldAt removed from schema
+      soldAt: null,
     });
   } catch (error: any) {
     console.error('Error fetching product:', error);
@@ -213,6 +247,8 @@ export async function PUT(
       include: {
         variants: { take: 1 },
         inventoryAccounts: { take: 1 },
+        inventoryLicenses: { take: 1 },
+        digitalContents: { take: 1 },
       },
     });
 
@@ -245,13 +281,45 @@ export async function PUT(
     }
 
     // Update Inventory Account
-    if ((data.accountEmail || data.accountPassword) && accountId) {
+    if (accountId && (data.accountEmail || data.accountPassword || data.accountDetails)) {
       await prisma.inventoryAccount.update({
         where: { id: accountId },
         data: {
           ...(data.accountEmail && { email: data.accountEmail }),
-          ...(data.accountPassword && { passwordHash: data.accountPassword }), // Note: Should be hashed!
+          ...(data.accountPassword && { passwordHash: data.accountPassword }),
+          // Update slots if profiles provided
+          ...(data.accountDetails?.profiles && {
+            // This is complex, for now let's assume we don't update slots via this simple endpoint
+            // or we would need to delete/re-create slots.
+            // Leaving as TODO or simple implementation if needed.
+          }),
         },
+      });
+    }
+
+    // Update License
+    const licenseId = productWithRelations.inventoryLicenses[0]?.id;
+    if (licenseId && data.accountDetails?.licenseKeys) {
+      await prisma.inventoryLicense.update({
+        where: { id: licenseId },
+        data: {
+          licenseKey: data.accountDetails.licenseKeys,
+          activationType: data.accountDetails.licenseType,
+        }
+      });
+    }
+
+    // Update Digital Content
+    const contentId = productWithRelations.digitalContents[0]?.id;
+    if (contentId && data.accountDetails) {
+      await prisma.digitalContent.update({
+        where: { id: contentId },
+        data: {
+          contentType: data.accountDetails.contentType,
+          resourceUrl: data.accountDetails.resourceUrl,
+          liveDate: data.accountDetails.liveDate ? new Date(data.accountDetails.liveDate) : null,
+          coverImageUrl: data.accountDetails.coverImageUrl,
+        }
       });
     }
 

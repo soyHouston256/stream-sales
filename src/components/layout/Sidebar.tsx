@@ -20,6 +20,7 @@ export interface NavItem {
   href: string;
   icon: LucideIcon;
   description?: string;
+  matchSubPaths?: boolean;
 }
 
 interface SidebarProps {
@@ -34,7 +35,9 @@ function NavigationContent({ items, onNavClick }: { items: NavItem[]; onNavClick
     <nav className="flex flex-col gap-1 p-4">
       {items.map((item) => {
         const Icon = item.icon;
-        const isActive = pathname === item.href;
+        const isActive = item.matchSubPaths
+          ? (pathname === item.href || pathname.startsWith(`${item.href}/`))
+          : pathname === item.href;
 
         return (
           <Link
