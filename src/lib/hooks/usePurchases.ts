@@ -96,10 +96,6 @@ export function useCreatePurchase() {
       queryClient.invalidateQueries({ queryKey: ['seller', 'stats'] });
       queryClient.invalidateQueries({ queryKey: ['seller', 'wallet'] });
       queryClient.invalidateQueries({ queryKey: ['seller', 'marketplace'] });
-      toast({
-        title: 'Purchase successful!',
-        description: `You purchased ${purchase.product.name}. Check your purchase details for credentials.`,
-      });
     },
     onError: (error: Error) => {
       toast({

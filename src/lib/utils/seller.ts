@@ -1,5 +1,16 @@
 import { toast } from '@/lib/hooks/useToast';
 
+export const CATEGORY_STYLES: Record<string, { bg: string; text: string; label: string }> = {
+  netflix: { bg: 'bg-red-900', text: 'text-red-100', label: 'N' },
+  spotify: { bg: 'bg-green-900', text: 'text-green-100', label: 'S' },
+  hbo: { bg: 'bg-purple-900', text: 'text-purple-100', label: 'H' },
+  disney: { bg: 'bg-blue-900', text: 'text-blue-100', label: 'D' },
+  prime: { bg: 'bg-blue-800', text: 'text-blue-100', label: 'P' },
+  youtube: { bg: 'bg-red-800', text: 'text-red-100', label: 'Y' },
+  ai: { bg: 'bg-teal-900', text: 'text-teal-100', label: 'AI' },
+  other: { bg: 'bg-slate-800', text: 'text-slate-100', label: '?' },
+};
+
 /**
  * Copy text to clipboard with user feedback
  */

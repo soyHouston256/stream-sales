@@ -4,6 +4,7 @@ import {
   Megaphone,
   Clock,
   Wallet,
+  Settings,
 } from 'lucide-react';
 import type { NavItem } from '../Sidebar';
 
@@ -37,5 +38,11 @@ export const getAffiliateNavItems = (t: (key: string) => string): NavItem[] => [
     href: '/dashboard/affiliate/marketing',
     icon: Megaphone,
     description: t('navigation.marketingMaterial'),
+  },
+  {
+    title: t('navigation.settings'),
+    href: '/dashboard/affiliate/settings',
+    icon: Settings,
+    description: t('navigation.settingsDesc'),
   },
 ];

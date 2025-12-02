@@ -1,5 +1,7 @@
 'use client';
 
+import { Suspense } from 'react';
+
 import { LoginForm } from '@/components/auth/LoginForm';
 import { LanguageSelector } from '@/components/LanguageSelector';
 import { ThemeSelector } from '@/components/ThemeSelector';
@@ -15,7 +17,9 @@ export default function LoginPage() {
           <ThemeSelector />
         </div>
       </div>
-      <LoginForm />
+      <Suspense fallback={<div>Loading...</div>}>
+        <LoginForm />
+      </Suspense>
     </div>
   );
 }

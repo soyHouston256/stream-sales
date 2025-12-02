@@ -13,7 +13,6 @@ import {
 } from '@/components/ui/select';
 import { DataTable, Column } from '@/components/admin/DataTable';
 import { EnhancedStatsCard } from '@/components/ui/enhanced-stats-card';
-import { EmptyState } from '@/components/ui/empty-state';
 import {
   useWalletBalance,
   useWalletTransactions,
@@ -77,9 +76,8 @@ export default function WalletPage() {
         const isPositive = transaction.type === 'credit';
         return (
           <span
-            className={`font-medium ${
-              isPositive ? 'text-green-600' : 'text-red-600'
-            }`}
+            className={`font-medium ${isPositive ? 'text-green-600' : 'text-red-600'
+              }`}
           >
             {isPositive ? '+' : '-'}
             {formatCurrency(transaction.amount)}
@@ -164,10 +162,10 @@ export default function WalletPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold">{t('seller.wallet.title')}</h1>
-          <p className="text-muted-foreground mt-2">
+          <h1 className="text-3xl font-bold tracking-tight">{t('seller.wallet.title')}</h1>
+          <p className="text-muted-foreground mt-1">
             {t('seller.wallet.subtitle')}
           </p>
         </div>
@@ -176,36 +174,23 @@ export default function WalletPage() {
 
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="col-span-2 overflow-hidden relative border-2 shadow-lg hover:shadow-xl transition-all">
-          <div className="absolute inset-0 bg-gradient-to-br from-green-500 via-emerald-500 to-teal-500 opacity-5" />
-          <CardHeader className="pb-3 relative">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="p-2.5 rounded-xl bg-gradient-to-br from-green-500 via-emerald-500 to-teal-500 shadow-md">
-                <Wallet className="h-6 w-6 text-white" />
-              </div>
-              <CardDescription className="text-base font-medium">
-                {t('seller.wallet.currentBalance')}
-              </CardDescription>
-            </div>
-            <CardTitle className="text-5xl font-bold bg-gradient-to-br from-green-500 via-emerald-500 to-teal-500 bg-clip-text text-transparent">
-              {balance ? formatCurrency(balance.balance) : '$0.00'}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="relative">
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                {balance?.currency || 'USD'} • {balance?.status || 'active'}
-              </span>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="col-span-2">
+          <EnhancedStatsCard
+            title={t('seller.wallet.currentBalance')}
+            value={balance ? formatCurrency(balance.balance) : '$0.00'}
+            description={`${balance?.currency || 'USD'} • ${balance?.status || 'active'}`}
+            icon={Wallet}
+            variant="success"
+            isLoading={balanceLoading}
+          />
+        </div>
 
         <EnhancedStatsCard
           title={t('seller.wallet.totalRecharged')}
           value={formatCurrency(totalRecharged.toFixed(2))}
           description={t('seller.wallet.lifetimeRecharges')}
           icon={TrendingUp}
-          variant="success"
+          variant="info"
           isLoading={rechargesLoading}
         />
 
@@ -222,7 +207,7 @@ export default function WalletPage() {
       {/* Transactions */}
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
               <CardTitle>{t('seller.wallet.transactionHistory')}</CardTitle>
               <CardDescription>
@@ -231,7 +216,7 @@ export default function WalletPage() {
                   : t('seller.wallet.allTransactions')}
               </CardDescription>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 w-full sm:w-auto">
               <Select
                 value={filters.type || 'all'}
                 onValueChange={(value) =>
@@ -242,7 +227,7 @@ export default function WalletPage() {
                   }))
                 }
               >
-                <SelectTrigger className="w-40">
+                <SelectTrigger className="w-full sm:w-[180px]">
                   <SelectValue placeholder={t('seller.wallet.filterByType')} />
                 </SelectTrigger>
                 <SelectContent>
@@ -276,6 +261,7 @@ export default function WalletPage() {
             <div className="flex items-center justify-center gap-2 mt-4">
               <Button
                 variant="outline"
+                size="sm"
                 onClick={() =>
                   setFilters((prev) => ({ ...prev, page: prev.page! - 1 }))
                 }
@@ -288,6 +274,7 @@ export default function WalletPage() {
               </span>
               <Button
                 variant="outline"
+                size="sm"
                 onClick={() =>
                   setFilters((prev) => ({ ...prev, page: prev.page! + 1 }))
                 }

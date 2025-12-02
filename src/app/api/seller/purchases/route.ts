@@ -112,10 +112,8 @@ export async function GET(request: NextRequest) {
 
     // 4. Build where clause
     const where: any = {
-      variant: {
-        product: {
-          providerId: user.id, // Vendedor es el proveedor del producto
-        },
+      order: {
+        userId: user.id, // Vendedor es el comprador
       },
     };
 
@@ -238,8 +236,28 @@ export async function GET(request: NextRequest) {
     });
 
     // 8. Calculate total effective spent
-    // For performance, we might want to skip this or optimize
-    const totalEffectiveSpent = 0; // Placeholder
+    // Fetch all paid items for this user to sum them up.
+    // Since price is on ProductVariant, we need to include it.
+    const allPaidItems = await prisma.orderItem.findMany({
+      where: {
+        order: {
+          userId: user.id,
+          status: 'paid',
+        },
+      },
+      include: {
+        variant: {
+          select: {
+            price: true,
+          },
+        },
+      },
+    });
+
+    const totalEffectiveSpent = allPaidItems.reduce(
+      (sum: number, item: any) => sum + Number(item.variant.price),
+      0
+    );
 
     // 9. Return paginated response with global stats
     return NextResponse.json({
