@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -39,6 +39,8 @@ type LoginFormData = z.infer<typeof loginSchema>;
 
 export function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const returnTo = searchParams.get('returnTo');
   const { login, user } = useAuth();
   const { t } = useLanguage();
   const { toast } = useToast();
@@ -74,8 +76,13 @@ export function LoginForm() {
 
         // Give a brief moment for the token to be saved to localStorage
         // then do a full page navigation (not client-side navigation)
+        // then do a full page navigation (not client-side navigation)
         setTimeout(() => {
-          window.location.href = dashboardRoute;
+          if (returnTo) {
+            window.location.href = returnTo;
+          } else {
+            window.location.href = dashboardRoute;
+          }
         }, 200);
       } else {
         console.error('❌ No response or user in response');

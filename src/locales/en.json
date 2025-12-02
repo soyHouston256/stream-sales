@@ -399,7 +399,46 @@
       "next": "Next",
       "page": "Page",
       "buyNow": "Buy Now",
-      "by": "by"
+      "by": "by",
+      "productDetails": {
+        "providedBy": "Provided by",
+        "description": "Description",
+        "price": "Price",
+        "category": "Category",
+        "whatYouReceive": "What you'll receive:",
+        "accountEmail": "Account email address",
+        "accountPassword": "Account password",
+        "additionalDetails": "Additional account details (if applicable)",
+        "instantAccess": "Instant access after purchase",
+        "cancel": "Cancel",
+        "loginToPurchase": "Login to Purchase",
+        "purchaseNow": "Purchase Now"
+      },
+      "purchaseConfirm": {
+        "title": "Confirm Purchase",
+        "description": "Please confirm your purchase of {name}",
+        "product": "Product:",
+        "price": "Price:",
+        "currentBalance": "Current Balance:",
+        "balanceAfter": "Balance After Purchase:",
+        "insufficientBalance": "Insufficient Balance",
+        "insufficientBalanceDesc": "You don't have enough balance to complete this purchase. Please add funds to your wallet.",
+        "lowBalance": "Low Balance Warning",
+        "readyToPurchase": "Ready to Purchase",
+        "readyToPurchaseDesc": "You have sufficient balance to complete this purchase.",
+        "cancel": "Cancel",
+        "processing": "Processing...",
+        "confirm": "Confirm Purchase"
+      },
+      "trust": {
+        "securePayment": "Secure Payment",
+        "instantDelivery": "Instant Delivery",
+        "support247": "24/7 Support"
+      },
+      "success": {
+        "title": "Purchase successful!",
+        "description": "You purchased {name}. Check your purchase details for credentials."
+      }
     },
     "wallet": {
       "title": "My Wallet",
@@ -861,7 +900,26 @@
       "disputed": "Disputed"
     },
     "refundedNotice": "This purchase was refunded. The money has been returned to your wallet.",
-    "partialRefundNotice": "This purchase was partially refunded. Part of the amount has been returned to your wallet.",
+    "partialRefundNotice": "This purchase has been partially refunded.",
+    "details": {
+      "title": "Purchase Details",
+      "purchaseId": "Purchase ID",
+      "accountCredentials": "Account Credentials",
+      "email": "Email",
+      "password": "Password",
+      "additionalDetails": "Additional Details",
+      "productInfo": "Product Information",
+      "description": "Description",
+      "price": "Price",
+      "providerInfo": "Provider Information",
+      "name": "Name",
+      "purchaseDate": "Purchase Date",
+      "completed": "Completed",
+      "refunded": "Refunded",
+      "status": "Status",
+      "copyEmail": "Email",
+      "copyPassword": "Password"
+    },
     "page": {
       "title": "My Purchases",
       "subtitle": "View your purchase history and access product credentials",
@@ -1049,6 +1107,7 @@
       "approve": "Approve",
       "reject": "Reject",
       "noRecharges": "No recharge requests found",
+      "noRechargesDesc": "There are no recharge requests to display at this time.",
       "previous": "Previous",
       "next": "Next",
       "page": "Page",
@@ -1066,7 +1125,9 @@
       "rejectionPlaceholder": "Explain why this recharge is being rejected...",
       "rejectionMinLength": "Reason must be at least 10 characters",
       "rejectionMaxLength": "Reason must not exceed 500 characters",
-      "rejecting": "Rejecting..."
+      "rejecting": "Rejecting...",
+      "noPendingRecharges": "No pending recharges",
+      "noPendingRechargesDesc": "There are no recharge requests waiting for validation."
     },
     "withdrawals": {
       "title": "Validate Withdrawals",
@@ -1120,7 +1181,9 @@
       "completeWarning": "⚠️ Important: Only complete this withdrawal after you have processed the payment to the user. This action will deduct",
       "fromWallet": "from the user's wallet and cannot be undone.",
       "confirmComplete": "I confirm the payment has been processed",
-      "completing": "Completing..."
+      "completing": "Completing...",
+      "noPendingWithdrawals": "No pending withdrawals",
+      "noPendingWithdrawalsDesc": "There are no withdrawal requests waiting for validation."
     },
     "navigation": {
       "dashboard": "Dashboard",

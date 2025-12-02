@@ -257,7 +257,7 @@ export default function LandingPage() {
             setShowProductDetails(false);
             setSelectedProduct(null);
           }}
-          isGuest={true}
+          isGuest={!user}
         />
       </div>
     </div>

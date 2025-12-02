@@ -399,7 +399,46 @@
       "next": "Siguiente",
       "page": "Página",
       "buyNow": "Comprar Ahora",
-      "by": "por"
+      "by": "por",
+      "productDetails": {
+        "providedBy": "Proporcionado por",
+        "description": "Descripción",
+        "price": "Precio",
+        "category": "Categoría",
+        "whatYouReceive": "Lo que recibirás:",
+        "accountEmail": "Correo de la cuenta",
+        "accountPassword": "Contraseña de la cuenta",
+        "additionalDetails": "Detalles adicionales (si aplica)",
+        "instantAccess": "Acceso instantáneo después de la compra",
+        "cancel": "Cancelar",
+        "loginToPurchase": "Iniciar sesión para comprar",
+        "purchaseNow": "Comprar Ahora"
+      },
+      "purchaseConfirm": {
+        "title": "Confirmar Compra",
+        "description": "Por favor confirma la compra de {name}",
+        "product": "Producto:",
+        "price": "Precio:",
+        "currentBalance": "Saldo Actual:",
+        "balanceAfter": "Saldo Después de Compra:",
+        "insufficientBalance": "Saldo Insuficiente",
+        "insufficientBalanceDesc": "No tienes suficiente saldo para completar esta compra. Por favor recarga tu billetera.",
+        "lowBalance": "Advertencia de Saldo Bajo",
+        "readyToPurchase": "Listo para Comprar",
+        "readyToPurchaseDesc": "Tienes saldo suficiente para completar esta compra.",
+        "cancel": "Cancelar",
+        "processing": "Procesando...",
+        "confirm": "Confirmar Compra"
+      },
+      "trust": {
+        "securePayment": "Pago Seguro",
+        "instantDelivery": "Entrega Inmediata",
+        "support247": "Soporte 24/7"
+      },
+      "success": {
+        "title": "¡Compra exitosa!",
+        "description": "Has comprado {name}. Revisa los detalles de tu compra para ver las credenciales."
+      }
     },
     "wallet": {
       "title": "Mi Billetera",
@@ -861,7 +900,26 @@
       "disputed": "En Disputa"
     },
     "refundedNotice": "Esta compra fue reembolsada. El dinero ha sido devuelto a tu billetera.",
-    "partialRefundNotice": "Esta compra fue parcialmente reembolsada. Parte del monto ha sido devuelto a tu billetera.",
+    "partialRefundNotice": "Esta compra ha sido parcialmente reembolsada. Parte del monto ha sido devuelto a tu billetera.",
+    "details": {
+      "title": "Detalles de la Compra",
+      "purchaseId": "ID de Compra",
+      "accountCredentials": "Credenciales de la Cuenta",
+      "email": "Correo",
+      "password": "Contraseña",
+      "additionalDetails": "Detalles Adicionales",
+      "productInfo": "Información del Producto",
+      "description": "Descripción",
+      "price": "Precio",
+      "providerInfo": "Información del Proveedor",
+      "name": "Nombre",
+      "purchaseDate": "Fecha de Compra",
+      "completed": "Completado",
+      "refunded": "Reembolsado",
+      "status": "Estado",
+      "copyEmail": "Correo",
+      "copyPassword": "Contraseña"
+    },
     "page": {
       "title": "Mis Compras",
       "subtitle": "Ve tu historial de compras y accede a las credenciales de los productos",
@@ -1049,6 +1107,7 @@
       "approve": "Aprobar",
       "reject": "Rechazar",
       "noRecharges": "No se encontraron solicitudes de recarga",
+      "noRechargesDesc": "No hay solicitudes de recarga para mostrar en este momento.",
       "previous": "Anterior",
       "next": "Siguiente",
       "page": "Página",
@@ -1066,7 +1125,9 @@
       "rejectionPlaceholder": "Explica por qué se está rechazando esta recarga...",
       "rejectionMinLength": "La razón debe tener al menos 10 caracteres",
       "rejectionMaxLength": "La razón no debe exceder 500 caracteres",
-      "rejecting": "Rechazando..."
+      "rejecting": "Rechazando...",
+      "noPendingRecharges": "No hay recargas pendientes",
+      "noPendingRechargesDesc": "No hay solicitudes de recarga esperando validación."
     },
     "withdrawals": {
       "title": "Validar Retiros",
@@ -1120,7 +1181,9 @@
       "completeWarning": "⚠️ Importante: Solo completa este retiro después de haber procesado el pago al usuario. Esta acción deducirá",
       "fromWallet": "de la billetera del usuario y no se puede deshacer.",
       "confirmComplete": "Confirmo que el pago ha sido procesado",
-      "completing": "Completando..."
+      "completing": "Completando...",
+      "noPendingWithdrawals": "No hay retiros pendientes",
+      "noPendingWithdrawalsDesc": "No hay solicitudes de retiro esperando validación."
     },
     "navigation": {
       "dashboard": "Panel",

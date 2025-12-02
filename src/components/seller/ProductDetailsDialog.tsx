@@ -13,9 +13,10 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { MarketplaceProduct } from '@/types/seller';
 import { CategoryBadge } from '@/components/provider/CategoryBadge';
-import { formatCurrency } from '@/lib/utils/seller';
-import { ShoppingCart, User } from 'lucide-react';
+import { formatCurrency, CATEGORY_STYLES } from '@/lib/utils/seller';
+import { ShoppingCart, User, ShieldCheck, Zap, Clock } from 'lucide-react';
 import { PurchaseConfirmDialog } from './PurchaseConfirmDialog';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface ProductDetailsDialogProps {
   product: MarketplaceProduct | null;
@@ -30,13 +31,16 @@ export function ProductDetailsDialog({
   onClose,
   isGuest = false,
 }: ProductDetailsDialogProps) {
+  const { t } = useLanguage();
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
   if (!product) return null;
 
+  const style = CATEGORY_STYLES[product.category] || CATEGORY_STYLES.other;
+
   const handlePurchaseClick = () => {
     if (isGuest) {
-      window.location.href = '/login';
+      window.location.href = '/login?returnTo=/';
       return;
     }
     setShowConfirmDialog(true);
@@ -50,63 +54,97 @@ export function ProductDetailsDialog({
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <div className="flex items-center gap-2">
-              <CategoryBadge category={product.category} />
-              <DialogTitle>{product.name}</DialogTitle>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto p-0 gap-0 overflow-hidden">
+          {/* Header with Category Style */}
+          <div className={`h-32 ${style.bg} relative flex items-center justify-center w-full`}>
+            <div className="text-6xl font-black text-white opacity-90">
+              {style.label}
             </div>
-            <DialogDescription className="flex items-center gap-1 text-xs">
-              <User className="h-3 w-3" />
-              Provided by {product.providerName}
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-4">
-            <div>
-              <h4 className="text-sm font-semibold mb-2">Description</h4>
-              <p className="text-sm text-muted-foreground">
-                {product.description}
-              </p>
-            </div>
-
-            <Separator />
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <h4 className="text-sm font-semibold mb-1">Price</h4>
-                <p className="text-2xl font-bold text-primary">
-                  {formatCurrency(product.price)}
-                </p>
-              </div>
-              <div>
-                <h4 className="text-sm font-semibold mb-1">Category</h4>
-                <CategoryBadge category={product.category} />
-              </div>
-            </div>
-
-            <Separator />
-
-            <div className="bg-muted/50 p-4 rounded-md">
-              <h4 className="text-sm font-semibold mb-2">What you'll receive:</h4>
-              <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
-                <li>Account email address</li>
-                <li>Account password</li>
-                <li>Additional account details (if applicable)</li>
-                <li>Instant access after purchase</li>
-              </ul>
-            </div>
+            <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-background to-transparent" />
           </div>
 
-          <DialogFooter>
-            <Button variant="outline" onClick={onClose}>
-              Cancel
-            </Button>
-            <Button onClick={handlePurchaseClick}>
-              <ShoppingCart className="h-4 w-4 mr-2" />
-              {isGuest ? 'Login to Purchase' : 'Purchase Now'}
-            </Button>
-          </DialogFooter>
+          <div className="p-6 space-y-6">
+            <DialogHeader className="space-y-4">
+              <div className="flex items-start justify-between">
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <CategoryBadge category={product.category} />
+                    <span className="text-xs text-muted-foreground flex items-center gap-1">
+                      <User className="h-3 w-3" />
+                      {t('seller.marketplace.productDetails.providedBy')} {product.providerName}
+                    </span>
+                  </div>
+                  <DialogTitle className="text-2xl font-bold">{product.name}</DialogTitle>
+                </div>
+                <div className="text-right">
+                  <p className="text-3xl font-black text-primary">
+                    {formatCurrency(product.price)}
+                  </p>
+                </div>
+              </div>
+            </DialogHeader>
+
+            {/* Trust Badges */}
+            <div className="grid grid-cols-3 gap-4 py-4 border-y border-border/50">
+              <div className="flex flex-col items-center text-center gap-2">
+                <div className="h-10 w-10 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center text-green-600 dark:text-green-400">
+                  <ShieldCheck className="h-5 w-5" />
+                </div>
+                <span className="text-xs font-medium">{t('seller.marketplace.trust.securePayment')}</span>
+              </div>
+              <div className="flex flex-col items-center text-center gap-2">
+                <div className="h-10 w-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400">
+                  <Zap className="h-5 w-5" />
+                </div>
+                <span className="text-xs font-medium">{t('seller.marketplace.trust.instantDelivery')}</span>
+              </div>
+              <div className="flex flex-col items-center text-center gap-2">
+                <div className="h-10 w-10 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center text-purple-600 dark:text-purple-400">
+                  <Clock className="h-5 w-5" />
+                </div>
+                <span className="text-xs font-medium">{t('seller.marketplace.trust.support247')}</span>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <h4 className="text-sm font-semibold mb-2">{t('seller.marketplace.productDetails.description')}</h4>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  {product.description}
+                </p>
+              </div>
+
+              <div className="bg-muted/50 p-4 rounded-xl border border-border/50">
+                <h4 className="text-sm font-semibold mb-3 flex items-center gap-2">
+                  <Zap className="h-4 w-4 text-yellow-500" />
+                  {t('seller.marketplace.productDetails.whatYouReceive')}
+                </h4>
+                <ul className="grid gap-2">
+                  {[
+                    t('seller.marketplace.productDetails.accountEmail'),
+                    t('seller.marketplace.productDetails.accountPassword'),
+                    t('seller.marketplace.productDetails.additionalDetails'),
+                    t('seller.marketplace.productDetails.instantAccess')
+                  ].map((item, i) => (
+                    <li key={i} className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <div className="h-1.5 w-1.5 rounded-full bg-primary" />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+
+            <DialogFooter className="gap-2 sm:gap-0">
+              <Button variant="outline" onClick={onClose} className="w-full sm:w-auto">
+                {t('seller.marketplace.productDetails.cancel')}
+              </Button>
+              <Button onClick={handlePurchaseClick} className="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700">
+                <ShoppingCart className="h-4 w-4 mr-2" />
+                {isGuest ? t('seller.marketplace.productDetails.loginToPurchase') : t('seller.marketplace.productDetails.purchaseNow')}
+              </Button>
+            </DialogFooter>
+          </div>
         </DialogContent>
       </Dialog>
 

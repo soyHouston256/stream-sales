@@ -38,7 +38,7 @@ export function PurchaseDetailsDialog({
   if (!purchase) return null;
 
   const handleCopyEmail = async () => {
-    const success = await copyToClipboard(purchase.product.accountEmail, 'Email');
+    const success = await copyToClipboard(purchase.product.accountEmail, t('purchases.details.copyEmail'));
     if (success) {
       setCopiedEmail(true);
       setTimeout(() => setCopiedEmail(false), 2000);
@@ -46,7 +46,7 @@ export function PurchaseDetailsDialog({
   };
 
   const handleCopyPassword = async () => {
-    const success = await copyToClipboard(purchase.product.accountPassword, 'Password');
+    const success = await copyToClipboard(purchase.product.accountPassword, t('purchases.details.copyPassword'));
     if (success) {
       setCopiedPassword(true);
       setTimeout(() => setCopiedPassword(false), 2000);
@@ -64,7 +64,7 @@ export function PurchaseDetailsDialog({
             <PurchaseStatusBadge status={purchase.status} />
           </div>
           <DialogTitle>{purchase.product.name}</DialogTitle>
-          <DialogDescription>Purchase ID: {purchase.id}</DialogDescription>
+          <DialogDescription>{t('purchases.details.purchaseId')}: {purchase.id}</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
@@ -82,7 +82,7 @@ export function PurchaseDetailsDialog({
                   </p>
                   {purchase.refundedAt && (
                     <p className="text-xs text-muted-foreground mt-2">
-                      Refunded: {format(new Date(purchase.refundedAt), 'PPp')}
+                      {t('purchases.details.refunded')}: {format(new Date(purchase.refundedAt), 'PPp')}
                     </p>
                   )}
                 </div>
@@ -104,7 +104,7 @@ export function PurchaseDetailsDialog({
                   </p>
                   {purchase.refundedAt && (
                     <p className="text-xs text-muted-foreground mt-2">
-                      Refunded: {format(new Date(purchase.refundedAt), 'PPp')}
+                      {t('purchases.details.refunded')}: {format(new Date(purchase.refundedAt), 'PPp')}
                     </p>
                   )}
                 </div>
@@ -116,14 +116,14 @@ export function PurchaseDetailsDialog({
           <div className="bg-primary/5 p-4 rounded-lg border-2 border-primary/20">
             <h4 className="text-sm font-semibold mb-3 flex items-center gap-2">
               <Key className="h-4 w-4" />
-              Account Credentials
+              {t('purchases.details.accountCredentials')}
             </h4>
             <div className="space-y-3">
               <div className="flex items-center justify-between bg-background p-3 rounded-md">
                 <div className="flex items-center gap-2 flex-1">
                   <Mail className="h-4 w-4 text-muted-foreground" />
                   <div>
-                    <p className="text-xs text-muted-foreground">Email</p>
+                    <p className="text-xs text-muted-foreground">{t('purchases.details.email')}</p>
                     <p className="text-sm font-medium font-mono">
                       {purchase.product.accountEmail}
                     </p>
@@ -147,7 +147,7 @@ export function PurchaseDetailsDialog({
                 <div className="flex items-center gap-2 flex-1">
                   <Key className="h-4 w-4 text-muted-foreground" />
                   <div>
-                    <p className="text-xs text-muted-foreground">Password</p>
+                    <p className="text-xs text-muted-foreground">{t('purchases.details.password')}</p>
                     <p className="text-sm font-medium font-mono">
                       {purchase.product.accountPassword}
                     </p>
@@ -174,7 +174,7 @@ export function PurchaseDetailsDialog({
             <div>
               <h4 className="text-sm font-semibold mb-2 flex items-center gap-2">
                 <FileJson className="h-4 w-4" />
-                Additional Details
+                {t('purchases.details.additionalDetails')}
               </h4>
               <div className="bg-muted/50 p-3 rounded-md">
                 <pre className="text-xs font-mono overflow-x-auto">
@@ -188,16 +188,16 @@ export function PurchaseDetailsDialog({
 
           {/* Product Information */}
           <div>
-            <h4 className="text-sm font-semibold mb-2">Product Information</h4>
+            <h4 className="text-sm font-semibold mb-2">{t('purchases.details.productInfo')}</h4>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Description:</span>
+                <span className="text-muted-foreground">{t('purchases.details.description')}:</span>
                 <span className="text-right max-w-md">
                   {purchase.product.description}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Price:</span>
+                <span className="text-muted-foreground">{t('purchases.details.price')}:</span>
                 <span className="font-semibold">
                   {formatCurrency(purchase.amount)}
                 </span>
@@ -211,15 +211,15 @@ export function PurchaseDetailsDialog({
           <div>
             <h4 className="text-sm font-semibold mb-2 flex items-center gap-2">
               <User className="h-4 w-4" />
-              Provider Information
+              {t('purchases.details.providerInfo')}
             </h4>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Name:</span>
+                <span className="text-muted-foreground">{t('purchases.details.name')}:</span>
                 <span>{purchase.provider.name}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Email:</span>
+                <span className="text-muted-foreground">{t('purchases.details.email')}:</span>
                 <span>{purchase.provider.email}</span>
               </div>
             </div>
@@ -231,27 +231,27 @@ export function PurchaseDetailsDialog({
           <div>
             <h4 className="text-sm font-semibold mb-2 flex items-center gap-2">
               <Calendar className="h-4 w-4" />
-              Purchase Details
+              {t('purchases.details.title')}
             </h4>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Purchase Date:</span>
+                <span className="text-muted-foreground">{t('purchases.details.purchaseDate')}:</span>
                 <span>{format(new Date(purchase.createdAt), 'PPp')}</span>
               </div>
               {purchase.completedAt && (
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Completed:</span>
+                  <span className="text-muted-foreground">{t('purchases.details.completed')}:</span>
                   <span>{format(new Date(purchase.completedAt), 'PPp')}</span>
                 </div>
               )}
               {purchase.refundedAt && (
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Refunded:</span>
+                  <span className="text-muted-foreground">{t('purchases.details.refunded')}:</span>
                   <span>{format(new Date(purchase.refundedAt), 'PPp')}</span>
                 </div>
               )}
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Status:</span>
+                <span className="text-muted-foreground">{t('purchases.details.status')}:</span>
                 <PurchaseStatusBadge status={purchase.status} />
               </div>
             </div>
