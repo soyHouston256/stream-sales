@@ -38,7 +38,20 @@
     "errorProfile": "Failed to update profile",
     "errorPassword": "Failed to update password",
     "saving": "Saving...",
-    "passwordsDoNotMatch": "Passwords do not match"
+    "passwordsDoNotMatch": "Passwords do not match",
+    "preferences": "Preferences",
+    "selectLanguage": "Select your interface language",
+    "theme": "Theme",
+    "selectTheme": "Choose your visual theme",
+    "active": "Active",
+    "updateProfile": "Update your personal information",
+    "emailReadOnly": "Email cannot be changed",
+    "validation": {
+      "nameLength": "Name must be at least 2 characters",
+      "passwordRequired": "Current password is required",
+      "passwordLength": "Password must be at least 8 characters",
+      "passwordMatch": "Passwords do not match"
+    }
   },
   "auth": {
     "login": "Log In",
@@ -268,6 +281,32 @@
       "noTransactionsFiltered": "No transactions found",
       "tryDifferentFilters": "Try adjusting your filters"
     },
+    "withdrawal": {
+      "title": "Request Withdrawal",
+      "description": "Withdraw your earnings to your preferred payment method. Minimum withdrawal: $10.",
+      "availableBalance": "Available Balance",
+      "amountLabel": "Amount (USD)",
+      "amountPlaceholder": "0.00",
+      "amountError": "Amount cannot exceed available balance ({amount})",
+      "receiveNote": "You will receive {amount} (no fees applied)",
+      "paymentMethodLabel": "Payment Method",
+      "paymentMethodPlaceholder": "Select payment method",
+      "paypal": "PayPal",
+      "bankTransfer": "Bank Transfer",
+      "crypto": "Cryptocurrency",
+      "paymentDetailsLabel": "Payment Details",
+      "paypalEmailLabel": "PayPal Email",
+      "bankDetailsLabel": "Bank Account Details",
+      "cryptoAddressLabel": "Crypto Wallet Address",
+      "paypalPlaceholder": "your-email@example.com",
+      "bankPlaceholder": "Bank account number or IBAN",
+      "cryptoPlaceholder": "Wallet address (BTC, ETH, USDT)",
+      "defaultPlaceholder": "Payment details",
+      "note": "Note: Withdrawal requests are processed within 2-5 business days. You will be notified once your request is approved.",
+      "cancel": "Cancel",
+      "submit": "Submit Request",
+      "submitting": "Submitting..."
+    },
     "wizard": {
       "newProduct": "New Product",
       "step": "Step",
@@ -357,6 +396,9 @@
   },
   "seller": {
     "title": "Seller Dashboard",
+    "quickStats": "Overview and quick stats",
+    "manageDisputes": "Manage all disputes",
+    "resolutionHistory": "Your resolution history",
     "walletBalance": "Wallet Balance",
     "availableBalance": "Available balance",
     "totalPurchases": "Total Purchases",
@@ -440,10 +482,17 @@
         "description": "You purchased {name}. Check your purchase details for credentials."
       }
     },
+    "tabs": {
+      "referrals": "Referrals",
+      "wallet": "Wallet",
+      "marketing": "Marketing",
+      "settings": "Settings"
+    },
     "wallet": {
       "title": "My Wallet",
-      "subtitle": "Manage your balance, transactions, and recharges",
+      "subtitle": "Manage your earnings and request withdrawals",
       "currentBalance": "Current Balance",
+      "addFunds": "Add Funds",
       "totalRecharged": "Total Recharged",
       "lifetimeRecharges": "Lifetime recharges",
       "pendingRecharges": "Pending Recharges",
@@ -472,7 +521,11 @@
       "page": "Page",
       "showing": "Showing",
       "of": "of",
-      "transactions": "transactions"
+      "transactions": "transactions",
+      "noTransactionsFiltered": "No transactions found matching your filter.",
+      "tryDifferentFilter": "Try selecting a different transaction type.",
+      "transactionsAppearHere": "Your wallet transactions will appear here.",
+      "rechargesAppearHere": "Your recharge history will appear here."
     },
     "recharge": {
       "addFunds": "Add Funds",
@@ -1052,9 +1105,7 @@
     "referredUsers": "Referred users",
     "earnedCommissions": "Earned commissions",
     "marketingMaterial": "Marketing material",
-    "quickStats": "Overview and quick stats",
-    "manageDisputes": "Manage all disputes",
-    "resolutionHistory": "Your resolution history"
+    "settingsDesc": "Manage your profile and security"
   },
   "paymentValidator": {
     "title": "Payment Validator Dashboard",

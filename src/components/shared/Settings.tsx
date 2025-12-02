@@ -30,15 +30,15 @@ import { apiClient } from '@/lib/api/client';
 
 // Schemas
 const profileSchema = z.object({
-    name: z.string().min(2, 'Name must be at least 2 characters'),
+    name: z.string().min(2, 'settings.validation.nameLength'),
 });
 
 const passwordSchema = z.object({
-    currentPassword: z.string().min(1, 'Current password is required'),
-    newPassword: z.string().min(8, 'Password must be at least 8 characters'),
-    confirmPassword: z.string().min(8, 'Password must be at least 8 characters'),
+    currentPassword: z.string().min(1, 'settings.validation.passwordRequired'),
+    newPassword: z.string().min(8, 'settings.validation.passwordLength'),
+    confirmPassword: z.string().min(8, 'settings.validation.passwordLength'),
 }).refine((data) => data.newPassword === data.confirmPassword, {
-    message: "Passwords do not match",
+    message: "settings.validation.passwordMatch",
     path: ["confirmPassword"],
 });
 
@@ -86,7 +86,7 @@ export function Settings() {
                                     {user?.role}
                                 </Badge>
                                 <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800">
-                                    Active
+                                    {t('settings.active')}
                                 </Badge>
                             </div>
                         </CardContent>
@@ -94,21 +94,21 @@ export function Settings() {
 
                     <Card>
                         <CardHeader>
-                            <CardTitle className="text-base">Preferences</CardTitle>
+                            <CardTitle className="text-base">{t('settings.preferences')}</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <div className="flex items-center justify-between">
                                 <Label className="flex flex-col gap-1">
-                                    <span>Language</span>
-                                    <span className="font-normal text-xs text-muted-foreground">Select your interface language</span>
+                                    <span>{t('settings.language')}</span>
+                                    <span className="font-normal text-xs text-muted-foreground">{t('settings.selectLanguage')}</span>
                                 </Label>
                                 <LanguageSelector />
                             </div>
                             <Separator />
                             <div className="flex items-center justify-between">
                                 <Label className="flex flex-col gap-1">
-                                    <span>Theme</span>
-                                    <span className="font-normal text-xs text-muted-foreground">Choose your visual theme</span>
+                                    <span>{t('settings.theme')}</span>
+                                    <span className="font-normal text-xs text-muted-foreground">{t('settings.selectTheme')}</span>
                                 </Label>
                                 <ThemeSelector />
                             </div>
@@ -144,7 +144,7 @@ export function Settings() {
     );
 }
 
-function ProfileSettings({ user, refreshUser, t }: { user: any, refreshUser: () => Promise<void>, t: any }) {
+export function ProfileSettings({ user, refreshUser, t }: { user: any, refreshUser: () => Promise<void>, t: any }) {
     const { toast } = useToast();
     const [isLoading, setIsLoading] = useState(false);
 
@@ -183,7 +183,7 @@ function ProfileSettings({ user, refreshUser, t }: { user: any, refreshUser: () 
         <Card className="border-none shadow-md">
             <CardHeader>
                 <CardTitle>{t('settings.profile')}</CardTitle>
-                <CardDescription>Update your personal information</CardDescription>
+                <CardDescription>{t('settings.updateProfile')}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
                 <div className="space-y-2">
@@ -192,7 +192,7 @@ function ProfileSettings({ user, refreshUser, t }: { user: any, refreshUser: () 
                         <Mail className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
                         <Input id="email" value={user?.email || ''} disabled className="pl-9 bg-muted/50" />
                     </div>
-                    <p className="text-xs text-muted-foreground">Email cannot be changed</p>
+                    <p className="text-xs text-muted-foreground">{t('settings.emailReadOnly')}</p>
                 </div>
 
                 <div className="space-y-2">
@@ -207,7 +207,7 @@ function ProfileSettings({ user, refreshUser, t }: { user: any, refreshUser: () 
                         />
                     </div>
                     {errors.name && (
-                        <p className="text-sm text-destructive">{errors.name.message}</p>
+                        <p className="text-sm text-destructive">{t(errors.name.message || '')}</p>
                     )}
                 </div>
             </CardContent>
@@ -221,7 +221,7 @@ function ProfileSettings({ user, refreshUser, t }: { user: any, refreshUser: () 
     );
 }
 
-function SecuritySettings({ t }: { t: any }) {
+export function SecuritySettings({ t }: { t: any }) {
     const { toast } = useToast();
     const [isLoading, setIsLoading] = useState(false);
 
@@ -274,7 +274,7 @@ function SecuritySettings({ t }: { t: any }) {
                         />
                     </div>
                     {errors.currentPassword && (
-                        <p className="text-sm text-destructive">{errors.currentPassword.message}</p>
+                        <p className="text-sm text-destructive">{t(errors.currentPassword.message || '')}</p>
                     )}
                 </div>
 
@@ -294,7 +294,7 @@ function SecuritySettings({ t }: { t: any }) {
                             />
                         </div>
                         {errors.newPassword && (
-                            <p className="text-sm text-destructive">{errors.newPassword.message}</p>
+                            <p className="text-sm text-destructive">{t(errors.newPassword.message || '')}</p>
                         )}
                     </div>
                     <div className="space-y-2">
@@ -310,7 +310,7 @@ function SecuritySettings({ t }: { t: any }) {
                             />
                         </div>
                         {errors.confirmPassword && (
-                            <p className="text-sm text-destructive">{errors.confirmPassword.message}</p>
+                            <p className="text-sm text-destructive">{t(errors.confirmPassword.message || '')}</p>
                         )}
                     </div>
                 </div>

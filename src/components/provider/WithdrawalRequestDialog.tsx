@@ -25,6 +25,7 @@ import {
 import { useRequestWithdrawal } from '@/lib/hooks/useProviderEarnings';
 import { withdrawalSchema, WithdrawalInput } from '@/lib/validations/product';
 import { DollarSign } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface WithdrawalRequestDialogProps {
   availableBalance: number;
@@ -35,6 +36,7 @@ export function WithdrawalRequestDialog({
   availableBalance,
   trigger,
 }: WithdrawalRequestDialogProps) {
+  const { t } = useLanguage();
   const [open, setOpen] = useState(false);
   const requestWithdrawal = useRequestWithdrawal();
 
@@ -61,7 +63,7 @@ export function WithdrawalRequestDialog({
     if (data.amount > availableBalance) {
       setError('amount', {
         type: 'manual',
-        message: `Amount cannot exceed available balance ($${availableBalance.toFixed(2)})`,
+        message: t('provider.withdrawal.amountError').replace('{amount}', `$${availableBalance.toFixed(2)}`),
       });
       return;
     }
@@ -78,26 +80,26 @@ export function WithdrawalRequestDialog({
   const getPaymentDetailsPlaceholder = () => {
     switch (paymentMethod) {
       case 'paypal':
-        return 'your-email@example.com';
+        return t('provider.withdrawal.paypalPlaceholder');
       case 'bank_transfer':
-        return 'Bank account number or IBAN';
+        return t('provider.withdrawal.bankPlaceholder');
       case 'crypto':
-        return 'Wallet address (BTC, ETH, USDT)';
+        return t('provider.withdrawal.cryptoPlaceholder');
       default:
-        return 'Payment details';
+        return t('provider.withdrawal.defaultPlaceholder');
     }
   };
 
   const getPaymentDetailsLabel = () => {
     switch (paymentMethod) {
       case 'paypal':
-        return 'PayPal Email';
+        return t('provider.withdrawal.paypalEmailLabel');
       case 'bank_transfer':
-        return 'Bank Account Details';
+        return t('provider.withdrawal.bankDetailsLabel');
       case 'crypto':
-        return 'Crypto Wallet Address';
+        return t('provider.withdrawal.cryptoAddressLabel');
       default:
-        return 'Payment Details';
+        return t('provider.withdrawal.paymentDetailsLabel');
     }
   };
 
@@ -107,21 +109,20 @@ export function WithdrawalRequestDialog({
         {trigger || (
           <Button>
             <DollarSign className="h-4 w-4 mr-2" />
-            Request Withdrawal
+            {t('provider.withdrawal.title')}
           </Button>
         )}
       </DialogTrigger>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Request Withdrawal</DialogTitle>
+          <DialogTitle>{t('provider.withdrawal.title')}</DialogTitle>
           <DialogDescription>
-            Withdraw your earnings to your preferred payment method. Minimum
-            withdrawal: $10.
+            {t('provider.withdrawal.description')}
           </DialogDescription>
         </DialogHeader>
 
         <div className="p-4 bg-muted rounded-lg mb-4">
-          <p className="text-sm text-muted-foreground">Available Balance</p>
+          <p className="text-sm text-muted-foreground">{t('provider.withdrawal.availableBalance')}</p>
           <p className="text-2xl font-bold">
             ${availableBalance.toFixed(2)}
           </p>
@@ -130,7 +131,7 @@ export function WithdrawalRequestDialog({
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="amount">
-              Amount (USD) <span className="text-red-500">*</span>
+              {t('provider.withdrawal.amountLabel')} <span className="text-red-500">*</span>
             </Label>
             <Input
               id="amount"
@@ -138,7 +139,7 @@ export function WithdrawalRequestDialog({
               step="0.01"
               min="10"
               max={availableBalance}
-              placeholder="0.00"
+              placeholder={t('provider.withdrawal.amountPlaceholder')}
               {...register('amount', { valueAsNumber: true })}
             />
             {errors.amount && (
@@ -146,14 +147,14 @@ export function WithdrawalRequestDialog({
             )}
             {amount && amount <= availableBalance && (
               <p className="text-xs text-muted-foreground">
-                You will receive ${amount.toFixed(2)} (no fees applied)
+                {t('provider.withdrawal.receiveNote').replace('{amount}', `$${amount.toFixed(2)}`)}
               </p>
             )}
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="paymentMethod">
-              Payment Method <span className="text-red-500">*</span>
+              {t('provider.withdrawal.paymentMethodLabel')} <span className="text-red-500">*</span>
             </Label>
             <Select
               value={paymentMethod}
@@ -164,12 +165,12 @@ export function WithdrawalRequestDialog({
               }
             >
               <SelectTrigger id="paymentMethod">
-                <SelectValue placeholder="Select payment method" />
+                <SelectValue placeholder={t('provider.withdrawal.paymentMethodPlaceholder')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="paypal">PayPal</SelectItem>
-                <SelectItem value="bank_transfer">Bank Transfer</SelectItem>
-                <SelectItem value="crypto">Cryptocurrency</SelectItem>
+                <SelectItem value="paypal">{t('provider.withdrawal.paypal')}</SelectItem>
+                <SelectItem value="bank_transfer">{t('provider.withdrawal.bankTransfer')}</SelectItem>
+                <SelectItem value="crypto">{t('provider.withdrawal.crypto')}</SelectItem>
               </SelectContent>
             </Select>
             {errors.paymentMethod && (
@@ -197,9 +198,7 @@ export function WithdrawalRequestDialog({
 
           <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
             <p className="text-xs text-blue-800">
-              <strong>Note:</strong> Withdrawal requests are processed within
-              2-5 business days. You will be notified once your request is
-              approved.
+              {t('provider.withdrawal.note')}
             </p>
           </div>
 
@@ -209,12 +208,12 @@ export function WithdrawalRequestDialog({
               variant="outline"
               onClick={() => setOpen(false)}
             >
-              Cancel
+              {t('provider.withdrawal.cancel')}
             </Button>
             <Button type="submit" disabled={requestWithdrawal.isPending}>
               {requestWithdrawal.isPending
-                ? 'Submitting...'
-                : 'Submit Request'}
+                ? t('provider.withdrawal.submitting')
+                : t('provider.withdrawal.submit')}
             </Button>
           </DialogFooter>
         </form>

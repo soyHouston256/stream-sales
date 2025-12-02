@@ -38,7 +38,20 @@
     "errorProfile": "Error al actualizar perfil",
     "errorPassword": "Error al actualizar contraseña",
     "saving": "Guardando...",
-    "passwordsDoNotMatch": "Las contraseñas no coinciden"
+    "passwordsDoNotMatch": "Las contraseñas no coinciden",
+    "preferences": "Preferencias",
+    "selectLanguage": "Selecciona tu idioma de interfaz",
+    "theme": "Tema",
+    "selectTheme": "Elige tu tema visual",
+    "active": "Activo",
+    "updateProfile": "Actualiza tu información personal",
+    "emailReadOnly": "El correo electrónico no se puede cambiar",
+    "validation": {
+      "nameLength": "El nombre debe tener al menos 2 caracteres",
+      "passwordRequired": "La contraseña actual es requerida",
+      "passwordLength": "La contraseña debe tener al menos 8 caracteres",
+      "passwordMatch": "Las contraseñas no coinciden"
+    }
   },
   "auth": {
     "login": "Iniciar Sesión",
@@ -268,6 +281,32 @@
       "noTransactionsFiltered": "No se encontraron transacciones",
       "tryDifferentFilters": "Intenta ajustar tus filtros"
     },
+    "withdrawal": {
+      "title": "Solicitar Retiro",
+      "description": "Retira tus ganancias a tu método de pago preferido. Retiro mínimo: $10.",
+      "availableBalance": "Saldo Disponible",
+      "amountLabel": "Monto (USD)",
+      "amountPlaceholder": "0.00",
+      "amountError": "El monto no puede exceder el saldo disponible ({amount})",
+      "receiveNote": "Recibirás {amount} (sin comisiones aplicadas)",
+      "paymentMethodLabel": "Método de Pago",
+      "paymentMethodPlaceholder": "Seleccionar método de pago",
+      "paypal": "PayPal",
+      "bankTransfer": "Transferencia Bancaria",
+      "crypto": "Criptomoneda",
+      "paymentDetailsLabel": "Detalles de Pago",
+      "paypalEmailLabel": "Email de PayPal",
+      "bankDetailsLabel": "Detalles de Cuenta Bancaria",
+      "cryptoAddressLabel": "Dirección de Billetera Cripto",
+      "paypalPlaceholder": "tu-email@ejemplo.com",
+      "bankPlaceholder": "Número de cuenta bancaria o IBAN",
+      "cryptoPlaceholder": "Dirección de billetera (BTC, ETH, USDT)",
+      "defaultPlaceholder": "Detalles de pago",
+      "note": "Nota: Las solicitudes de retiro se procesan dentro de 2-5 días hábiles. Se te notificará una vez que tu solicitud sea aprobada.",
+      "cancel": "Cancelar",
+      "submit": "Enviar Solicitud",
+      "submitting": "Enviando..."
+    },
     "wizard": {
       "newProduct": "Nuevo Producto",
       "step": "Paso",
@@ -357,6 +396,9 @@
   },
   "seller": {
     "title": "Dashboard de Vendedor",
+    "quickStats": "Estadísticas Rápidas",
+    "manageDisputes": "Gestionar Disputas",
+    "resolutionHistory": "Historial de Resoluciones",
     "walletBalance": "Saldo de Billetera",
     "availableBalance": "Saldo disponible",
     "totalPurchases": "Compras Totales",
@@ -440,6 +482,12 @@
         "description": "Has comprado {name}. Revisa los detalles de tu compra para ver las credenciales."
       }
     },
+    "tabs": {
+      "referrals": "Referidos",
+      "wallet": "Mi Saldo",
+      "marketing": "Marketing",
+      "settings": "Configuración"
+    },
     "wallet": {
       "title": "Mi Billetera",
       "subtitle": "Gestiona tu saldo, transacciones y recargas",
@@ -472,7 +520,11 @@
       "page": "Página",
       "showing": "Mostrando",
       "of": "de",
-      "transactions": "transacciones"
+      "transactions": "transacciones",
+      "noTransactionsFiltered": "No se encontraron transacciones con este filtro.",
+      "tryDifferentFilter": "Intenta seleccionar otro tipo de transacción.",
+      "transactionsAppearHere": "Tus transacciones aparecerán aquí.",
+      "rechargesAppearHere": "Tu historial de recargas aparecerá aquí."
     },
     "recharge": {
       "addFunds": "Agregar Fondos",
@@ -1054,7 +1106,8 @@
     "balanceWithdrawals": "Saldo y retiros",
     "referredUsers": "Usuarios referidos",
     "earnedCommissions": "Comisiones ganadas",
-    "marketingMaterial": "Material de marketing"
+    "marketingMaterial": "Material de marketing",
+    "settingsDesc": "Administra tu perfil y seguridad"
   },
   "paymentValidator": {
     "title": "Dashboard de Validador de Pagos",

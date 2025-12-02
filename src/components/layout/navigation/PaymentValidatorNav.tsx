@@ -3,6 +3,7 @@ import {
   Wallet,
   TrendingUp,
   CheckCircle,
+  Settings,
 } from 'lucide-react';
 import type { NavItem } from '../Sidebar';
 
@@ -24,5 +25,11 @@ export const getPaymentValidatorNavItems = (t: (key: string) => string): NavItem
     href: '/dashboard/payment-validator/withdrawals',
     icon: TrendingUp,
     description: t('paymentValidator.navigation.validateWithdrawals'),
+  },
+  {
+    title: t('navigation.settings'),
+    href: '/dashboard/payment-validator/settings',
+    icon: Settings,
+    description: t('navigation.settingsDesc'),
   },
 ];

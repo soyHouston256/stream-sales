@@ -4,7 +4,7 @@ import { useAuth } from '@/lib/auth/useAuth';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Package, DollarSign, Wallet, ShoppingCart } from 'lucide-react';
+import { Package, DollarSign, Wallet, ShoppingCart, ArrowUpRight } from 'lucide-react';
 import { EnhancedStatsCard } from '@/components/ui/enhanced-stats-card';
 import { SalesByCategoryChart } from '@/components/provider/SalesByCategoryChart';
 import { DataTable, Column } from '@/components/admin/DataTable';
@@ -13,10 +13,10 @@ import { useProviderSales } from '@/lib/hooks/useProviderSales';
 import { ProviderSale } from '@/types/provider';
 import { CategoryBadge } from '@/components/provider/CategoryBadge';
 import { format } from 'date-fns';
-import { WalletBalanceCard } from '@/components/wallet/WalletBalanceCard';
 import { useProviderWalletBalance } from '@/hooks/useWalletBalance';
 import { WithdrawalRequestDialog } from '@/components/provider/WithdrawalRequestDialog';
 import { useRouter } from 'next/navigation';
+import { formatCurrency } from '@/lib/utils/seller';
 
 export default function ProviderDashboard() {
   const { user } = useAuth();
@@ -73,41 +73,42 @@ export default function ProviderDashboard() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold">{t('provider.title')}</h1>
-          <p className="text-muted-foreground mt-2">
+          <h1 className="text-3xl font-bold tracking-tight">{t('provider.title')}</h1>
+          <p className="text-muted-foreground mt-1">
             {t('dashboard.welcome')}, {user?.name || user?.email}
           </p>
         </div>
-        <Button onClick={() => router.push('/dashboard/provider/products')}>
-          <Package className="mr-2 h-4 w-4" />
-          {t('provider.products.title')}
-        </Button>
+        <div className="flex gap-2">
+          <WithdrawalRequestDialog
+            availableBalance={Number(walletBalance?.balance ?? stats?.pendingBalance ?? 0)}
+            trigger={
+              <Button variant="outline">
+                <ArrowUpRight className="mr-2 h-4 w-4" />
+                {t('wallet.withdraw')}
+              </Button>
+            }
+          />
+          <Button onClick={() => router.push('/dashboard/provider/products')}>
+            <Package className="mr-2 h-4 w-4" />
+            {t('provider.products.title')}
+          </Button>
+        </div>
       </div>
 
-      {/* Prominent Wallet Balance Card - MOST VISIBLE ELEMENT */}
-      <WalletBalanceCard
-        balance={walletBalance?.balance ?? stats?.pendingBalance ?? 0}
-        currency={walletBalance?.currency ?? 'USD'}
-        lastUpdated={walletBalance?.lastUpdated ? new Date(walletBalance.lastUpdated) : undefined}
-        pendingAmount={walletBalance?.pendingAmount ?? 0}
-        isLoading={walletLoading}
-        variant="provider"
-        onWithdraw={() => {
-          // Trigger the WithdrawalDialog via a hidden button click
-          document.getElementById('withdrawal-trigger-btn')?.click();
-        }}
-        onViewTransactions={() => router.push('/dashboard/provider/earnings')}
-      />
-
-      {/* WithdrawalRequestDialog */}
-      <WithdrawalRequestDialog
-        availableBalance={Number(walletBalance?.balance ?? stats?.pendingBalance ?? 0)}
-        trigger={<button id="withdrawal-trigger-btn" style={{ display: 'none' }} />}
-      />
-
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <div className="col-span-2">
+          <EnhancedStatsCard
+            title={t('provider.earnings.availableBalance')}
+            value={walletBalance ? formatCurrency(walletBalance.balance) : '$0.00'}
+            description={`${walletBalance?.currency || 'USD'} • ${t('provider.earnings.readyForWithdrawal')}`}
+            icon={Wallet}
+            variant="success"
+            isLoading={walletLoading}
+          />
+        </div>
+
         <EnhancedStatsCard
           title={t('provider.totalProducts')}
           value={stats?.totalProducts ?? 0}
@@ -116,27 +117,12 @@ export default function ProviderDashboard() {
           isLoading={statsLoading}
           variant="info"
         />
-        <EnhancedStatsCard
-          title={t('provider.totalEarnings')}
-          value={stats ? `$${parseFloat(stats.totalEarnings).toFixed(2)}` : '$0.00'}
-          description={t('provider.lifetimeEarnings')}
-          icon={DollarSign}
-          isLoading={statsLoading}
-          variant="success"
-        />
+
         <EnhancedStatsCard
           title={t('provider.thisMonth')}
           value={stats ? `$${parseFloat(stats.thisMonthEarnings).toFixed(2)}` : '$0.00'}
           description={`${stats?.thisMonthSales ?? 0} ${t('provider.salesThisMonth')}`}
           icon={ShoppingCart}
-          isLoading={statsLoading}
-          variant="info"
-        />
-        <EnhancedStatsCard
-          title={t('provider.pendingBalance')}
-          value={stats ? `$${parseFloat(stats.pendingBalance).toFixed(2)}` : '$0.00'}
-          description={t('provider.availableForWithdrawal')}
-          icon={Wallet}
           isLoading={statsLoading}
           variant="warning"
         />
