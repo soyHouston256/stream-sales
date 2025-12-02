@@ -1,3 +1,5 @@
+import { z } from 'zod';
+
 export class Email {
   private readonly email: string;
 
@@ -14,19 +16,15 @@ export class Email {
   }
 
   private static isValid(email: string): boolean {
-    // SECURITY: More robust email validation using RFC 5322 compliant regex
-    // This prevents common email validation bypasses
-    const emailRegex = /^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
+    // SECURITY: Use Zod for robust email validation instead of custom regex
+    const emailSchema = z.string().email().max(254);
+    const result = emailSchema.safeParse(email);
 
-    if (!emailRegex.test(email)) {
+    if (!result.success) {
       return false;
     }
 
-    // Additional validation checks
-    if (email.length > 254) {
-      return false; // RFC 5321 maximum length
-    }
-
+    // Additional checks not always covered by standard email regex
     const parts = email.split('@');
     if (parts.length !== 2) {
       return false;
