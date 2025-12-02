@@ -18,7 +18,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { EnhancedStatsCard } from '@/components/ui/enhanced-stats-card';
-import { Users, Clock, CheckCircle, XCircle, ArrowRight, AlertCircle, Wallet } from 'lucide-react';
+import { Users, Clock, CheckCircle, XCircle, ArrowRight, AlertCircle, Wallet, Plus, CreditCard } from 'lucide-react';
 import {
   useAffiliateInfo,
   useAffiliateStats,
@@ -30,6 +30,7 @@ import {
 } from '@/components/affiliate';
 import { useAffiliateWalletBalance } from '@/lib/hooks/useAffiliateWallet';
 import { useRouter } from 'next/navigation';
+import { formatCurrency } from '@/lib/utils/seller';
 
 export default function AffiliateDashboard() {
   const { user } = useAuth();
@@ -137,43 +138,24 @@ export default function AffiliateDashboard() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold">{t('affiliate.title')}</h1>
-        <p className="text-muted-foreground mt-2">
-          {t('dashboard.welcome')}, {user?.name || user?.email}
-        </p>
-      </div>
-
-      {/* Wallet Balance - For Approval Fees */}
-      <Card className="relative border-2 shadow-lg hover:shadow-xl transition-all overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-green-500 via-emerald-500 to-teal-500 opacity-5 rounded-lg pointer-events-none" />
-        <CardHeader className="relative">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="p-2.5 rounded-xl bg-gradient-to-br from-green-500 via-emerald-500 to-teal-500 shadow-md">
-              <Wallet className="h-6 w-6 text-white" />
-            </div>
-            <CardDescription className="text-base font-medium">
-              {t('affiliate.dashboard.availableBalance')}
-            </CardDescription>
-          </div>
-          <CardTitle className="text-5xl font-bold bg-gradient-to-br from-green-500 via-emerald-500 to-teal-500 bg-clip-text text-transparent">
-            {walletLoading ? '...' : `$${walletBalance?.balance || '0.00'}`}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="relative">
-          <p className="text-sm text-muted-foreground mb-4">
-            {t('affiliate.dashboard.balanceDescription')}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h1 className="text-3xl font-bold">{t('affiliate.title')}</h1>
+          <p className="text-muted-foreground mt-2">
+            {t('dashboard.welcome')}, {user?.name || user?.email}
           </p>
-          <div className="flex gap-2">
-            <Button onClick={() => router.push('/dashboard/affiliate/wallet')} variant="outline" size="sm">
-              {t('affiliate.dashboard.viewTransactions')}
-            </Button>
-            <Button onClick={() => router.push('/dashboard/affiliate/wallet')} size="sm">
-              {t('affiliate.dashboard.rechargeBalance')}
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+        </div>
+        <div className="flex gap-2">
+          <Button onClick={() => router.push('/dashboard/affiliate/wallet')} variant="outline">
+            <CreditCard className="h-4 w-4 mr-2" />
+            {t('affiliate.dashboard.viewTransactions')}
+          </Button>
+          <Button onClick={() => router.push('/dashboard/affiliate/wallet')}>
+            <Plus className="h-4 w-4 mr-2" />
+            {t('affiliate.dashboard.rechargeBalance')}
+          </Button>
+        </div>
+      </div>
 
       {/* Referral Code Card */}
       {infoLoading ? (
@@ -185,8 +167,18 @@ export default function AffiliateDashboard() {
         />
       ) : null}
 
-      {/* Stats Cards - Approval Status */}
+      {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        {/* Wallet Balance */}
+        <EnhancedStatsCard
+          title={t('affiliate.dashboard.availableBalance')}
+          value={walletLoading ? '...' : formatCurrency(walletBalance?.balance || 0)}
+          description={t('affiliate.dashboard.balanceDescription')}
+          icon={Wallet}
+          variant="success"
+          isLoading={walletLoading}
+        />
+
         <EnhancedStatsCard
           title={t('affiliate.dashboard.totalReferrals')}
           value={stats?.totalReferrals || 0}
@@ -211,15 +203,6 @@ export default function AffiliateDashboard() {
           description={t('affiliate.dashboard.activeSellers')}
           icon={CheckCircle}
           variant="success"
-          isLoading={referralsLoading}
-        />
-
-        <EnhancedStatsCard
-          title={t('affiliate.dashboard.rejectedReferrals')}
-          value={rejectedReferrals.length}
-          description={t('affiliate.dashboard.notApproved')}
-          icon={XCircle}
-          variant="danger"
           isLoading={referralsLoading}
         />
       </div>
