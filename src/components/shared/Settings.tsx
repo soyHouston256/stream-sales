@@ -68,7 +68,7 @@ export function Settings() {
                         <CardContent className="relative pt-0 text-center px-6 pb-8">
                             <div className="relative -mt-12 mb-4 inline-block">
                                 <Avatar className="h-24 w-24 border-4 border-background shadow-xl">
-                                    <AvatarImage src={user?.image} />
+                                    <AvatarImage src={user?.image || undefined} />
                                     <AvatarFallback className="text-2xl font-bold bg-indigo-100 text-indigo-600 dark:bg-indigo-900 dark:text-indigo-300">
                                         {user?.name?.charAt(0).toUpperCase()}
                                     </AvatarFallback>
