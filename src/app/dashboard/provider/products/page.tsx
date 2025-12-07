@@ -23,17 +23,26 @@ import { format } from 'date-fns';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 // Simple Stat Card Component
-const StatCard = ({ label, value, icon: Icon, color }: { label: string; value: string; icon: any; color: string }) => (
-  <div className="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-100 dark:border-slate-800 shadow-sm flex items-start justify-between">
-    <div>
-      <p className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase mb-1">{label}</p>
-      <h3 className="text-2xl font-extrabold text-slate-800 dark:text-white">{value}</h3>
+const StatCard = ({ label, value, icon: Icon, color }: { label: string; value: string; icon: any; color: 'blue' | 'red' | 'green' | 'purple' }) => {
+  const colorStyles = {
+    blue: "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400",
+    red: "bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400",
+    green: "bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400",
+    purple: "bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400",
+  };
+
+  return (
+    <div className="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-100 dark:border-slate-800 shadow-sm flex items-start justify-between">
+      <div>
+        <p className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase mb-1">{label}</p>
+        <h3 className="text-2xl font-extrabold text-slate-800 dark:text-white">{value}</h3>
+      </div>
+      <div className={`p-3 rounded-xl ${colorStyles[color]}`}>
+        <Icon size={24} />
+      </div>
     </div>
-    <div className={`p-3 rounded-xl bg-${color}-50 dark:bg-${color}-900/20 text-${color}-600 dark:text-${color}-400`}>
-      <Icon size={24} />
-    </div>
-  </div>
-);
+  );
+};
 
 import { useRouter } from 'next/navigation';
 
