@@ -251,7 +251,7 @@ export default function ProductDetailsPage() {
             {/* Additional Info Card */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">What's Included</CardTitle>
+                <CardTitle className="text-lg">What&apos;s Included</CardTitle>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2 text-sm text-muted-foreground">
