@@ -160,7 +160,7 @@ const updateProductSchema = z.object({
   name: z.string().min(1).optional(),
   description: z.string().min(1).optional(),
   price: z.number().positive().optional(),
-  imageUrl: z.string().url('Must be a valid URL').optional().or(z.literal('')),
+  imageUrl: z.string().optional().or(z.literal('')),
   accountEmail: z.string().email().optional(),
   accountPassword: z.string().min(1).optional(),
   accountDetails: z.any().optional(),
