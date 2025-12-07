@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
@@ -21,6 +21,7 @@ import {
   UpdateProductInput,
 } from '@/lib/validations/product';
 import { Product } from '@/types/provider';
+import { ImageUpload } from '@/components/shared/ImageUpload';
 
 interface EditProductDialogProps {
   product: Product;
@@ -35,14 +36,20 @@ export function EditProductDialog({
 }: EditProductDialogProps) {
   const updateProduct = useUpdateProduct();
 
+
+
   const {
     register,
     handleSubmit,
     formState: { errors },
     reset,
+    watch,
+    setValue,
   } = useForm<UpdateProductInput>({
     resolver: zodResolver(updateProductSchema),
   });
+
+  const imageUrl = watch('imageUrl');
 
   useEffect(() => {
     if (open && product) {
@@ -51,6 +58,7 @@ export function EditProductDialog({
         description: product.description,
         price: parseFloat(product.price || product.variants?.[0]?.price || '0'),
         accountEmail: product.accountEmail,
+        imageUrl: product.imageUrl || '',
       });
     }
   }, [open, product, reset]);
@@ -94,6 +102,17 @@ export function EditProductDialog({
               <p className="text-sm text-red-500">
                 {errors.description.message}
               </p>
+            )}
+          </div>
+
+          <div className="space-y-3">
+            <Label>Product Image</Label>
+            <ImageUpload
+              value={imageUrl}
+              onChange={(value) => setValue('imageUrl', value, { shouldValidate: true })}
+            />
+            {errors.imageUrl && (
+              <p className="text-sm text-red-500">{errors.imageUrl.message}</p>
             )}
           </div>
 

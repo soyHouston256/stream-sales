@@ -21,14 +21,24 @@ export function ProductCard({ product, onBuyClick }: ProductCardProps) {
 
   return (
     <Card className="overflow-hidden border-none shadow-lg hover:shadow-xl transition-all duration-300 group bg-white dark:bg-slate-900 rounded-3xl">
-      {/* Colored Header */}
-      <div className={`h-32 ${style.bg} relative flex items-center justify-center`}>
-        <Badge className="absolute top-3 right-3 bg-green-100 text-green-700 hover:bg-green-200 border-none font-bold text-[10px] uppercase tracking-wider">
+      {/* Product Image or Colored Header */}
+      <div className={`h-32 relative flex items-center justify-center ${!product.imageUrl ? style.bg : 'bg-slate-100 dark:bg-slate-800'}`}>
+        <Badge className="absolute top-3 right-3 bg-green-100 text-green-700 hover:bg-green-200 border-none font-bold text-[10px] uppercase tracking-wider z-10">
           STOCK ONLINE
         </Badge>
-        <div className="text-6xl font-black text-white opacity-90">
-          {style.label}
-        </div>
+
+        {product.imageUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={product.imageUrl}
+            alt={product.name}
+            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+          />
+        ) : (
+          <div className="text-6xl font-black text-white opacity-90">
+            {style.label}
+          </div>
+        )}
       </div>
 
       <CardContent className="p-5">

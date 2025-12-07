@@ -55,11 +55,20 @@ export function ProductDetailsDialog({
     <>
       <Dialog open={isOpen} onOpenChange={onClose}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto p-0 gap-0 overflow-hidden">
-          {/* Header with Category Style */}
-          <div className={`h-32 ${style.bg} relative flex items-center justify-center w-full`}>
-            <div className="text-6xl font-black text-white opacity-90">
-              {style.label}
-            </div>
+          {/* Header with Category Style or Image */}
+          <div className={`h-32 relative flex items-center justify-center w-full ${!product.imageUrl ? style.bg : 'bg-slate-100 dark:bg-slate-800'}`}>
+            {product.imageUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={product.imageUrl}
+                alt={product.name}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="text-6xl font-black text-white opacity-90">
+                {style.label}
+              </div>
+            )}
             <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-background to-transparent" />
           </div>
 

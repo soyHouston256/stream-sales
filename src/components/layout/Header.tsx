@@ -10,7 +10,14 @@ import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { tokenManager } from '@/lib/utils/tokenManager';
 
-export function Header() {
+import { MobileNav } from './MobileNav';
+import { type NavItem } from './Sidebar';
+
+interface HeaderProps {
+  navItems?: NavItem[];
+}
+
+export function Header({ navItems = [] }: HeaderProps) {
   const { user, logout } = useAuth();
   const { t } = useLanguage();
   const router = useRouter();
@@ -58,6 +65,7 @@ export function Header() {
       <div className="container flex h-16 items-center px-4">
         <div className="flex flex-1 items-center justify-between">
           <div className="flex items-center gap-2">
+            {navItems.length > 0 && <MobileNav items={navItems} />}
             <h1 className="text-xl font-bold">Stream Sales</h1>
           </div>
 
@@ -73,9 +81,9 @@ export function Header() {
 
                   {/* Wallet Balance - Only for seller, affiliate, provider */}
                   {['seller', 'affiliate', 'provider'].includes(user.role) && walletBalance && (
-                    <span className="hidden md:flex items-center gap-1 font-medium text-emerald-600">
+                    <span className="flex items-center gap-1 font-medium text-emerald-600 mr-2 md:mr-0">
                       <Wallet className="h-3.5 w-3.5" />
-                      ${walletBalance.balance || '0.00'}
+                      <span className="text-sm">${walletBalance.balance || '0.00'}</span>
                     </span>
                   )}
 

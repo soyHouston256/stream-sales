@@ -29,6 +29,7 @@ export interface MarketplaceProduct {
   name: string;
   description: string;
   price: string; // Decimal as string
+  imageUrl?: string;
   status: 'available'; // Solo available en marketplace
   createdAt: string;
 }
