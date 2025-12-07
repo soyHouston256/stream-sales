@@ -10,7 +10,14 @@ import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { tokenManager } from '@/lib/utils/tokenManager';
 
-export function Header() {
+import { MobileNav } from './MobileNav';
+import { type NavItem } from './Sidebar';
+
+interface HeaderProps {
+  navItems?: NavItem[];
+}
+
+export function Header({ navItems = [] }: HeaderProps) {
   const { user, logout } = useAuth();
   const { t } = useLanguage();
   const router = useRouter();
@@ -58,6 +65,7 @@ export function Header() {
       <div className="container flex h-16 items-center px-4">
         <div className="flex flex-1 items-center justify-between">
           <div className="flex items-center gap-2">
+            {navItems.length > 0 && <MobileNav items={navItems} />}
             <h1 className="text-xl font-bold">Stream Sales</h1>
           </div>
 

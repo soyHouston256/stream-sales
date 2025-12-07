@@ -68,9 +68,9 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="space-y-8 bg-slate-50 dark:bg-slate-950 min-h-screen">
+    <div className="space-y-8 bg-slate-50 dark:bg-slate-950 min-h-screen" suppressHydrationWarning>
       {/* Navbar */}
-      <nav className="bg-white dark:bg-slate-900 border-b dark:border-slate-800 sticky top-0 z-50">
+      <nav className="bg-white dark:bg-slate-900 border-b dark:border-slate-800 sticky top-0 z-50" suppressHydrationWarning>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex items-center">

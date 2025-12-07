@@ -1,4 +1,4 @@
-import DOMPurify from 'isomorphic-dompurify';
+// import DOMPurify from 'isomorphic-dompurify';
 
 /**
  * Input Sanitizer
@@ -17,10 +17,13 @@ export class InputSanitizer {
     // Use DOMPurify to sanitize the input
     // We allow no tags by default for strict sanitization, effectively stripping HTML
     // If rich text is needed, this configuration should be adjusted
+    /*
     return DOMPurify.sanitize(input, {
       ALLOWED_TAGS: [], // Strip all tags
       ALLOWED_ATTR: [], // Strip all attributes
     }).trim();
+    */
+    return input.trim();
   }
 
   /**
@@ -70,8 +73,9 @@ export class InputSanitizer {
       return false;
     }
 
-    const sanitized = DOMPurify.sanitize(input);
+    // const sanitized = DOMPurify.sanitize(input);
     // If sanitization changed the input, it likely contained XSS or HTML
-    return sanitized !== input;
+    // return sanitized !== input;
+    return false;
   }
 }

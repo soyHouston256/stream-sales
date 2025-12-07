@@ -29,6 +29,7 @@ import {
   CreateProductInput,
 } from '@/lib/validations/product';
 import { Plus } from 'lucide-react';
+import { ImageUpload } from '@/components/shared/ImageUpload';
 
 interface CreateProductDialogProps {
   trigger?: React.ReactNode;
@@ -54,6 +55,7 @@ export function CreateProductDialog({ trigger }: CreateProductDialogProps) {
   });
 
   const category = watch('category');
+  const imageUrl = watch('imageUrl');
 
   const onSubmit = async (data: CreateProductInput) => {
     try {
@@ -161,20 +163,15 @@ export function CreateProductDialog({ trigger }: CreateProductDialogProps) {
             )}
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="imageUrl">Product Image URL (Optional)</Label>
-            <Input
-              id="imageUrl"
-              type="url"
-              placeholder="https://example.com/product-image.jpg"
-              {...register('imageUrl')}
+          <div className="space-y-3">
+            <Label>Product Image</Label>
+            <ImageUpload
+              value={imageUrl}
+              onChange={(value) => setValue('imageUrl', value, { shouldValidate: true })}
             />
             {errors.imageUrl && (
               <p className="text-sm text-red-500">{errors.imageUrl.message}</p>
             )}
-            <p className="text-xs text-muted-foreground">
-              URL of the product image. Recommended size: 800x600px.
-            </p>
           </div>
 
           <div className="space-y-2">

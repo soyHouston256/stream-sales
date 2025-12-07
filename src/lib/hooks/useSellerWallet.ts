@@ -12,8 +12,12 @@ import {
 import { useToast } from './useToast';
 import { tokenManager } from '@/lib/utils/tokenManager';
 
+import { useAuth } from '@/lib/auth/useAuth';
+
 async function fetchWalletBalance(): Promise<WalletBalance> {
   const token = tokenManager.getToken();
+  if (!token) throw new Error('No authentication token found');
+
   const response = await fetch('/api/seller/wallet/balance', {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -31,6 +35,8 @@ async function fetchWalletTransactions(
   filters: TransactionsFilters
 ): Promise<PaginatedResponse<WalletTransaction>> {
   const token = tokenManager.getToken();
+  if (!token) throw new Error('No authentication token found');
+
   const params = new URLSearchParams();
 
   if (filters.page) params.append('page', filters.page.toString());
@@ -57,6 +63,8 @@ async function fetchWalletTransactions(
 
 async function fetchRecharges(): Promise<Recharge[]> {
   const token = tokenManager.getToken();
+  if (!token) throw new Error('No authentication token found');
+
   const response = await fetch('/api/seller/wallet/recharges', {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -72,6 +80,8 @@ async function fetchRecharges(): Promise<Recharge[]> {
 
 async function createRecharge(data: RechargeRequest): Promise<Recharge> {
   const token = tokenManager.getToken();
+  if (!token) throw new Error('No authentication token found');
+
   const response = await fetch('/api/seller/wallet/recharge', {
     method: 'POST',
     headers: {
@@ -90,24 +100,33 @@ async function createRecharge(data: RechargeRequest): Promise<Recharge> {
 }
 
 export function useWalletBalance() {
+  const { isAuthenticated } = useAuth();
+
   return useQuery({
     queryKey: ['seller', 'wallet', 'balance'],
     queryFn: fetchWalletBalance,
     refetchInterval: 30000, // Refetch every 30 seconds
+    enabled: isAuthenticated,
   });
 }
 
 export function useWalletTransactions(filters: TransactionsFilters = {}) {
+  const { isAuthenticated } = useAuth();
+
   return useQuery({
     queryKey: ['seller', 'wallet', 'transactions', filters],
     queryFn: () => fetchWalletTransactions(filters),
+    enabled: isAuthenticated,
   });
 }
 
 export function useRecharges() {
+  const { isAuthenticated } = useAuth();
+
   return useQuery({
     queryKey: ['seller', 'wallet', 'recharges'],
     queryFn: fetchRecharges,
+    enabled: isAuthenticated,
   });
 }
 

@@ -1,11 +1,12 @@
 'use client';
-
 import { Package } from 'lucide-react';
 import { WizardFormData } from './ProductCreatorWizard';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Button } from '@/components/ui/button';
+import { ImageUpload } from '@/components/shared/ImageUpload';
 
 interface StepBasicInfoProps {
     data: WizardFormData;
@@ -64,15 +65,13 @@ export function StepBasicInfo({ data, onChange }: StepBasicInfoProps) {
                 </div>
 
                 <div>
-                    <Label htmlFor="imageUrl" className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">
+                    <Label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">
                         {t('provider.wizard.form.imageUrl')}
                     </Label>
-                    <Input
-                        id="imageUrl"
+
+                    <ImageUpload
                         value={data.imageUrl}
-                        onChange={(e) => onChange({ imageUrl: e.target.value })}
-                        placeholder={t('provider.wizard.form.urlPlaceholder')}
-                        className="bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 focus:ring-indigo-500"
+                        onChange={(value) => onChange({ imageUrl: value })}
                     />
                 </div>
             </div>
