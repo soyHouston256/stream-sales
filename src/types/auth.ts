@@ -6,6 +6,9 @@ export interface User {
   name: string | null;
   role: UserRole;
   image?: string | null;
+  username?: string | null;
+  phoneNumber?: string | null;
+  countryCode?: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -30,6 +33,9 @@ export interface RegisterRequest {
   name: string;
   role: UserRole;
   referralCode?: string;
+  phoneNumber?: string;
+  countryCode?: string;
+  username?: string;
 }
 
 export interface AuthResponse {

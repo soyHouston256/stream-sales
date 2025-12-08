@@ -9,6 +9,9 @@ export interface UserProps {
   role: string;
   createdAt: Date;
   updatedAt: Date;
+  phoneNumber?: string;
+  countryCode?: string;
+  username?: string;
 }
 
 export class User {
@@ -55,8 +58,33 @@ export class User {
     return this.props.updatedAt;
   }
 
+  get phoneNumber(): string | undefined {
+    return this.props.phoneNumber;
+  }
+
+  get countryCode(): string | undefined {
+    return this.props.countryCode;
+  }
+
+  get username(): string | undefined {
+    return this.props.username;
+  }
+
   updateName(name: string): void {
     this.props.name = name;
+    this.props.updatedAt = new Date();
+  }
+
+  updateUsername(username: string): void {
+    this.props.username = username;
+    this.props.updatedAt = new Date();
+  }
+
+  updatePhoneNumber(phoneNumber: string, countryCode?: string): void {
+    this.props.phoneNumber = phoneNumber;
+    if (countryCode) {
+      this.props.countryCode = countryCode;
+    }
     this.props.updatedAt = new Date();
   }
 
@@ -77,6 +105,9 @@ export class User {
       role: this.props.role,
       createdAt: this.props.createdAt,
       updatedAt: this.props.updatedAt,
+      phoneNumber: this.props.phoneNumber,
+      countryCode: this.props.countryCode,
+      username: this.props.username,
     };
   }
 }

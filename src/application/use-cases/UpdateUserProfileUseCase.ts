@@ -4,7 +4,10 @@ import { UserNotFoundException } from '@/domain/exceptions/DomainException';
 
 interface UpdateUserProfileDTO {
     userId: string;
-    name: string;
+    name?: string;
+    username?: string;
+    phoneNumber?: string;
+    countryCode?: string;
 }
 
 interface UpdateUserProfileResult {
@@ -13,6 +16,8 @@ interface UpdateUserProfileResult {
         email: string;
         name: string | undefined;
         role: string;
+        username: string | undefined;
+        phoneNumber: string | undefined;
     };
 }
 
@@ -27,9 +32,9 @@ export class UpdateUserProfileUseCase {
         }
 
         // Update fields
-        if (data.name) {
-            user.updateName(data.name);
-        }
+        if (data.name) user.updateName(data.name);
+        if (data.username) user.updateUsername(data.username);
+        if (data.phoneNumber) user.updatePhoneNumber(data.phoneNumber, data.countryCode);
 
         const savedUser = await this.userRepository.update(user);
 
@@ -39,6 +44,8 @@ export class UpdateUserProfileUseCase {
                 email: savedUser.email.value,
                 name: savedUser.name,
                 role: savedUser.role,
+                username: savedUser.username,
+                phoneNumber: savedUser.phoneNumber,
             },
         };
     }

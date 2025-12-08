@@ -12,7 +12,10 @@ const updateUserProfileUseCase = new UpdateUserProfileUseCase(userRepository);
 const jwtService = new JwtService();
 
 const updateProfileSchema = z.object({
-    name: z.string().min(2, 'Name must be at least 2 characters').max(100),
+    name: z.string().min(2, 'Name must be at least 2 characters').max(100).optional(),
+    username: z.string().min(3, 'Username must be at least 3 characters').max(20).regex(/^[a-zA-Z0-9_]+$/, 'Invalid username format').optional(),
+    phoneNumber: z.string().optional(),
+    countryCode: z.string().optional(),
 });
 
 export async function PUT(request: NextRequest) {
@@ -37,6 +40,9 @@ export async function PUT(request: NextRequest) {
         const result = await updateUserProfileUseCase.execute({
             userId: payload.userId,
             name: validatedData.name,
+            username: validatedData.username,
+            phoneNumber: validatedData.phoneNumber,
+            countryCode: validatedData.countryCode,
         });
 
         SecurityLogger.log(

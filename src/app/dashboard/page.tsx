@@ -29,12 +29,41 @@ export default function DashboardPage() {
         }
 
         const data = await response.json();
-        setUser(data.user);
+        const userData = data.user;
+        setUser(userData);
+
+        // Redirect based on role
+        if (userData?.role) {
+          switch (userData.role) {
+            case 'admin':
+              router.push('/dashboard/admin');
+              return;
+            case 'affiliate':
+              router.push('/dashboard/affiliate');
+              return;
+            case 'provider':
+              router.push('/dashboard/provider');
+              return;
+            case 'seller':
+              router.push('/dashboard/seller');
+              return;
+            case 'conciliator':
+              router.push('/dashboard/conciliator');
+              return;
+            case 'payment_validator':
+              router.push('/dashboard/payment-validator');
+              return;
+            default:
+              // If role is unknown, show dashboard content
+              setLoading(false);
+              break;
+          }
+        } else {
+          setLoading(false);
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred');
         router.push('/login');
-      } finally {
-        setLoading(false);
       }
     };
 
@@ -57,8 +86,11 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div style={styles.container}>
-        <div style={styles.loading}>Loading...</div>
+      <div className="flex items-center justify-center min-h-screen bg-slate-50">
+        <div className="flex flex-col items-center gap-4">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+          <p className="text-muted-foreground">Redirigiendo a tu panel...</p>
+        </div>
       </div>
     );
   }

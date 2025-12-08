@@ -16,7 +16,7 @@ const jwtService = new JwtService();
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { email, password, name, role, referralCode } = body;
+    const { email, password, name, role, referralCode, phoneNumber, countryCode, username } = body;
 
     if (!email || !password) {
       return NextResponse.json(
@@ -30,6 +30,9 @@ export async function POST(request: NextRequest) {
       password,
       name,
       role, // Pass the role to the use case
+      phoneNumber,
+      countryCode,
+      username,
     });
 
     // Handle referral code if provided
@@ -72,6 +75,24 @@ export async function POST(request: NextRequest) {
       } catch (error) {
         // Log but don't fail registration if referral processing fails
         console.error('Error processing referral code:', error);
+      }
+    }
+
+    // NEW: Create ProviderProfile if role is provider
+    if (result.user.role === 'provider') {
+      try {
+        await prisma.providerProfile.create({
+          data: {
+            userId: result.user.id,
+            status: 'pending',
+          }
+        });
+        console.log(`✅ ProviderProfile created for user ${result.user.id}`);
+      } catch (error) {
+        console.error('Error creating ProviderProfile:', error);
+        // We prioritize user creation success over profile creation failure here? 
+        // Ideally this should be transactional with user creation, but UseCase is separated.
+        // For now, logging error. Admin can manually fix or user can contact support.
       }
     }
 

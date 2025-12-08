@@ -112,21 +112,42 @@ export async function GET(request: NextRequest) {
       if (dateTo) where.createdAt.lte = new Date(dateTo);
     }
 
-    // 5. Get total count for all statuses (for summary)
-    const [pendingCount, approvedCount, rejectedCount, activeCount, suspendedCount] =
-      await Promise.all([
-        prisma.affiliateProfile.count({ where: { status: 'pending' } }),
-        prisma.affiliateProfile.count({ where: { status: 'approved' } }),
-        prisma.affiliateProfile.count({ where: { status: 'rejected' } }),
-        prisma.affiliateProfile.count({ where: { status: 'active' } }),
-        prisma.affiliateProfile.count({ where: { status: 'suspended' } }),
-      ]);
+    if (search) {
+      where.OR = [
+        { referralCode: { contains: search, mode: 'insensitive' } },
+        { user: { name: { contains: search, mode: 'insensitive' } } },
+        { user: { email: { contains: search, mode: 'insensitive' } } },
+      ];
+    }
+
+    // 5. Get total count for all statuses (for summary) using groupBy to save connections
+    const statusGroups = await prisma.affiliateProfile.groupBy({
+      by: ['status'],
+      _count: {
+        status: true,
+      },
+    });
+
+    const summary = {
+      pending: 0,
+      approved: 0,
+      rejected: 0,
+      active: 0,
+      suspended: 0,
+    };
+
+    statusGroups.forEach((group) => {
+      const s = group.status as keyof typeof summary;
+      if (summary.hasOwnProperty(s)) {
+        summary[s] = group._count.status;
+      }
+    });
 
     // 6. Get total count for filtered results
     const total = await prisma.affiliateProfile.count({ where });
 
     // 7. Get affiliate profiles with user data
-    let affiliateProfiles = await prisma.affiliateProfile.findMany({
+    const affiliateProfiles = await prisma.affiliateProfile.findMany({
       where,
       skip: (page - 1) * limit,
       take: limit,
@@ -143,19 +164,8 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    // 8. Filter by search if specified
-    if (search) {
-      const searchLower = search.toLowerCase();
-      affiliateProfiles = affiliateProfiles.filter(
-        (profile: any) =>
-          profile.user.name?.toLowerCase().includes(searchLower) ||
-          profile.user.email.toLowerCase().includes(searchLower) ||
-          profile.referralCode.toLowerCase().includes(searchLower)
-      );
-    }
-
-    // 9. Transform to response format
-    const data = affiliateProfiles.map((profile: any) => ({
+    // 8. Transform to response format
+    const data = affiliateProfiles.map((profile) => ({
       id: profile.id,
       userId: profile.userId,
       user: {
@@ -180,22 +190,16 @@ export async function GET(request: NextRequest) {
       updatedAt: profile.updatedAt.toISOString(),
     }));
 
-    // 10. Return paginated response with summary
+    // 9. Return paginated response with summary
     return NextResponse.json({
       data,
       pagination: {
         page,
         limit,
-        total: search ? data.length : total,
+        total,
         totalPages: Math.ceil(total / limit),
       },
-      summary: {
-        pending: pendingCount,
-        approved: approvedCount,
-        rejected: rejectedCount,
-        active: activeCount,
-        suspended: suspendedCount,
-      },
+      summary,
     });
   } catch (error: any) {
     console.error('Error fetching affiliate applications:', error);

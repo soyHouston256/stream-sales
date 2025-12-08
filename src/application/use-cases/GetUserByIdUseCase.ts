@@ -7,11 +7,14 @@ export interface GetUserByIdResponse {
     email: string;
     name?: string;
     role: string;
+    username?: string;
+    phoneNumber?: string;
+    countryCode?: string;
   };
 }
 
 export class GetUserByIdUseCase {
-  constructor(private userRepository: IUserRepository) {}
+  constructor(private userRepository: IUserRepository) { }
 
   async execute(userId: string): Promise<GetUserByIdResponse> {
     const user = await this.userRepository.findById(userId);
@@ -26,6 +29,9 @@ export class GetUserByIdUseCase {
         email: user.email.value,
         name: user.name,
         role: user.role,
+        username: user.username,
+        phoneNumber: user.phoneNumber,
+        countryCode: user.countryCode,
       },
     };
   }
