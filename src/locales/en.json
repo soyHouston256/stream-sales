@@ -444,6 +444,7 @@
       "products": "products",
       "loading": "Loading...",
       "noProductsFound": "No products found matching your criteria.",
+      "noProductsDesc": "Browse our marketplace to find great deals on digital products.",
       "clearFiltersLink": "Clear filters",
       "previous": "Previous",
       "next": "Next",
