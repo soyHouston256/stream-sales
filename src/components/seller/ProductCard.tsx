@@ -52,12 +52,19 @@ export function ProductCard({ product, onBuyClick }: ProductCardProps) {
           ))}
         </div>
 
-        {/* Duration Selector Mock */}
-        <div className="flex bg-slate-50 dark:bg-slate-800 p-1 rounded-xl mb-4 w-fit">
-          <button className="px-3 py-1 bg-white dark:bg-slate-700 shadow-sm rounded-lg text-xs font-bold text-indigo-600 dark:text-indigo-400">1M</button>
-          <button className="px-3 py-1 text-slate-400 dark:text-slate-500 text-xs font-medium hover:text-slate-600 dark:hover:text-slate-300">6M</button>
-          <button className="px-3 py-1 text-slate-400 dark:text-slate-500 text-xs font-medium hover:text-slate-600 dark:hover:text-slate-300">12M</button>
-        </div>
+        {/* Duration Badge */}
+        {product.durationDays !== undefined && (
+          <div className="flex bg-slate-50 dark:bg-slate-800 p-1 rounded-xl mb-4 w-fit">
+            <span className="px-3 py-1 bg-white dark:bg-slate-700 shadow-sm rounded-lg text-xs font-bold text-indigo-600 dark:text-indigo-400">
+              {product.durationDays === 0 ? t('provider.products.durations.lifetime') :
+                product.durationDays === 30 ? t('provider.products.durations.1month') :
+                  product.durationDays === 90 ? t('provider.products.durations.3months') :
+                    product.durationDays === 180 ? t('provider.products.durations.6months') :
+                      product.durationDays === 365 ? t('provider.products.durations.1year') :
+                        `${product.durationDays} ${t('common.days') || 'days'}`}
+            </span>
+          </div>
+        )}
 
         <div className="flex items-end justify-between mt-2">
           <div className="text-3xl font-black text-slate-900 dark:text-white">
