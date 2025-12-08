@@ -7,6 +7,7 @@ import {
   Wallet,
   UserCheck,
   Cog,
+  Briefcase,
 } from 'lucide-react';
 import type { NavItem } from '../Sidebar';
 
@@ -22,6 +23,13 @@ export const getAdminNavItems = (t: (key: string) => string): NavItem[] => [
     href: '/dashboard/admin/users',
     icon: Users,
     description: t('navigation.userManagement'),
+    matchSubPaths: true,
+  },
+  {
+    title: t('navigation.providers'),
+    href: '/dashboard/admin/providers',
+    icon: Briefcase,
+    description: t('navigation.providerManagement'),
     matchSubPaths: true,
   },
   {

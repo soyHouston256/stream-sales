@@ -89,6 +89,7 @@ export function RegisterForm() {
   const { register: registerUser } = useAuth();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [isUsernameManuallyEdited, setIsUsernameManuallyEdited] = useState(false);
 
   const {
     register,
@@ -110,17 +111,20 @@ export function RegisterForm() {
 
   // Auto-fill username from email
   useEffect(() => {
-    if (watchedEmail && (!watchedUsername || watchedUsername.trim() === '')) {
+    // Only auto-fill if the user hasn't manually edited the username
+    if (!isUsernameManuallyEdited && watchedEmail) {
       const emailParts = watchedEmail.split('@');
       if (emailParts.length > 0 && emailParts[0]) {
         // Clean username: remove special chars, keep alphanumeric and underscore
         const autoUsername = emailParts[0].replace(/[^a-zA-Z0-9_]/g, '').toLowerCase();
-        if (autoUsername.length >= 3) {
+
+        // Only update if it's different to avoid loops/unnecessary renders
+        if (autoUsername !== watchedUsername) {
           setValue('username', autoUsername, { shouldValidate: true });
         }
       }
     }
-  }, [watchedEmail, watchedUsername, setValue]);
+  }, [watchedEmail, isUsernameManuallyEdited, setValue, watchedUsername]);
 
   // Auto-populate referral code from URL parameter
   useEffect(() => {
@@ -188,29 +192,6 @@ export function RegisterForm() {
       <form onSubmit={handleSubmit(onSubmit)}>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="name">Nombre Completo</Label>
-            <Input
-              id="name"
-              type="text"
-              placeholder="Juan Pérez"
-              autoComplete="name"
-              disabled={isLoading}
-              {...register('name')}
-              aria-invalid={errors.name ? 'true' : 'false'}
-              aria-describedby={errors.name ? 'name-error' : undefined}
-            />
-            {errors.name && (
-              <p
-                id="name-error"
-                className="text-sm text-destructive"
-                role="alert"
-              >
-                {errors.name.message}
-              </p>
-            )}
-          </div>
-
-          <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
             <Input
               id="email"
@@ -229,6 +210,54 @@ export function RegisterForm() {
                 role="alert"
               >
                 {errors.email.message}
+              </p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="username">Nombre de Usuario</Label>
+            <Input
+              id="username"
+              type="text"
+              placeholder="juan_perez"
+              autoComplete="username"
+              disabled={isLoading}
+              {...register('username', {
+                onChange: () => setIsUsernameManuallyEdited(true)
+              })}
+              aria-invalid={errors.username ? 'true' : 'false'}
+              aria-describedby={errors.username ? 'username-error' : undefined}
+            />
+            {errors.username && (
+              <p
+                id="username-error"
+                className="text-sm text-destructive"
+                role="alert"
+              >
+                {errors.username.message}
+              </p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="name">Nombre Completo</Label>
+            <Input
+              id="name"
+              type="text"
+              placeholder="Juan Pérez"
+              autoComplete="name"
+              disabled={isLoading}
+              {...register('name')}
+              aria-invalid={errors.name ? 'true' : 'false'}
+              aria-describedby={errors.name ? 'name-error' : undefined}
+            />
+            {errors.name && (
+              <p
+                id="name-error"
+                className="text-sm text-destructive"
+                role="alert"
+              >
+                {errors.name.message}
               </p>
             )}
           </div>

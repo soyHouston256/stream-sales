@@ -197,6 +197,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Provider role required' }, { status: 403 });
     }
 
+    // NEW: Check if provider is approved
+    const providerProfile = await prisma.providerProfile.findUnique({
+      where: { userId: user.id },
+    });
+
+    if (!providerProfile || providerProfile.status !== 'approved') {
+      return NextResponse.json({
+        error: 'Tu cuenta de proveedor está pendiente de aprobación. No puedes subir productos aún.'
+      }, { status: 403 });
+    }
+
     const body = await request.json();
     const validation = createProductSchema.safeParse(body);
     if (!validation.success) {

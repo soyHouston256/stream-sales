@@ -78,6 +78,24 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // NEW: Create ProviderProfile if role is provider
+    if (result.user.role === 'provider') {
+      try {
+        await prisma.providerProfile.create({
+          data: {
+            userId: result.user.id,
+            status: 'pending',
+          }
+        });
+        console.log(`✅ ProviderProfile created for user ${result.user.id}`);
+      } catch (error) {
+        console.error('Error creating ProviderProfile:', error);
+        // We prioritize user creation success over profile creation failure here? 
+        // Ideally this should be transactional with user creation, but UseCase is separated.
+        // For now, logging error. Admin can manually fix or user can contact support.
+      }
+    }
+
     const token = jwtService.sign({
       userId: result.user.id,
       email: result.user.email,

@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -21,6 +22,8 @@ import { Product, ProductCategory, ProductStatus } from '@/types/provider';
 import { Edit, Trash2, Search, Package, Plus, CheckCircle2, ShoppingCart, Users } from 'lucide-react';
 import { format } from 'date-fns';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { tokenManager } from '@/lib/utils/tokenManager';
 
 // Simple Stat Card Component
 const StatCard = ({ label, value, icon: Icon, color }: { label: string; value: string; icon: any; color: 'blue' | 'red' | 'green' | 'purple' }) => {
@@ -44,8 +47,6 @@ const StatCard = ({ label, value, icon: Icon, color }: { label: string; value: s
   );
 };
 
-import { useRouter } from 'next/navigation';
-
 export default function ProductsPage() {
   const router = useRouter();
   const { t } = useLanguage();
@@ -54,6 +55,10 @@ export default function ProductsPage() {
   const [status, setStatus] = useState<ProductStatus | 'all'>('all');
   const [search, setSearch] = useState('');
   const [isWizardOpen, setIsWizardOpen] = useState(false);
+  const [providerStatus, setProviderStatus] = useState<string | null>(null);
+  const [isStatusLoading, setIsStatusLoading] = useState(true);
+  const [showRestrictionDialog, setShowRestrictionDialog] = useState(false);
+  const [debugInfo, setDebugInfo] = useState<string>('');
 
   const { data, isLoading } = useProducts({
     page,
@@ -72,6 +77,58 @@ export default function ProductsPage() {
       )
     ) {
       await deleteProduct.mutateAsync(id);
+    }
+  };
+
+  // Fetch provider status
+  useEffect(() => {
+    const fetchStatus = async () => {
+      try {
+        // Use tokenManager to get the correct token key ('auth_token')
+        const token = tokenManager.getToken();
+
+        if (!token) {
+          setDebugInfo('No token found via tokenManager (checked auth_token)');
+          setIsStatusLoading(false);
+          return;
+        }
+
+        const res = await fetch('/api/provider/status', {
+          headers: { Authorization: `Bearer ${token}` },
+          cache: 'no-store'
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          console.log('Provider Status Debug:', data);
+          setProviderStatus(data.status);
+          setDebugInfo(`Success: ${JSON.stringify(data)}`);
+        } else {
+          const text = await res.text();
+          console.error('Failed to fetch status:', res.status, text);
+          setDebugInfo(`Error ${res.status}: ${text}`);
+        }
+      } catch (err) {
+        console.error('Error fetching provider status', err);
+        setDebugInfo(`Exception: ${err instanceof Error ? err.message : String(err)}`);
+      } finally {
+        setIsStatusLoading(false);
+      }
+    };
+    fetchStatus();
+  }, []);
+
+  const handleNewProductClick = () => {
+    if (isStatusLoading) return;
+
+    // Normalize status to lowercase to be safe
+    const currentStatus = providerStatus?.toLowerCase();
+    console.log('Checking permission with status:', currentStatus);
+
+    if (currentStatus === 'approved') {
+      setIsWizardOpen(true);
+    } else {
+      setShowRestrictionDialog(true);
     }
   };
 
@@ -134,7 +191,7 @@ export default function ProductsPage() {
             variant="ghost"
             size="sm"
             onClick={() => handleDelete(product.id, product.name)}
-            disabled={product.isActive} // Example logic: cannot delete active products? Or maybe just allow it.
+            disabled={product.isActive}
             title={t('provider.products.deleteProduct')}
           >
             <Trash2 className="h-4 w-4 text-red-500" />
@@ -154,7 +211,7 @@ export default function ProductsPage() {
           </p>
         </div>
         <Button
-          onClick={() => setIsWizardOpen(true)}
+          onClick={handleNewProductClick}
           className="px-6 py-2.5 rounded-lg font-bold shadow-lg shadow-indigo-500/20 transition-all flex items-center gap-2 active:scale-95"
         >
           <Plus size={20} /> {t('provider.products.newProduct')}
@@ -286,6 +343,28 @@ export default function ProductsPage() {
       {isWizardOpen && (
         <ProductCreatorWizard onClose={() => setIsWizardOpen(false)} />
       )}
+
+      {/* Restriction Dialog */}
+      <Dialog open={showRestrictionDialog} onOpenChange={setShowRestrictionDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t('provider.products.restriction.title')}</DialogTitle>
+            <DialogDescription>
+              {t('provider.products.restriction.description')}
+              <div className="mt-2 text-xs text-muted-foreground p-2 bg-slate-100 dark:bg-slate-800 rounded break-all font-mono">
+                Debug Info: {debugInfo || 'Loading...'}
+                <br />
+                Current State: {providerStatus || 'null'}
+              </div>
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button onClick={() => setShowRestrictionDialog(false)}>
+              {t('provider.products.restriction.button')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
