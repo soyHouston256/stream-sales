@@ -511,7 +511,8 @@
         "instantAccess": "Acceso instantáneo después de la compra",
         "cancel": "Cancelar",
         "loginToPurchase": "Iniciar sesión para comprar",
-        "purchaseNow": "Comprar Ahora"
+        "purchaseNow": "Comprar Ahora",
+        "duration": "Tiempo de compra"
       },
       "purchaseConfirm": {
         "title": "Confirmar Compra",
