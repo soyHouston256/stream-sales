@@ -151,6 +151,8 @@ export async function GET(request: NextRequest) {
       name: product.name,
       description: product.description || '',
       price: product.variants[0]?.price.toString() || '0',
+      durationDays: product.variants[0]?.durationDays ?? 0,
+      imageUrl: product.imageUrl,
       status: product.isActive ? 'available' : 'unavailable',
       createdAt: product.createdAt.toISOString(),
     }));

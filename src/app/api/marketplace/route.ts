@@ -110,6 +110,7 @@ export async function GET(request: NextRequest) {
       name: product.name,
       description: product.description,
       price: product.variants[0]?.price.toString() || '0.00',
+      durationDays: product.variants[0]?.durationDays ?? 0,
       imageUrl: product.imageUrl,
       createdAt: product.createdAt.toISOString(),
     }));
