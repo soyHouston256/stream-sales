@@ -7,6 +7,13 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { ImageUpload } from '@/components/shared/ImageUpload';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 
 interface StepBasicInfoProps {
     data: WizardFormData;
@@ -62,6 +69,27 @@ export function StepBasicInfo({ data, onChange }: StepBasicInfoProps) {
                         placeholder={t('provider.wizard.form.pricePlaceholder')}
                         className="bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 focus:ring-indigo-500"
                     />
+                </div>
+
+                <div>
+                    <Label htmlFor="duration" className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">
+                        {t('provider.wizard.form.duration')}
+                    </Label>
+                    <Select
+                        value={data.durationDays?.toString() || "0"}
+                        onValueChange={(value) => onChange({ durationDays: parseInt(value) })}
+                    >
+                        <SelectTrigger id="duration" className="bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 focus:ring-indigo-500">
+                            <SelectValue placeholder="Select duration" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="0">{t('provider.products.durations.lifetime')}</SelectItem>
+                            <SelectItem value="30">{t('provider.products.durations.1month')}</SelectItem>
+                            <SelectItem value="90">{t('provider.products.durations.3months')}</SelectItem>
+                            <SelectItem value="180">{t('provider.products.durations.6months')}</SelectItem>
+                            <SelectItem value="365">{t('provider.products.durations.1year')}</SelectItem>
+                        </SelectContent>
+                    </Select>
                 </div>
 
                 <div>

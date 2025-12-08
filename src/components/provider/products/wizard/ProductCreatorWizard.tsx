@@ -21,6 +21,7 @@ export type WizardFormData = {
     name: string;
     description: string;
     price: string;
+    durationDays?: number;
     imageUrl: string;
     category: ProductCategory | null;
 
@@ -54,6 +55,7 @@ const INITIAL_DATA: WizardFormData = {
     name: '',
     description: '',
     price: '',
+    durationDays: 0,
     imageUrl: '',
     category: null,
     variants: [],

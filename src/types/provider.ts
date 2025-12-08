@@ -42,6 +42,7 @@ export interface Product {
   variants?: ProductVariant[];
   // Flattened fields from API
   price?: string;
+  durationDays?: number;
   accountEmail?: string;
   accountPassword?: string;
   accountDetails?: any;
@@ -51,6 +52,7 @@ export interface CreateProductDTO {
   name: string;
   description?: string;
   price: string | number;
+  durationDays?: number;
   imageUrl?: string;
   category: ProductCategory;
 
@@ -74,6 +76,7 @@ export interface UpdateProductDTO {
   name?: string;
   description?: string;
   price?: number;
+  durationDays?: number;
   imageUrl?: string;
   accountEmail?: string;
   accountPassword?: string;

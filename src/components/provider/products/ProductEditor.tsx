@@ -28,6 +28,7 @@ export function ProductEditor({ initialData }: ProductEditorProps) {
             name: data.name || '',
             description: data.description || '',
             price: data.price || '',
+            durationDays: data.durationDays || 0,
             imageUrl: data.imageUrl || '',
             category: data.category,
 
@@ -68,6 +69,7 @@ export function ProductEditor({ initialData }: ProductEditorProps) {
                     name: formData.name,
                     description: formData.description,
                     price: formData.price ? parseFloat(formData.price) : undefined,
+                    durationDays: formData.durationDays,
                     imageUrl: formData.imageUrl || undefined,
                     accountEmail: formData.email || undefined,
                     accountPassword: formData.password || undefined, // Only send if changed

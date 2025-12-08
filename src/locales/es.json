@@ -214,7 +214,14 @@
       "totalProducts": "Total Productos",
       "stockCritical": "Stock Crítico",
       "salesToday": "Ventas Hoy",
-      "activeClients": "Clientes Activos"
+      "activeClients": "Clientes Activos",
+      "durations": {
+        "lifetime": "De por vida",
+        "1month": "1 Mes",
+        "3months": "3 Meses",
+        "6months": "6 Meses",
+        "1year": "1 Año"
+      }
     },
     "sales": {
       "title": "Historial de Ventas",
@@ -338,6 +345,7 @@
         "name": "Nombre del Producto",
         "description": "Descripción",
         "price": "Precio Base",
+        "duration": "Duración",
         "imageUrl": "URL de Imagen",
         "platformType": "Plataforma",
         "accountType": "Tipo de Cuenta",
