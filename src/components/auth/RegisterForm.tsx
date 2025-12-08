@@ -38,6 +38,14 @@ const registerSchema = z.object({
     required_error: 'Debes seleccionar un rol',
   }),
   referralCode: z.string().optional(),
+  countryCode: z.string().optional(),
+  phoneNumber: z.string().optional(),
+  username: z
+    .string()
+    .min(3, 'El usuario debe tener al menos 3 caracteres')
+    .max(20, 'El usuario no puede tener más de 20 caracteres')
+    .regex(/^[a-zA-Z0-9_]+$/, 'Solo letras, números y guión bajo')
+    .optional(),
 });
 
 type RegisterFormData = z.infer<typeof registerSchema>;
@@ -92,10 +100,27 @@ export function RegisterForm() {
     resolver: zodResolver(registerSchema),
     defaultValues: {
       role: 'seller',
+      countryCode: '+51', // Default to Peru
     },
   });
 
   const selectedRole = watch('role');
+  const watchedEmail = watch('email');
+  const watchedUsername = watch('username');
+
+  // Auto-fill username from email
+  useEffect(() => {
+    if (watchedEmail && (!watchedUsername || watchedUsername.trim() === '')) {
+      const emailParts = watchedEmail.split('@');
+      if (emailParts.length > 0 && emailParts[0]) {
+        // Clean username: remove special chars, keep alphanumeric and underscore
+        const autoUsername = emailParts[0].replace(/[^a-zA-Z0-9_]/g, '').toLowerCase();
+        if (autoUsername.length >= 3) {
+          setValue('username', autoUsername, { shouldValidate: true });
+        }
+      }
+    }
+  }, [watchedEmail, watchedUsername, setValue]);
 
   // Auto-populate referral code from URL parameter
   useEffect(() => {
@@ -229,6 +254,53 @@ export function RegisterForm() {
                 {errors.password.message}
               </p>
             )}
+          </div>
+
+          <div className="grid grid-cols-4 gap-2">
+            <div className="col-span-1 space-y-2">
+              <Label htmlFor="countryCode">País</Label>
+              <select
+                id="countryCode"
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                disabled={isLoading}
+                {...register('countryCode')}
+              >
+                <option value="+51">🇵🇪 +51</option>
+                <option value="+591">🇧🇴 +591</option>
+                <option value="+52">🇲🇽 +52</option>
+                <option value="+593">🇪🇨 +593</option>
+                <option value="+57">🇨🇴 +57</option>
+                <option value="+502">🇬🇹 +502</option>
+                <option value="+503">🇸🇻 +503</option>
+                <option value="+54">🇦🇷 +54</option>
+                <option value="+56">🇨🇱 +56</option>
+                <option value="+55">🇧🇷 +55</option>
+                <option value="+506">🇨🇷 +506</option>
+                <option value="+53">🇨🇺 +53</option>
+                <option value="+504">🇭🇳 +504</option>
+                <option value="+505">🇳🇮 +505</option>
+                <option value="+507">🇵🇦 +507</option>
+                <option value="+595">🇵🇾 +595</option>
+                <option value="+1">🇵🇷 +1</option>
+                <option value="+1">🇩🇴 +1</option>
+                <option value="+598">🇺🇾 +598</option>
+                <option value="+58">🇻🇪 +58</option>
+                <option value="+34">🇪🇸 +34</option>
+                <option value="+1">🇺🇸 +1</option>
+                <option value="">Otro</option>
+              </select>
+            </div>
+            <div className="col-span-3 space-y-2">
+              <Label htmlFor="phoneNumber">Celular</Label>
+              <Input
+                id="phoneNumber"
+                type="tel"
+                placeholder="999 999 999"
+                autoComplete="tel"
+                disabled={isLoading}
+                {...register('phoneNumber')}
+              />
+            </div>
           </div>
 
           <div className="space-y-2">

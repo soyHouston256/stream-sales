@@ -11,6 +11,9 @@ export interface RegisterUserDTO {
   password: string;
   name?: string;
   role?: string; // Optional, defaults to 'user' if not provided
+  phoneNumber?: string;
+  countryCode?: string;
+  username?: string;
 }
 
 export interface RegisterUserResponse {
@@ -32,7 +35,7 @@ export class RegisterUserUseCase {
   constructor(
     private userRepository: IUserRepository,
     private walletRepository: IWalletRepository
-  ) {}
+  ) { }
 
   async execute(data: RegisterUserDTO): Promise<RegisterUserResponse> {
     // Create value objects
@@ -51,6 +54,9 @@ export class RegisterUserUseCase {
       password,
       name: data.name,
       role: data.role || 'user', // Use provided role or default to 'user'
+      phoneNumber: data.phoneNumber,
+      countryCode: data.countryCode,
+      username: data.username,
     });
 
     // Save user

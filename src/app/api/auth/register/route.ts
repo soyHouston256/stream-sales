@@ -16,7 +16,7 @@ const jwtService = new JwtService();
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { email, password, name, role, referralCode } = body;
+    const { email, password, name, role, referralCode, phoneNumber, countryCode, username } = body;
 
     if (!email || !password) {
       return NextResponse.json(
@@ -30,6 +30,9 @@ export async function POST(request: NextRequest) {
       password,
       name,
       role, // Pass the role to the use case
+      phoneNumber,
+      countryCode,
+      username,
     });
 
     // Handle referral code if provided

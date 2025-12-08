@@ -648,6 +648,7 @@
     },
     "referrals": {
       "title": "Referrals Management",
+      "startReferring": "Start Referring!",
       "subtitle": "Manage and track all your referrals",
       "totalReferrals": "Total Referrals",
       "active": "Active",

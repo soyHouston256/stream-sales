@@ -13,6 +13,9 @@ export class PrismaUserRepository implements IUserRepository {
         password: user.password.value,
         name: user.name,
         role: user.role,
+        phoneNumber: user.phoneNumber,
+        countryCode: user.countryCode,
+        username: user.username,
       },
     });
 
@@ -24,6 +27,9 @@ export class PrismaUserRepository implements IUserRepository {
       role: data.role,
       createdAt: data.createdAt,
       updatedAt: data.updatedAt,
+      phoneNumber: data.phoneNumber ?? undefined,
+      countryCode: data.countryCode ?? undefined,
+      username: data.username ?? undefined,
     });
   }
 
@@ -42,6 +48,9 @@ export class PrismaUserRepository implements IUserRepository {
       role: data.role,
       createdAt: data.createdAt,
       updatedAt: data.updatedAt,
+      phoneNumber: data.phoneNumber ?? undefined,
+      countryCode: data.countryCode ?? undefined,
+      username: data.username ?? undefined,
     });
   }
 
@@ -78,6 +87,9 @@ export class PrismaUserRepository implements IUserRepository {
         password: user.password.value,
         name: user.name,
         role: user.role,
+        phoneNumber: user.phoneNumber,
+        countryCode: user.countryCode,
+        username: user.username,
       },
     });
 
@@ -89,6 +101,9 @@ export class PrismaUserRepository implements IUserRepository {
       role: data.role,
       createdAt: data.createdAt,
       updatedAt: data.updatedAt,
+      phoneNumber: data.phoneNumber ?? undefined,
+      countryCode: data.countryCode ?? undefined,
+      username: data.username ?? undefined,
     });
   }
 }

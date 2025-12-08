@@ -1,10 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { User, Lock, Save, Loader2, Mail, Shield, Key, Camera } from 'lucide-react';
+import { User, Lock, Save, Loader2, Mail, Shield, Key, Camera, Phone, Globe } from 'lucide-react';
 
 import { useAuth } from '@/lib/auth/useAuth';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -31,6 +31,9 @@ import { apiClient } from '@/lib/api/client';
 // Schemas
 const profileSchema = z.object({
     name: z.string().min(2, 'settings.validation.nameLength'),
+    username: z.string().min(3, 'settings.validation.usernameLength').max(20).regex(/^[a-zA-Z0-9_]+$/, 'settings.validation.usernameFormat').optional(),
+    phoneNumber: z.string().optional(),
+    countryCode: z.string().optional(),
 });
 
 const passwordSchema = z.object({
@@ -151,13 +154,29 @@ export function ProfileSettings({ user, refreshUser, t }: { user: any, refreshUs
     const {
         register,
         handleSubmit,
+        reset,
         formState: { errors },
     } = useForm<ProfileFormData>({
         resolver: zodResolver(profileSchema),
         defaultValues: {
             name: user?.name || '',
+            username: user?.username || '',
+            phoneNumber: user?.phoneNumber || '',
+            countryCode: user?.countryCode || '+51',
         },
     });
+
+    // Update form when user data is loaded
+    useEffect(() => {
+        if (user) {
+            reset({
+                name: user.name || '',
+                username: user.username || '',
+                phoneNumber: user.phoneNumber || '',
+                countryCode: user.countryCode || '+51',
+            });
+        }
+    }, [user, reset]);
 
     const onSubmit = async (data: ProfileFormData) => {
         setIsLoading(true);
@@ -209,6 +228,75 @@ export function ProfileSettings({ user, refreshUser, t }: { user: any, refreshUs
                     {errors.name && (
                         <p className="text-sm text-destructive">{t(errors.name.message || '')}</p>
                     )}
+                </div>
+
+                <div className="space-y-2">
+                    <Label htmlFor="username">Usuario</Label>
+                    <div className="relative">
+                        <User className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                        <Input
+                            id="username"
+                            {...register('username')}
+                            disabled={isLoading}
+                            className="pl-9"
+                        />
+                    </div>
+                    {errors.username && (
+                        <p className="text-sm text-destructive">{t(errors.username.message || '')}</p>
+                    )}
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                        <Label htmlFor="countryCode">País</Label>
+                        <div className="relative">
+                            <Globe className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground z-10" />
+                            <select
+                                id="countryCode"
+                                className="flex h-10 w-full rounded-md border border-input bg-background pl-9 pr-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 appearance-none"
+                                disabled={isLoading}
+                                {...register('countryCode')}
+                            >
+                                <option value="+51">🇵🇪 +51</option>
+                                <option value="+591">🇧🇴 +591</option>
+                                <option value="+52">🇲🇽 +52</option>
+                                <option value="+593">🇪🇨 +593</option>
+                                <option value="+57">🇨🇴 +57</option>
+                                <option value="+502">🇬🇹 +502</option>
+                                <option value="+503">🇸🇻 +503</option>
+                                <option value="+54">🇦🇷 +54</option>
+                                <option value="+56">🇨🇱 +56</option>
+                                <option value="+55">🇧🇷 +55</option>
+                                <option value="+506">🇨🇷 +506</option>
+                                <option value="+53">🇨🇺 +53</option>
+                                <option value="+504">🇭🇳 +504</option>
+                                <option value="+505">🇳🇮 +505</option>
+                                <option value="+507">🇵🇦 +507</option>
+                                <option value="+595">🇵🇾 +595</option>
+                                <option value="+1">🇵🇷 +1</option>
+                                <option value="+1">🇩🇴 +1</option>
+                                <option value="+598">🇺🇾 +598</option>
+                                <option value="+58">🇻🇪 +58</option>
+                                <option value="+34">🇪🇸 +34</option>
+                                <option value="+1">🇺🇸 +1</option>
+                                <option value="">Otro</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div className="space-y-2">
+                        <Label htmlFor="phoneNumber">Celular</Label>
+                        <div className="relative">
+                            <Phone className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                            <Input
+                                id="phoneNumber"
+                                {...register('phoneNumber')}
+                                disabled={isLoading}
+                                className="pl-9"
+                                placeholder="999 999 999"
+                            />
+                        </div>
+                    </div>
                 </div>
             </CardContent>
             <CardFooter className="bg-muted/30 px-6 py-4">

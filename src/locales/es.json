@@ -647,6 +647,7 @@
     },
     "referrals": {
       "title": "Gestión de Referidos",
+      "startReferring": "¡Comienza a Referir!",
       "subtitle": "Gestiona y rastrea todos tus referidos",
       "totalReferrals": "Referidos Totales",
       "active": "Activos",
