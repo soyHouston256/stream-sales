@@ -260,6 +260,13 @@
         "title": "Acceso Restringido",
         "description": "No puedes agregar productos porque tu cuenta de proveedor aún no ha sido aprobada. Por favor contacta al administrador.",
         "button": "Entendido"
+      },
+      "durations": {
+        "lifetime": "De por vida",
+        "1month": "1 Mes",
+        "3months": "3 Meses",
+        "6months": "6 Meses",
+        "1year": "1 Año"
       }
     },
     "sales": {
@@ -385,6 +392,7 @@
         "name": "Nombre del Producto",
         "description": "Descripción",
         "price": "Precio Base",
+        "duration": "Duración",
         "imageUrl": "URL de Imagen",
         "platformType": "Plataforma",
         "accountType": "Tipo de Cuenta",
@@ -483,6 +491,7 @@
       "products": "productos",
       "loading": "Cargando...",
       "noProductsFound": "No se encontraron productos que coincidan con tus criterios.",
+      "noProductsDesc": "Explora nuestro marketplace para encontrar grandes ofertas en productos digitales.",
       "clearFiltersLink": "Limpiar filtros",
       "previous": "Anterior",
       "next": "Siguiente",

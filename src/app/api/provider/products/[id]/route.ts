@@ -120,6 +120,7 @@ export async function GET(
       name: product.name,
       description: product.description,
       price: variant?.price.toString() || '0',
+      durationDays: variant?.durationDays || 0,
       imageUrl: product.imageUrl,
       accountEmail: account?.email || '',
       accountPassword: '', // Don't return hash
@@ -160,6 +161,7 @@ const updateProductSchema = z.object({
   name: z.string().min(1).optional(),
   description: z.string().min(1).optional(),
   price: z.number().positive().optional(),
+  durationDays: z.number().min(0).optional(),
   imageUrl: z.string().optional().or(z.literal('')),
   accountEmail: z.string().email().optional(),
   accountPassword: z.string().min(1).optional(),
@@ -272,11 +274,14 @@ export async function PUT(
       data: updateData,
     });
 
-    // Update Variant (Price)
-    if (data.price && variantId) {
+    // Update Variant (Price and Duration)
+    if (variantId && (data.price !== undefined || data.durationDays !== undefined)) {
       await prisma.productVariant.update({
         where: { id: variantId },
-        data: { price: data.price },
+        data: {
+          ...(data.price !== undefined && { price: data.price }),
+          ...(data.durationDays !== undefined && { durationDays: data.durationDays }),
+        },
       });
     }
 
@@ -347,6 +352,7 @@ export async function PUT(
       name: updatedProduct.name,
       description: updatedProduct.description,
       price: updatedVariant?.price.toString() || '0',
+      durationDays: updatedVariant?.durationDays || 0,
       imageUrl: updatedProduct.imageUrl,
       accountEmail: updatedAccount?.email || '',
       accountPassword: '', // Don't return hash
