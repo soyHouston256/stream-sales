@@ -511,7 +511,8 @@
         "instantAccess": "Instant access after purchase",
         "cancel": "Cancel",
         "loginToPurchase": "Login to Purchase",
-        "purchaseNow": "Purchase Now"
+        "purchaseNow": "Purchase Now",
+        "duration": "Purchase Duration"
       },
       "purchaseConfirm": {
         "title": "Confirm Purchase",

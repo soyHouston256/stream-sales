@@ -115,6 +115,28 @@ export function ProductDetailsDialog({
               </div>
             </div>
 
+            {/* Duration Section */}
+            {product.durationDays !== undefined && (
+              <div className="space-y-2">
+                <h4 className="text-sm font-semibold">{t('seller.marketplace.productDetails.duration') || 'Tiempo de compra'}</h4>
+                <div className="inline-flex p-1 bg-slate-100 dark:bg-slate-800 rounded-xl">
+                  <div className="px-4 py-2 bg-yellow-500/20 border-2 border-yellow-500 rounded-lg text-center">
+                    <span className="text-lg font-bold text-yellow-500">
+                      {product.durationDays === 0 ? t('provider.products.durations.lifetime') :
+                        product.durationDays === 30 ? t('provider.products.durations.1month') :
+                          product.durationDays === 90 ? t('provider.products.durations.3months') :
+                            product.durationDays === 180 ? t('provider.products.durations.6months') :
+                              product.durationDays === 365 ? t('provider.products.durations.1year') :
+                                `${product.durationDays} ${t('common.days') || 'días'}`}
+                    </span>
+                    <div className="text-xs text-muted-foreground mt-1">
+                      {formatCurrency(product.price)}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
             <div className="space-y-4">
               <div>
                 <h4 className="text-sm font-semibold mb-2">{t('seller.marketplace.productDetails.description')}</h4>
