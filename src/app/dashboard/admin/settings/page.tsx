@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Settings, Loader2, CheckCircle, AlertTriangle } from 'lucide-react';
+import { Settings, Loader2, CheckCircle, AlertTriangle, Copy, Link2, ShieldCheck, UserPlus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { tokenManager } from '@/lib/utils/tokenManager';
 
@@ -17,6 +17,45 @@ export default function AdminSettingsPage() {
   const [validationError, setValidationError] = useState<string | null>(null);
   const queryClient = useQueryClient();
   const { toast } = useToast();
+
+  // Get base URL for links
+  const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
+
+  const registrationLinks = [
+    {
+      role: 'provider',
+      label: 'Proveedor',
+      description: 'Usuarios que crean y venden productos digitales',
+      path: '/register/provider',
+      color: 'text-purple-600 dark:text-purple-400',
+      bgColor: 'bg-purple-50 dark:bg-purple-950',
+    },
+    {
+      role: 'payment_validator',
+      label: 'Validador de Pagos',
+      description: 'Usuarios que validan recargas y retiros',
+      path: '/register/validator',
+      color: 'text-blue-600 dark:text-blue-400',
+      bgColor: 'bg-blue-50 dark:bg-blue-950',
+    },
+  ];
+
+  const copyToClipboard = async (path: string, label: string) => {
+    const fullUrl = `${baseUrl}${path}`;
+    try {
+      await navigator.clipboard.writeText(fullUrl);
+      toast({
+        title: '¡Enlace copiado!',
+        description: `El enlace de registro de ${label} ha sido copiado al portapapeles.`,
+      });
+    } catch (err) {
+      toast({
+        title: 'Error',
+        description: 'No se pudo copiar el enlace.',
+        variant: 'destructive',
+      });
+    }
+  };
 
   // Fetch current approval fee configuration
   const { data, isLoading, error } = useQuery({
@@ -117,7 +156,7 @@ export default function AdminSettingsPage() {
       <div>
         <h1 className="text-3xl font-bold">Configuración del Sistema</h1>
         <p className="text-muted-foreground mt-2">
-          Administra los parámetros globales del sistema de afiliados.
+          Administra los parámetros globales del sistema.
         </p>
       </div>
 
@@ -125,6 +164,62 @@ export default function AdminSettingsPage() {
       <Settings />
 
       <div className="border-t my-8" />
+
+      {/* Registration Links Section */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <UserPlus className="h-5 w-5" />
+            <CardTitle>Enlaces de Registro Restringido</CardTitle>
+          </div>
+          <CardDescription>
+            Comparte estos enlaces con personas específicas para que se registren con roles especiales.
+            Estos roles no están disponibles en el registro público.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Alert>
+            <ShieldCheck className="h-4 w-4" />
+            <AlertDescription>
+              <strong>Importante:</strong> Estos enlaces permiten el registro directo con roles privilegiados.
+              Compártelos solo con personas de confianza.
+            </AlertDescription>
+          </Alert>
+
+          <div className="space-y-3">
+            {registrationLinks.map((link) => (
+              <div
+                key={link.role}
+                className={`rounded-lg border p-4 ${link.bgColor}`}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <Link2 className={`h-4 w-4 ${link.color}`} />
+                      <h4 className={`font-semibold ${link.color}`}>{link.label}</h4>
+                    </div>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {link.description}
+                    </p>
+                    <code className="text-xs mt-2 block bg-background/80 px-2 py-1 rounded border truncate">
+                      {baseUrl}{link.path}
+                    </code>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => copyToClipboard(link.path, link.label)}
+                    className="ml-4 shrink-0"
+                  >
+                    <Copy className="h-4 w-4 mr-2" />
+                    Copiar
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Referral Approval Fee Settings */}
       <Card>
@@ -134,8 +229,8 @@ export default function AdminSettingsPage() {
             <CardTitle>Monto de Aprobación de Referidos</CardTitle>
           </div>
           <CardDescription>
-            Configura el monto fijo que se cobrará a los afiliados cuando aprueben un referido.
-            Este monto se transfiere del wallet del afiliado al wallet del administrador.
+            Configura el monto fijo que se cobrará a los partners cuando aprueben un referido.
+            Este monto se transfiere del wallet del partner al wallet del administrador.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -143,7 +238,7 @@ export default function AdminSettingsPage() {
           <Alert>
             <AlertDescription>
               <strong>Importante:</strong> Este monto será cobrado automáticamente cada vez que un
-              afiliado apruebe un referido. El afiliado debe tener saldo suficiente en su wallet
+              partner apruebe un referido. El partner debe tener saldo suficiente en su wallet
               para poder aprobar referidos.
             </AlertDescription>
           </Alert>
@@ -167,7 +262,7 @@ export default function AdminSettingsPage() {
                 <div>
                   <p className="text-sm font-medium">Monto Actual de Aprobación</p>
                   <p className="text-xs text-muted-foreground mt-1">
-                    Cobrado a afiliados al aprobar referidos
+                    Cobrado a partners al aprobar referidos
                   </p>
                 </div>
                 <div className="text-right">
@@ -263,7 +358,7 @@ export default function AdminSettingsPage() {
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground">
-            Configuraciones futuras: porcentajes de comisión, niveles de afiliados, restricciones
+            Configuraciones futuras: porcentajes de comisión, niveles de partners, restricciones
             de aprobación, etc.
           </p>
         </CardContent>
@@ -271,3 +366,4 @@ export default function AdminSettingsPage() {
     </div>
   );
 }
+

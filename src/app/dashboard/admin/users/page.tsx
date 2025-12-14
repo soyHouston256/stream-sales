@@ -23,7 +23,7 @@ import { es } from 'date-fns/locale';
 const roleLabels: Record<string, string> = {
   admin: 'Admin',
   seller: 'Vendedor',
-  affiliate: 'Afiliado',
+  affiliate: 'Partner',
   provider: 'Proveedor',
   conciliator: 'Conciliador',
 };
@@ -164,7 +164,7 @@ export default function UsersPage() {
                 <SelectItem value="all">Todos los roles</SelectItem>
                 <SelectItem value="admin">Admin</SelectItem>
                 <SelectItem value="seller">Vendedor</SelectItem>
-                <SelectItem value="affiliate">Afiliado</SelectItem>
+                <SelectItem value="affiliate">Partner</SelectItem>
                 <SelectItem value="provider">Proveedor</SelectItem>
                 <SelectItem value="conciliator">Conciliador</SelectItem>
               </SelectContent>
@@ -198,10 +198,10 @@ export default function UsersPage() {
             pagination={
               data
                 ? {
-                    currentPage: data.pagination.page,
-                    totalPages: data.pagination.totalPages,
-                    onPageChange: setPage,
-                  }
+                  currentPage: data.pagination.page,
+                  totalPages: data.pagination.totalPages,
+                  onPageChange: setPage,
+                }
                 : undefined
             }
             emptyState={{
