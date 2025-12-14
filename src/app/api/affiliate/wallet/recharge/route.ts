@@ -43,14 +43,18 @@ export const dynamic = 'force-dynamic';
 const rechargeSchema = z.object({
   amount: z.number().positive('Amount must be positive'),
   paymentMethod: z.enum([
+    'yape',
+    'plin',
+    'binance',
+    'bank_transfer',
     'credit_card',
     'paypal',
-    'bank_transfer',
     'crypto',
     'mock',
   ]),
   paymentDetails: z.string().optional(),
 });
+
 
 export async function POST(request: NextRequest) {
   try {

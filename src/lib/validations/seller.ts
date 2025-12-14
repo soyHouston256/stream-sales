@@ -3,15 +3,18 @@ import { z } from 'zod';
 export const rechargeSchema = z.object({
   amount: z
     .number({ required_error: 'Amount is required' })
-    .min(10, 'Minimum recharge is $10')
+    .min(1, 'El monto mínimo es 1')
     .max(10000, 'Maximum recharge is $10,000'),
-  paymentMethod: z.enum(['credit_card', 'paypal', 'bank_transfer', 'crypto', 'mock'], {
+  paymentMethod: z.enum(['yape', 'plin', 'binance', 'bank_transfer', 'credit_card', 'paypal', 'crypto', 'mock'], {
     required_error: 'Payment method is required',
   }),
   paymentDetails: z.string().optional(),
+  holderName: z.string().optional(),
+  paymentTime: z.string().optional(),
 });
 
 export type RechargeInput = z.infer<typeof rechargeSchema>;
+
 
 export const purchaseSchema = z.object({
   productId: z.string().cuid('Invalid product ID'),

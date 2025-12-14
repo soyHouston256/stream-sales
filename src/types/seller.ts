@@ -13,11 +13,15 @@ export type EffectivePurchaseStatus =
 export type RechargeStatus = 'pending' | 'completed' | 'failed' | 'cancelled';
 
 export type PaymentMethod =
+  | 'yape'
+  | 'plin'
+  | 'binance'
+  | 'bank_transfer'
   | 'credit_card'
   | 'paypal'
-  | 'bank_transfer'
   | 'crypto'
   | 'mock';
+
 
 export type WalletTransactionType = 'credit' | 'debit' | 'transfer';
 

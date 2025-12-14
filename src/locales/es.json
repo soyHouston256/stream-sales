@@ -586,26 +586,51 @@
     },
     "recharge": {
       "addFunds": "Agregar Fondos",
-      "title": "Agregar Fondos a la Billetera",
-      "subtitle": "Solicita una recarga para agregar fondos a tu billetera",
+      "title": "Recargar Saldo",
+      "subtitle": "Elige tu método de pago preferido",
       "currentBalance": "Saldo Actual",
-      "amountLabel": "Monto (USD)",
-      "amountPlaceholder": "100.00",
-      "amountHelp": "Mínimo: $10.00 | Máximo: $10,000.00",
-      "paymentMethodLabel": "Método de Pago",
-      "paymentMethodPlaceholder": "Seleccionar método de pago",
-      "mockPayment": "Pago Simulado (Desarrollo)",
-      "creditCard": "Tarjeta de Crédito",
-      "paypal": "PayPal",
-      "bankTransfer": "Transferencia Bancaria",
-      "crypto": "Criptomoneda",
-      "paymentDetailsLabel": "Detalles de Pago (Opcional)",
-      "paymentDetailsPlaceholder": "Ingresa email, número de cuenta, dirección de billetera, o cualquier información de pago relevante...",
-      "paymentDetailsHelp": "Proporciona cualquier información adicional necesaria para procesar tu pago",
-      "youWillReceive": "Recibirás:",
-      "cancel": "Cancelar",
-      "requesting": "Solicitando...",
-      "requestRecharge": "Solicitar Recarga"
+      "paymentData": "Datos de Envío",
+      "reportPayment": "Reportar Pago",
+      "reportDescription": "Ingresa los datos de tu transferencia para validarla.",
+      "amountTransferred": "Monto Transferido",
+      "holderName": "Nombre del Titular (Origen)",
+      "holderNamePlaceholder": "Ej. Juan Pérez",
+      "paymentTime": "Hora exacta del pago",
+      "thirdPartyWarning": "Si pagaste desde la cuenta de un familiar o amigo, <strong>es obligatorio</strong> que pongas SU nombre abajo.",
+      "confirm": "Confirmar",
+      "submitting": "Enviando...",
+      "copied": "¡Copiado!",
+      "copiedToClipboard": "Datos copiados al portapapeles",
+      "copyError": "No se pudo copiar",
+      "validationTime": "Validación promedio: 5-10 minutos",
+      "fieldsRequired": "Campos requeridos",
+      "fieldsRequiredDesc": "Por favor completa el nombre del titular y la hora del pago.",
+      "methods": {
+        "yape": {
+          "name": "Yape",
+          "cta": "Yapear",
+          "copyNumber": "Copiar Número Celular"
+        },
+        "plin": {
+          "name": "Plin",
+          "cta": "Plinear",
+          "copyNumber": "Copiar Número Celular"
+        },
+        "binance": {
+          "name": "Binance",
+          "cta": "Transferir",
+          "copyWallet": "Copiar Wallet (TRC20)"
+        },
+        "banco": {
+          "name": "Banco",
+          "cta": "Transferir",
+          "accountLabel": "Cuenta Corriente BCP",
+          "cciLabel": "CCI",
+          "holderLabel": "Titular"
+        }
+      },
+      "noConfigTitle": "Métodos de pago no disponibles",
+      "noConfigDesc": "No hay métodos de pago configurados para tu país. Contacta al administrador."
     },
     "hero": {
       "automatedDelivery": "Entrega Automatizada en 30 segundos",
@@ -1305,8 +1330,31 @@
       "withdrawals": "Retiros",
       "overviewStats": "Vista general y estadísticas",
       "validateRecharges": "Validar recargas",
-      "validateWithdrawals": "Validar retiros"
+      "validateWithdrawals": "Validar retiros",
+      "paymentConfig": "Métodos de Pago"
     }
+  },
+  "paymentConfig": {
+    "title": "Configuración de Métodos de Pago",
+    "subtitle": "Configura los métodos de pago disponibles para tu país",
+    "save": "Guardar Configuración",
+    "saveSuccess": "Configuración guardada",
+    "saveSuccessDesc": "Los métodos de pago han sido actualizados correctamente.",
+    "saveError": "Error al guardar",
+    "loadError": "Error al cargar la configuración",
+    "noCountryWarning": "Debes tener un código de país asignado para configurar métodos de pago. Contacta al administrador.",
+    "mobilePayment": "Pago móvil",
+    "cryptoPayment": "Pago con criptomonedas",
+    "bankTransfer": "Transferencia Bancaria",
+    "bankTransferDesc": "Cuentas bancarias locales",
+    "phoneNumber": "Número de Teléfono",
+    "qrImage": "Imagen QR",
+    "walletAddress": "Dirección de Wallet",
+    "bankName": "Nombre del Banco",
+    "accountNumber": "Número de Cuenta",
+    "cci": "CCI (Código Interbancario)",
+    "holderName": "Nombre del Titular",
+    "info": "Estos datos serán visibles para los usuarios de tu país cuando quieran recargar saldo. Solo los métodos habilitados serán mostrados."
   },
   "errors": {
     "generic": "Ocurrió un error inesperado",

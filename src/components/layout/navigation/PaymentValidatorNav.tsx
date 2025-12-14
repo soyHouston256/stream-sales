@@ -2,7 +2,7 @@ import {
   LayoutDashboard,
   Wallet,
   TrendingUp,
-  CheckCircle,
+  CreditCard,
   Settings,
 } from 'lucide-react';
 import type { NavItem } from '../Sidebar';
@@ -27,9 +27,16 @@ export const getPaymentValidatorNavItems = (t: (key: string) => string): NavItem
     description: t('paymentValidator.navigation.validateWithdrawals'),
   },
   {
+    title: t('paymentValidator.navigation.paymentConfig'),
+    href: '/dashboard/payment-validator/payment-config',
+    icon: CreditCard,
+    description: t('paymentConfig.subtitle'),
+  },
+  {
     title: t('navigation.settings'),
     href: '/dashboard/payment-validator/settings',
     icon: Settings,
     description: t('navigation.settingsDesc'),
   },
 ];
+

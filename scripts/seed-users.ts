@@ -10,6 +10,7 @@ async function main() {
             password: 'Password@123',
             role: 'seller',
             name: 'Seller User',
+            countryCode: 'PE', // Peru
         },
         {
             email: 'provider@streamsales.com',
@@ -22,6 +23,7 @@ async function main() {
             password: 'Password@123',
             role: 'payment_validator',
             name: 'Payment Validator',
+            countryCode: 'PE', // Peru - must match seller country
         },
         {
             email: 'conciliator@streamsales.com',
@@ -40,6 +42,7 @@ async function main() {
             password: 'Password@123',
             role: 'affiliate',
             name: 'Affiliate User',
+            countryCode: 'PE', // Peru
         },
     ];
 
@@ -54,12 +57,14 @@ async function main() {
                 password: hashedPassword,
                 role: user.role,
                 name: user.name,
+                countryCode: (user as any).countryCode,
             },
             create: {
                 email: user.email,
                 password: hashedPassword,
                 role: user.role,
                 name: user.name,
+                countryCode: (user as any).countryCode,
             },
         });
 

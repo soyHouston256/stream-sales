@@ -41,8 +41,10 @@ model User {
   disputeMessages         DisputeMessage[]
   processedWithdrawals    Withdrawal[]      @relation("ProcessedWithdrawals")
   orders                  Order[]
+  paymentMethodConfig     PaymentMethodConfig?
 
   @@map("users")
+
 }
 
 model ProviderProfile {
@@ -451,3 +453,44 @@ model DisputeMessage {
   @@index([createdAt])
   @@map("dispute_messages")
 }
+
+// ============================================
+// PAYMENT METHOD CONFIG (Per-Country Payment Settings)
+// ============================================
+
+model PaymentMethodConfig {
+  id            String   @id @default(cuid())
+  countryCode   String   @unique // PE, BO, MX, etc. - Solo 1 config por país
+  validatorId   String   @unique // payment_validator user ID
+  
+  // Yape Config
+  yapeEnabled   Boolean  @default(false)
+  yapePhone     String?
+  yapeQrUrl     String?  // URL de imagen del QR
+  
+  // Plin Config  
+  plinEnabled   Boolean  @default(false)
+  plinPhone     String?
+  plinQrUrl     String?
+  
+  // Binance Config
+  binanceEnabled    Boolean  @default(false)
+  binanceWallet     String?  // TRC20 address
+  binanceQrUrl      String?
+  
+  // Bank Config
+  bankEnabled       Boolean  @default(false)
+  bankName          String?  // "BCP", "BBVA"
+  bankAccountNumber String?
+  bankCci           String?  // CCI for inter-bank transfers
+  bankHolderName    String?
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  validator User @relation(fields: [validatorId], references: [id])
+
+  @@map("payment_method_configs")
+}
+
