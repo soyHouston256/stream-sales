@@ -58,28 +58,8 @@ const roleOptions: { value: UserRole; label: string; description: string }[] = [
   },
   {
     value: 'affiliate',
-    label: 'Afiliado',
+    label: 'Partner',
     description: 'Refiere vendedores y gana comisiones',
-  },
-  {
-    value: 'provider',
-    label: 'Proveedor',
-    description: 'Crea y vende productos digitales',
-  },
-  {
-    value: 'conciliator',
-    label: 'Validador',
-    description: 'Valida pagos y transacciones',
-  },
-  {
-    value: 'payment_validator',
-    label: 'Validador de Pagos',
-    description: 'Valida recargas y retiros de dinero',
-  },
-  {
-    value: 'admin',
-    label: 'Administrador',
-    description: 'Gestiona todo el sistema',
   },
 ];
 
