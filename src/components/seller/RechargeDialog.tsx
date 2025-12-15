@@ -14,7 +14,6 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useCreateRecharge } from '@/lib/hooks/useSellerWallet';
 import { useCreateAffiliateRecharge } from '@/lib/hooks/useAffiliateWallet';
@@ -25,10 +24,11 @@ import {
   Check,
   Clock,
   User,
-  DollarSign,
-  QrCode,
   AlertCircle,
-  AlertTriangle
+  AlertTriangle,
+  Smartphone,
+  Building2,
+  Coins
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -40,63 +40,34 @@ interface RechargeDialogProps {
   role?: 'seller' | 'affiliate';
 }
 
-type PaymentMethodKey = 'yape' | 'plin' | 'binance' | 'banco';
-
-interface PaymentMethodConfig {
+interface PaymentMethod {
+  id: string;
+  name: string;
+  type: 'mobile' | 'bank' | 'crypto';
   color: string;
-  lightColor: string;
-  textColor: string;
-  borderColor: string;
-  currency: string;
+  enabled: boolean;
+  phone?: string;
+  qrImage?: string;
+  walletAddress?: string;
+  bankName?: string;
+  accountNumber?: string;
+  cci?: string;
+  holderName?: string;
+  instructions?: string;
 }
 
-// Styling config - estos no vienen del backend
-const methodStyles: Record<PaymentMethodKey, PaymentMethodConfig> = {
-  yape: {
-    color: 'bg-purple-600',
-    lightColor: 'bg-purple-50 dark:bg-purple-950',
-    textColor: 'text-purple-600 dark:text-purple-400',
-    borderColor: 'border-purple-200 dark:border-purple-800',
-    currency: 'S/',
-  },
-  plin: {
-    color: 'bg-sky-500',
-    lightColor: 'bg-sky-50 dark:bg-sky-950',
-    textColor: 'text-sky-600 dark:text-sky-400',
-    borderColor: 'border-sky-200 dark:border-sky-800',
-    currency: 'S/',
-  },
-  binance: {
-    color: 'bg-yellow-400',
-    lightColor: 'bg-yellow-50 dark:bg-yellow-950',
-    textColor: 'text-yellow-700 dark:text-yellow-400',
-    borderColor: 'border-yellow-200 dark:border-yellow-800',
-    currency: 'USDT',
-  },
-  banco: {
-    color: 'bg-gray-800',
-    lightColor: 'bg-gray-100 dark:bg-gray-900',
-    textColor: 'text-gray-700 dark:text-gray-300',
-    borderColor: 'border-gray-200 dark:border-gray-700',
-    currency: 'S/',
-  },
+const TYPE_ICONS = {
+  mobile: Smartphone,
+  bank: Building2,
+  crypto: Coins,
 };
-
-interface PaymentConfigData {
-  countryCode: string;
-  availableMethods: PaymentMethodKey[];
-  yape: { phone: string; qrUrl: string } | null;
-  plin: { phone: string; qrUrl: string } | null;
-  binance: { wallet: string; qrUrl: string } | null;
-  banco: { bankName: string; accountNumber: string; cci: string; holderName: string } | null;
-}
 
 export function RechargeDialog({ currentBalance, trigger, role = 'seller' }: RechargeDialogProps) {
   const { t } = useLanguage();
   const { toast } = useToast();
   const { user } = useAuth();
   const [open, setOpen] = useState(false);
-  const [selectedMethod, setSelectedMethod] = useState<PaymentMethodKey | null>(null);
+  const [selectedMethod, setSelectedMethod] = useState<PaymentMethod | null>(null);
   const [copied, setCopied] = useState('');
 
   const createSellerRecharge = useCreateRecharge();
@@ -104,7 +75,7 @@ export function RechargeDialog({ currentBalance, trigger, role = 'seller' }: Rec
   const createRecharge = role === 'affiliate' ? createAffiliateRecharge : createSellerRecharge;
 
   // Fetch payment config for user's country
-  const { data: paymentConfig, isLoading: configLoading, error: configError } = useQuery({
+  const { data: paymentConfig, isLoading: configLoading } = useQuery({
     queryKey: ['payment-config', user?.countryCode],
     queryFn: async () => {
       if (!user?.countryCode) return null;
@@ -115,15 +86,15 @@ export function RechargeDialog({ currentBalance, trigger, role = 'seller' }: Rec
       if (res.status === 404) return null;
       if (!res.ok) throw new Error('Failed to fetch payment config');
       const data = await res.json();
-      return data.data as PaymentConfigData;
+      return data.data as { countryCode: string; methods: PaymentMethod[] };
     },
     enabled: open && !!user?.countryCode,
   });
 
   // Set first available method when config loads
   useEffect(() => {
-    if (paymentConfig?.availableMethods?.length && !selectedMethod) {
-      setSelectedMethod(paymentConfig.availableMethods[0]);
+    if (paymentConfig?.methods?.length && !selectedMethod) {
+      setSelectedMethod(paymentConfig.methods[0]);
     }
   }, [paymentConfig, selectedMethod]);
 
@@ -137,16 +108,11 @@ export function RechargeDialog({ currentBalance, trigger, role = 'seller' }: Rec
   } = useForm<RechargeInput>({
     resolver: zodResolver(rechargeSchema),
     defaultValues: {
-      paymentMethod: 'yape',
+      paymentMethod: 'bank_transfer',
     },
   });
 
   const amount = watch('amount');
-  const currentMethodStyle = selectedMethod ? methodStyles[selectedMethod] : methodStyles.yape;
-
-  // Get translated method name and CTA
-  const getMethodName = (key: PaymentMethodKey) => t(`seller.recharge.methods.${key}.name`);
-  const getMethodCta = (key: PaymentMethodKey) => t(`seller.recharge.methods.${key}.cta`);
 
   const copyToClipboard = async (text: string, type: string) => {
     try {
@@ -166,9 +132,11 @@ export function RechargeDialog({ currentBalance, trigger, role = 'seller' }: Rec
     }
   };
 
-  const handleMethodChange = (method: PaymentMethodKey) => {
+  const handleMethodChange = (method: PaymentMethod) => {
     setSelectedMethod(method);
-    const apiMethod = method === 'banco' ? 'bank_transfer' : method;
+    // Map type to API payment method
+    const apiMethod = method.type === 'bank' ? 'bank_transfer' :
+      method.type === 'crypto' ? 'crypto' : 'bank_transfer';
     setValue('paymentMethod', apiMethod as any, { shouldValidate: true });
   };
 
@@ -185,7 +153,7 @@ export function RechargeDialog({ currentBalance, trigger, role = 'seller' }: Rec
     try {
       await createRecharge.mutateAsync({
         ...data,
-        paymentDetails: `Titular: ${data.holderName}, Hora: ${data.paymentTime}`,
+        paymentDetails: `Método: ${selectedMethod?.name}, Titular: ${data.holderName}, Hora: ${data.paymentTime}`,
       });
       setOpen(false);
       reset();
@@ -199,13 +167,11 @@ export function RechargeDialog({ currentBalance, trigger, role = 'seller' }: Rec
     setValue('amount', amt, { shouldValidate: true });
   };
 
-  // Get payment data for selected method
-  const getMethodData = () => {
-    if (!paymentConfig || !selectedMethod) return null;
-    return paymentConfig[selectedMethod];
+  // Get currency based on method type
+  const getCurrency = () => {
+    if (!selectedMethod) return 'S/';
+    return selectedMethod.type === 'crypto' ? 'USDT' : 'S/';
   };
-
-  const methodData = getMethodData();
 
   return (
     <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) setSelectedMethod(null); }}>
@@ -227,18 +193,18 @@ export function RechargeDialog({ currentBalance, trigger, role = 'seller' }: Rec
         )}
 
         {/* No Config Error */}
-        {!configLoading && (!paymentConfig || paymentConfig.availableMethods.length === 0) && (
+        {!configLoading && (!paymentConfig || paymentConfig.methods.length === 0) && (
           <div className="p-10 flex flex-col items-center justify-center min-h-[400px] text-center">
             <AlertTriangle className="h-16 w-16 text-yellow-500 mb-4" />
-            <h2 className="text-xl font-bold mb-2">{t('seller.recharge.noConfigTitle') || 'Métodos de pago no disponibles'}</h2>
+            <h2 className="text-xl font-bold mb-2">{t('seller.recharge.noConfigTitle')}</h2>
             <p className="text-muted-foreground max-w-md">
-              {t('seller.recharge.noConfigDesc') || 'No hay métodos de pago configurados para tu país. Contacta al administrador.'}
+              {t('seller.recharge.noConfigDesc')}
             </p>
           </div>
         )}
 
         {/* Main Content */}
-        {!configLoading && paymentConfig && paymentConfig.availableMethods.length > 0 && selectedMethod && (
+        {!configLoading && paymentConfig && paymentConfig.methods.length > 0 && selectedMethod && (
           <div className="flex flex-col md:flex-row min-h-[600px]">
 
             {/* --- LEFT COLUMN: PAYMENT METHODS --- */}
@@ -250,40 +216,41 @@ export function RechargeDialog({ currentBalance, trigger, role = 'seller' }: Rec
                 <p className="text-muted-foreground text-sm mt-1">{t('seller.recharge.subtitle')}</p>
               </div>
 
-              {/* Method Selector */}
+              {/* Method Selector - Dynamic Grid */}
               <div className="p-4 grid grid-cols-2 gap-3">
-                {paymentConfig.availableMethods.map((key) => {
-                  const style = methodStyles[key];
+                {paymentConfig.methods.map((method) => {
+                  const Icon = TYPE_ICONS[method.type];
                   return (
                     <button
-                      key={key}
+                      key={method.id}
                       type="button"
-                      onClick={() => handleMethodChange(key)}
+                      onClick={() => handleMethodChange(method)}
                       className={cn(
                         "relative p-3 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2 border-2 group",
-                        selectedMethod === key
-                          ? `bg-background ${style.borderColor} shadow-md`
+                        selectedMethod?.id === method.id
+                          ? `bg-background shadow-md`
                           : 'bg-background border-transparent hover:bg-muted'
                       )}
+                      style={{
+                        borderColor: selectedMethod?.id === method.id ? method.color : 'transparent'
+                      }}
                     >
-                      <div className={cn(
-                        "w-12 h-12 rounded-full shadow-sm flex items-center justify-center text-white transition-transform duration-300 group-hover:scale-110",
-                        style.color
-                      )}>
-                        {key === 'banco' ? <span className="font-bold text-xs">BCP</span> :
-                          key === 'binance' ? <DollarSign size={20} className="text-black" /> :
-                            <span className="font-bold text-lg">{getMethodName(key)[0]}</span>}
+                      <div
+                        className="w-12 h-12 rounded-full shadow-sm flex items-center justify-center text-white transition-transform duration-300 group-hover:scale-110"
+                        style={{ backgroundColor: method.color }}
+                      >
+                        <Icon size={20} />
                       </div>
                       <span className={cn(
                         "text-sm font-medium",
-                        selectedMethod === key ? 'text-foreground' : 'text-muted-foreground'
+                        selectedMethod?.id === method.id ? 'text-foreground' : 'text-muted-foreground'
                       )}>
-                        {getMethodName(key)}
+                        {method.name}
                       </span>
 
-                      {selectedMethod === key && (
+                      {selectedMethod?.id === method.id && (
                         <div className="absolute top-2 right-2">
-                          <div className={cn("w-2 h-2 rounded-full", style.color)} />
+                          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: method.color }} />
                         </div>
                       )}
                     </button>
@@ -293,97 +260,129 @@ export function RechargeDialog({ currentBalance, trigger, role = 'seller' }: Rec
 
               {/* Dynamic Payment Info Panel */}
               <div className="flex-1 px-4 pb-4 flex flex-col justify-end">
-                <div className={cn(
-                  "rounded-2xl p-5 border transition-colors duration-300",
-                  currentMethodStyle.lightColor,
-                  currentMethodStyle.borderColor
-                )}>
+                <div
+                  className="rounded-2xl p-5 border transition-colors duration-300"
+                  style={{
+                    backgroundColor: `${selectedMethod.color}10`,
+                    borderColor: `${selectedMethod.color}30`
+                  }}
+                >
                   <div className="flex justify-between items-center mb-4">
-                    <span className={cn("text-xs font-bold uppercase tracking-wider", currentMethodStyle.textColor)}>
+                    <span
+                      className="text-xs font-bold uppercase tracking-wider"
+                      style={{ color: selectedMethod.color }}
+                    >
                       {t('seller.recharge.paymentData')}
                     </span>
-                    <span className={cn(
-                      "text-xs font-medium px-2 py-0.5 rounded bg-background/50",
-                      currentMethodStyle.textColor
-                    )}>
-                      {getMethodName(selectedMethod)}
+                    <span
+                      className="text-xs font-medium px-2 py-0.5 rounded bg-background/50"
+                      style={{ color: selectedMethod.color }}
+                    >
+                      {selectedMethod.name}
                     </span>
                   </div>
 
-                  {selectedMethod === 'banco' && methodData && 'accountNumber' in methodData ? (
-                    // BANK VIEW
+                  {/* Bank Type */}
+                  {selectedMethod.type === 'bank' && (
                     <div className="space-y-3">
-                      <div className="bg-background/80 p-3 rounded-lg">
-                        <p className="text-[10px] text-muted-foreground uppercase font-bold">
-                          {t('seller.recharge.methods.banco.accountLabel')} - {methodData.bankName}
-                        </p>
-                        <div className="flex justify-between items-end mt-1">
-                          <p className="font-mono text-sm font-semibold">{methodData.accountNumber}</p>
-                          <button
-                            type="button"
-                            onClick={() => copyToClipboard(methodData.accountNumber, 'cuenta')}
-                            className="text-blue-600 hover:text-blue-800 transition-colors"
-                          >
-                            {copied === 'cuenta' ? <Check size={16} /> : <Copy size={16} />}
-                          </button>
+                      {selectedMethod.bankName && (
+                        <div className="bg-background/80 p-3 rounded-lg">
+                          <p className="text-[10px] text-muted-foreground uppercase font-bold">
+                            Banco
+                          </p>
+                          <p className="font-semibold">{selectedMethod.bankName}</p>
                         </div>
-                      </div>
-                      <div className="bg-background/80 p-3 rounded-lg">
-                        <p className="text-[10px] text-muted-foreground uppercase font-bold">
-                          {t('seller.recharge.methods.banco.cciLabel')}
-                        </p>
-                        <div className="flex justify-between items-end mt-1">
-                          <p className="font-mono text-sm font-semibold">{methodData.cci}</p>
-                          <button
-                            type="button"
-                            onClick={() => copyToClipboard(methodData.cci, 'cci')}
-                            className="text-blue-600 hover:text-blue-800 transition-colors"
-                          >
-                            {copied === 'cci' ? <Check size={16} /> : <Copy size={16} />}
-                          </button>
+                      )}
+                      {selectedMethod.accountNumber && (
+                        <div className="bg-background/80 p-3 rounded-lg">
+                          <p className="text-[10px] text-muted-foreground uppercase font-bold">
+                            Número de Cuenta
+                          </p>
+                          <div className="flex justify-between items-end mt-1">
+                            <p className="font-mono text-sm font-semibold">{selectedMethod.accountNumber}</p>
+                            <button
+                              type="button"
+                              onClick={() => copyToClipboard(selectedMethod.accountNumber!, 'cuenta')}
+                              className="text-blue-600 hover:text-blue-800 transition-colors"
+                            >
+                              {copied === 'cuenta' ? <Check size={16} /> : <Copy size={16} />}
+                            </button>
+                          </div>
                         </div>
-                      </div>
-                      <p className="text-xs text-center text-muted-foreground mt-2">
-                        {t('seller.recharge.methods.banco.holderLabel')}: <strong>{methodData.holderName}</strong>
-                      </p>
+                      )}
+                      {selectedMethod.cci && (
+                        <div className="bg-background/80 p-3 rounded-lg">
+                          <p className="text-[10px] text-muted-foreground uppercase font-bold">
+                            CCI / CLABE
+                          </p>
+                          <div className="flex justify-between items-end mt-1">
+                            <p className="font-mono text-sm font-semibold">{selectedMethod.cci}</p>
+                            <button
+                              type="button"
+                              onClick={() => copyToClipboard(selectedMethod.cci!, 'cci')}
+                              className="text-blue-600 hover:text-blue-800 transition-colors"
+                            >
+                              {copied === 'cci' ? <Check size={16} /> : <Copy size={16} />}
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                      {selectedMethod.holderName && (
+                        <p className="text-xs text-center text-muted-foreground mt-2">
+                          Titular: <strong>{selectedMethod.holderName}</strong>
+                        </p>
+                      )}
                     </div>
-                  ) : methodData && 'qrUrl' in methodData ? (
-                    // QR VIEW
+                  )}
+
+                  {/* Mobile/Crypto Type - QR View */}
+                  {(selectedMethod.type === 'mobile' || selectedMethod.type === 'crypto') && (
                     <div className="flex flex-col items-center">
-                      <div className="bg-background p-3 rounded-xl shadow-sm mb-3 relative group cursor-pointer">
-                        {/* QR Image */}
-                        {methodData.qrUrl ? (
+                      {selectedMethod.qrImage ? (
+                        <div className="bg-white p-3 rounded-xl shadow-sm mb-3">
                           <img
-                            src={methodData.qrUrl}
-                            alt={`QR ${getMethodName(selectedMethod)}`}
+                            src={selectedMethod.qrImage}
+                            alt={`QR ${selectedMethod.name}`}
                             className="w-40 h-40 rounded-lg object-contain"
                           />
-                        ) : (
-                          <div className="w-40 h-40 bg-gray-900 dark:bg-gray-700 rounded-lg flex flex-col items-center justify-center text-white relative overflow-hidden">
-                            <QrCode size={64} className="opacity-20" />
-                            <span className="text-[10px] font-mono text-gray-400 opacity-50">QR</span>
-                          </div>
-                        )}
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => copyToClipboard(
-                          'wallet' in methodData ? methodData.wallet : methodData.phone,
-                          'number'
-                        )}
-                        className={cn("text-xs font-semibold hover:underline flex items-center gap-1", currentMethodStyle.textColor)}
-                      >
-                        {copied === 'number' ? <Check size={14} /> : <Copy size={14} />}
-                        {selectedMethod === 'binance'
-                          ? t('seller.recharge.methods.binance.copyWallet')
-                          : t(`seller.recharge.methods.${selectedMethod}.copyNumber`)
-                        }
-                      </button>
+                        </div>
+                      ) : (
+                        <div className="w-40 h-40 bg-muted rounded-lg flex items-center justify-center mb-3">
+                          <span className="text-muted-foreground text-sm">Sin QR</span>
+                        </div>
+                      )}
+
+                      {selectedMethod.phone && (
+                        <button
+                          type="button"
+                          onClick={() => copyToClipboard(selectedMethod.phone!, 'phone')}
+                          className="text-xs font-semibold hover:underline flex items-center gap-1"
+                          style={{ color: selectedMethod.color }}
+                        >
+                          {copied === 'phone' ? <Check size={14} /> : <Copy size={14} />}
+                          Copiar número: {selectedMethod.phone}
+                        </button>
+                      )}
+
+                      {selectedMethod.walletAddress && (
+                        <button
+                          type="button"
+                          onClick={() => copyToClipboard(selectedMethod.walletAddress!, 'wallet')}
+                          className="text-xs font-semibold hover:underline flex items-center gap-1 mt-2"
+                          style={{ color: selectedMethod.color }}
+                        >
+                          {copied === 'wallet' ? <Check size={14} /> : <Copy size={14} />}
+                          Copiar wallet
+                        </button>
+                      )}
                     </div>
-                  ) : (
-                    <div className="text-center text-muted-foreground">
-                      No hay datos configurados para este método
-                    </div>
+                  )}
+
+                  {/* Instructions */}
+                  {selectedMethod.instructions && (
+                    <p className="text-xs text-muted-foreground mt-3 text-center italic">
+                      {selectedMethod.instructions}
+                    </p>
                   )}
                 </div>
               </div>
@@ -403,7 +402,7 @@ export function RechargeDialog({ currentBalance, trigger, role = 'seller' }: Rec
                   </Label>
                   <div className="relative group">
                     <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-bold text-2xl transition-colors group-focus-within:text-primary">
-                      {currentMethodStyle.currency}
+                      {getCurrency()}
                     </span>
                     <Input
                       type="number"
@@ -426,7 +425,7 @@ export function RechargeDialog({ currentBalance, trigger, role = 'seller' }: Rec
                         onClick={() => setQuickAmount(amt)}
                         className="px-3 py-1.5 bg-muted hover:bg-muted/80 border border-border hover:border-primary/50 text-muted-foreground rounded-full text-xs font-medium transition-all active:scale-95"
                       >
-                        {currentMethodStyle.currency}{amt}
+                        {getCurrency()}{amt}
                       </button>
                     ))}
                   </div>
@@ -478,13 +477,14 @@ export function RechargeDialog({ currentBalance, trigger, role = 'seller' }: Rec
                   type="submit"
                   disabled={createRecharge.isPending}
                   className="mt-8 w-full py-6 text-lg font-bold"
+                  style={{ backgroundColor: selectedMethod.color }}
                 >
                   {createRecharge.isPending ? (
                     t('seller.recharge.submitting')
                   ) : (
                     <>
-                      <span>{t('seller.recharge.confirm')} {getMethodCta(selectedMethod)}</span>
-                      <Check size={20} className="ml-2 text-green-400" strokeWidth={3} />
+                      <span>{t('seller.recharge.confirm')} {selectedMethod.name}</span>
+                      <Check size={20} className="ml-2" strokeWidth={3} />
                     </>
                   )}
                 </Button>

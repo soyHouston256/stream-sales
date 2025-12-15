@@ -21,19 +21,32 @@ const phoneToIsoMap: Record<string, string> = {
 };
 
 function normalizeCountryCode(code: string): string {
-    // If it starts with +, it's a phone code - convert to ISO
     if (code.startsWith('+')) {
         return phoneToIsoMap[code] || code;
     }
-    // Already an ISO code
     return code.toUpperCase();
+}
+
+interface PaymentMethod {
+    id: string;
+    name: string;
+    type: 'mobile' | 'bank' | 'crypto';
+    color: string;
+    enabled: boolean;
+    phone?: string;
+    qrImage?: string;
+    walletAddress?: string;
+    bankName?: string;
+    accountNumber?: string;
+    cci?: string;
+    holderName?: string;
+    instructions?: string;
 }
 
 /**
  * GET /api/payment-config/[countryCode]
  * Get the payment method configuration for a specific country
- * Used by RechargeDialog to load payment methods dynamically
- * Accepts both ISO codes (PE) and phone codes (+51)
+ * Only returns methods if the assigned validator is APPROVED
  */
 export async function GET(
     request: NextRequest,
@@ -61,7 +74,7 @@ export async function GET(
             );
         }
 
-        // Normalize the country code (convert +51 to PE, etc.)
+        // Normalize the country code
         const countryCode = normalizeCountryCode(decodeURIComponent(rawCode));
 
         if (countryCode.length !== 2) {
@@ -71,25 +84,21 @@ export async function GET(
             );
         }
 
-        // Find config for this country
+        // Find config for this country WITH validator approval check
         const config = await prisma.paymentMethodConfig.findUnique({
             where: { countryCode: countryCode },
-            select: {
-                countryCode: true,
-                yapeEnabled: true,
-                yapePhone: true,
-                yapeQrUrl: true,
-                plinEnabled: true,
-                plinPhone: true,
-                plinQrUrl: true,
-                binanceEnabled: true,
-                binanceWallet: true,
-                binanceQrUrl: true,
-                bankEnabled: true,
-                bankName: true,
-                bankAccountNumber: true,
-                bankCci: true,
-                bankHolderName: true,
+            include: {
+                validator: {
+                    select: {
+                        id: true,
+                        paymentValidatorProfile: {
+                            select: {
+                                status: true,
+                                assignedCountry: true,
+                            }
+                        }
+                    }
+                }
             },
         });
 
@@ -104,35 +113,35 @@ export async function GET(
             );
         }
 
-        // Build available methods list
-        const availableMethods = [];
-        if (config.yapeEnabled) availableMethods.push('yape');
-        if (config.plinEnabled) availableMethods.push('plin');
-        if (config.binanceEnabled) availableMethods.push('binance');
-        if (config.bankEnabled) availableMethods.push('banco');
+        // CRITICAL: Check if validator is approved
+        const validatorProfile = config.validator?.paymentValidatorProfile;
+        if (!validatorProfile || validatorProfile.status !== 'approved') {
+            return NextResponse.json(
+                {
+                    error: 'Payment methods are not available for this country. The payment validator is pending approval.',
+                    code: 'VALIDATOR_NOT_APPROVED',
+                },
+                { status: 404 }
+            );
+        }
+
+        // Filter only enabled methods
+        const methods = (config.methods as unknown as PaymentMethod[]).filter(m => m.enabled);
+
+        if (methods.length === 0) {
+            return NextResponse.json(
+                {
+                    error: 'No payment methods are enabled for this country',
+                    code: 'NO_ENABLED_METHODS',
+                },
+                { status: 404 }
+            );
+        }
 
         return NextResponse.json({
             data: {
                 countryCode: config.countryCode,
-                availableMethods,
-                yape: config.yapeEnabled ? {
-                    phone: config.yapePhone,
-                    qrUrl: config.yapeQrUrl,
-                } : null,
-                plin: config.plinEnabled ? {
-                    phone: config.plinPhone,
-                    qrUrl: config.plinQrUrl,
-                } : null,
-                binance: config.binanceEnabled ? {
-                    wallet: config.binanceWallet,
-                    qrUrl: config.binanceQrUrl,
-                } : null,
-                banco: config.bankEnabled ? {
-                    bankName: config.bankName,
-                    accountNumber: config.bankAccountNumber,
-                    cci: config.bankCci,
-                    holderName: config.bankHolderName,
-                } : null,
+                methods: methods,
             },
         });
     } catch (error) {

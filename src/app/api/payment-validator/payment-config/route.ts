@@ -5,26 +5,28 @@ import { verifyJWT } from '@/infrastructure/auth/jwt';
 
 export const dynamic = 'force-dynamic';
 
-const updateConfigSchema = z.object({
-    // Yape
-    yapeEnabled: z.boolean().optional(),
-    yapePhone: z.string().optional().nullable(),
-    yapeQrUrl: z.string().url().optional().nullable(),
-    // Plin
-    plinEnabled: z.boolean().optional(),
-    plinPhone: z.string().optional().nullable(),
-    plinQrUrl: z.string().url().optional().nullable(),
-    // Binance
-    binanceEnabled: z.boolean().optional(),
-    binanceWallet: z.string().optional().nullable(),
-    binanceQrUrl: z.string().url().optional().nullable(),
-    // Bank
-    bankEnabled: z.boolean().optional(),
-    bankName: z.string().optional().nullable(),
-    bankAccountNumber: z.string().optional().nullable(),
-    bankCci: z.string().optional().nullable(),
-    bankHolderName: z.string().optional().nullable(),
+// Schema for a single payment method
+const paymentMethodSchema = z.object({
+    id: z.string(),
+    name: z.string().min(1, 'Name is required'),
+    type: z.enum(['mobile', 'bank', 'crypto']),
+    color: z.string().regex(/^#[0-9A-Fa-f]{6}$/, 'Invalid hex color'),
+    enabled: z.boolean(),
+    phone: z.string().optional(),
+    qrImage: z.string().optional(), // Base64 image
+    walletAddress: z.string().optional(),
+    bankName: z.string().optional(),
+    accountNumber: z.string().optional(),
+    cci: z.string().optional(),
+    holderName: z.string().optional(),
+    instructions: z.string().optional(),
 });
+
+const updateConfigSchema = z.object({
+    methods: z.array(paymentMethodSchema),
+});
+
+export type PaymentMethod = z.infer<typeof paymentMethodSchema>;
 
 /**
  * GET /api/payment-validator/payment-config
@@ -43,10 +45,19 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
         }
 
-        // Verify user is payment_validator
+        // Verify user is payment_validator with profile
         const user = await prisma.user.findUnique({
             where: { id: payload.userId },
-            select: { id: true, role: true, countryCode: true },
+            select: {
+                id: true,
+                role: true,
+                paymentValidatorProfile: {
+                    select: {
+                        status: true,
+                        assignedCountry: true,
+                    }
+                }
+            },
         });
 
         if (!user || user.role !== 'payment_validator') {
@@ -56,30 +67,30 @@ export async function GET(request: NextRequest) {
             );
         }
 
+        const profile = user.paymentValidatorProfile;
+
+        // Return status info for all validators (approved or not)
+        if (!profile || profile.status !== 'approved') {
+            return NextResponse.json({
+                approved: false,
+                status: profile?.status || 'pending',
+                data: { methods: [] },
+                userCountryCode: null,
+            });
+        }
+
         // Get existing config or return empty
         const config = await prisma.paymentMethodConfig.findUnique({
             where: { validatorId: user.id },
         });
 
         return NextResponse.json({
-            data: config || {
-                countryCode: user.countryCode || '',
-                yapeEnabled: false,
-                yapePhone: null,
-                yapeQrUrl: null,
-                plinEnabled: false,
-                plinPhone: null,
-                plinQrUrl: null,
-                binanceEnabled: false,
-                binanceWallet: null,
-                binanceQrUrl: null,
-                bankEnabled: false,
-                bankName: null,
-                bankAccountNumber: null,
-                bankCci: null,
-                bankHolderName: null,
+            approved: true,
+            status: 'approved',
+            data: {
+                methods: config ? (config.methods as PaymentMethod[]) : [],
             },
-            userCountryCode: user.countryCode,
+            userCountryCode: profile.assignedCountry,
         });
     } catch (error) {
         console.error('Error fetching payment config:', error);
@@ -89,7 +100,7 @@ export async function GET(request: NextRequest) {
 
 /**
  * PUT /api/payment-validator/payment-config
- * Create or update the payment method configuration
+ * Create or update the payment method configuration with dynamic methods
  */
 export async function PUT(request: NextRequest) {
     try {
@@ -104,10 +115,19 @@ export async function PUT(request: NextRequest) {
             return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
         }
 
-        // Verify user is payment_validator
+        // Verify user is approved payment_validator
         const user = await prisma.user.findUnique({
             where: { id: payload.userId },
-            select: { id: true, role: true, countryCode: true },
+            select: {
+                id: true,
+                role: true,
+                paymentValidatorProfile: {
+                    select: {
+                        status: true,
+                        assignedCountry: true,
+                    }
+                }
+            },
         });
 
         if (!user || user.role !== 'payment_validator') {
@@ -117,9 +137,19 @@ export async function PUT(request: NextRequest) {
             );
         }
 
-        if (!user.countryCode) {
+        const profile = user.paymentValidatorProfile;
+
+        // Must be approved to update config
+        if (!profile || profile.status !== 'approved') {
             return NextResponse.json(
-                { error: 'You must have a country code assigned to configure payment methods.' },
+                { error: 'Your account must be approved by an administrator before you can configure payment methods.' },
+                { status: 403 }
+            );
+        }
+
+        if (!profile.assignedCountry) {
+            return NextResponse.json(
+                { error: 'No country has been assigned to your account. Contact an administrator.' },
                 { status: 400 }
             );
         }
@@ -134,27 +164,32 @@ export async function PUT(request: NextRequest) {
             );
         }
 
-        const data = validation.data;
+        const { methods } = validation.data;
 
-        // Upsert config
+        // Upsert config using assigned country from profile
         const config = await prisma.paymentMethodConfig.upsert({
             where: { validatorId: user.id },
             update: {
-                ...data,
+                methods: methods as unknown as any,
+                countryCode: profile.assignedCountry, // Always use admin-assigned country
                 updatedAt: new Date(),
             },
             create: {
                 validatorId: user.id,
-                countryCode: user.countryCode,
-                ...data,
+                countryCode: profile.assignedCountry,
+                methods: methods as unknown as any,
             },
         });
 
-        return NextResponse.json({ data: config });
+        return NextResponse.json({
+            data: {
+                methods: config.methods as PaymentMethod[]
+            }
+        });
     } catch (error: any) {
         console.error('Error updating payment config:', error);
 
-        // Handle unique constraint error (another validator already has this country)
+        // Handle unique constraint error
         if (error.code === 'P2002' && error.meta?.target?.includes('countryCode')) {
             return NextResponse.json(
                 { error: 'Another payment validator is already assigned to this country.' },

@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
 import {
   Select,
   SelectContent,
@@ -19,29 +20,127 @@ import { ProductStatusBadge } from '@/components/provider/ProductStatusBadge';
 import { CategoryBadge } from '@/components/provider/CategoryBadge';
 import { useProducts, useDeleteProduct } from '@/lib/hooks/useProducts';
 import { Product, ProductCategory, ProductStatus } from '@/types/provider';
-import { Edit, Trash2, Search, Package, Plus, CheckCircle2, ShoppingCart, Users } from 'lucide-react';
+import {
+  Edit,
+  Trash2,
+  Search,
+  Package,
+  Plus,
+  CheckCircle2,
+  ShoppingCart,
+  Users,
+  Clock,
+  ShieldCheck,
+  XCircle,
+  AlertTriangle,
+  Sparkles,
+  TrendingUp
+} from 'lucide-react';
 import { format } from 'date-fns';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { tokenManager } from '@/lib/utils/tokenManager';
+import { cn } from '@/lib/utils';
 
-// Simple Stat Card Component
-const StatCard = ({ label, value, icon: Icon, color }: { label: string; value: string; icon: any; color: 'blue' | 'red' | 'green' | 'purple' }) => {
+// Enhanced Stat Card Component
+const StatCard = ({
+  label,
+  value,
+  icon: Icon,
+  color,
+  trend
+}: {
+  label: string;
+  value: string;
+  icon: any;
+  color: 'blue' | 'red' | 'green' | 'purple';
+  trend?: string;
+}) => {
   const colorStyles = {
-    blue: "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400",
-    red: "bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400",
-    green: "bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400",
-    purple: "bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400",
+    blue: "from-blue-500 to-blue-600",
+    red: "from-rose-500 to-rose-600",
+    green: "from-emerald-500 to-emerald-600",
+    purple: "from-violet-500 to-violet-600",
+  };
+
+  const bgStyles = {
+    blue: "bg-blue-50 dark:bg-blue-950/30",
+    red: "bg-rose-50 dark:bg-rose-950/30",
+    green: "bg-emerald-50 dark:bg-emerald-950/30",
+    purple: "bg-violet-50 dark:bg-violet-950/30",
   };
 
   return (
-    <div className="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-100 dark:border-slate-800 shadow-sm flex items-start justify-between">
-      <div>
-        <p className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase mb-1">{label}</p>
-        <h3 className="text-2xl font-extrabold text-slate-800 dark:text-white">{value}</h3>
-      </div>
-      <div className={`p-3 rounded-xl ${colorStyles[color]}`}>
-        <Icon size={24} />
+    <Card className={cn("relative overflow-hidden border-0 shadow-lg", bgStyles[color])}>
+      <div className={cn("absolute top-0 right-0 w-32 h-32 -mr-8 -mt-8 rounded-full opacity-10 bg-gradient-to-br", colorStyles[color])} />
+      <CardContent className="p-6">
+        <div className="flex items-start justify-between">
+          <div>
+            <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">{label}</p>
+            <h3 className="text-3xl font-black">{value}</h3>
+            {trend && (
+              <div className="flex items-center gap-1 mt-2 text-xs text-emerald-600">
+                <TrendingUp size={12} />
+                <span>{trend}</span>
+              </div>
+            )}
+          </div>
+          <div className={cn("p-3 rounded-2xl bg-gradient-to-br shadow-lg text-white", colorStyles[color])}>
+            <Icon size={24} />
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
+// Pending Approval Banner
+const PendingApprovalBanner = ({ status }: { status: string }) => {
+  const configs = {
+    pending: {
+      icon: Clock,
+      title: 'Tu cuenta está en revisión',
+      description: 'Estamos verificando tu información. Te notificaremos cuando sea aprobada.',
+      color: 'bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-900',
+      iconColor: 'text-amber-500',
+      badge: 'Pendiente'
+    },
+    rejected: {
+      icon: XCircle,
+      title: 'Cuenta no aprobada',
+      description: 'Tu solicitud fue rechazada. Contacta soporte para más información.',
+      color: 'bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-900',
+      iconColor: 'text-red-500',
+      badge: 'Rechazada'
+    },
+    suspended: {
+      icon: AlertTriangle,
+      title: 'Cuenta suspendida',
+      description: 'Tu cuenta ha sido suspendida temporalmente.',
+      color: 'bg-gray-50 dark:bg-gray-950/30 border-gray-200 dark:border-gray-800',
+      iconColor: 'text-gray-500',
+      badge: 'Suspendida'
+    }
+  };
+
+  const config = configs[status as keyof typeof configs] || configs.pending;
+  const Icon = config.icon;
+
+  return (
+    <div className={cn("rounded-2xl border-2 p-6 mb-6", config.color)}>
+      <div className="flex items-start gap-4">
+        <div className={cn("p-3 rounded-xl bg-white dark:bg-gray-900 shadow-sm", config.iconColor)}>
+          <Icon size={28} />
+        </div>
+        <div className="flex-1">
+          <div className="flex items-center gap-3 mb-1">
+            <h3 className="font-bold text-lg">{config.title}</h3>
+            <Badge variant="outline" className={cn("text-xs", config.iconColor)}>
+              {config.badge}
+            </Badge>
+          </div>
+          <p className="text-muted-foreground">{config.description}</p>
+        </div>
       </div>
     </div>
   );
@@ -58,7 +157,6 @@ export default function ProductsPage() {
   const [providerStatus, setProviderStatus] = useState<string | null>(null);
   const [isStatusLoading, setIsStatusLoading] = useState(true);
   const [showRestrictionDialog, setShowRestrictionDialog] = useState(false);
-  const [debugInfo, setDebugInfo] = useState<string>('');
 
   const { data, isLoading } = useProducts({
     page,
@@ -71,11 +169,7 @@ export default function ProductsPage() {
   const deleteProduct = useDeleteProduct();
 
   const handleDelete = async (id: string, productName: string) => {
-    if (
-      window.confirm(
-        t('provider.products.confirmDelete').replace('{name}', productName)
-      )
-    ) {
+    if (window.confirm(t('provider.products.confirmDelete').replace('{name}', productName))) {
       await deleteProduct.mutateAsync(id);
     }
   };
@@ -84,11 +178,8 @@ export default function ProductsPage() {
   useEffect(() => {
     const fetchStatus = async () => {
       try {
-        // Use tokenManager to get the correct token key ('auth_token')
         const token = tokenManager.getToken();
-
         if (!token) {
-          setDebugInfo('No token found via tokenManager (checked auth_token)');
           setIsStatusLoading(false);
           return;
         }
@@ -100,17 +191,10 @@ export default function ProductsPage() {
 
         if (res.ok) {
           const data = await res.json();
-          console.log('Provider Status Debug:', data);
           setProviderStatus(data.status);
-          setDebugInfo(`Success: ${JSON.stringify(data)}`);
-        } else {
-          const text = await res.text();
-          console.error('Failed to fetch status:', res.status, text);
-          setDebugInfo(`Error ${res.status}: ${text}`);
         }
       } catch (err) {
         console.error('Error fetching provider status', err);
-        setDebugInfo(`Exception: ${err instanceof Error ? err.message : String(err)}`);
       } finally {
         setIsStatusLoading(false);
       }
@@ -118,14 +202,11 @@ export default function ProductsPage() {
     fetchStatus();
   }, []);
 
+  const isApproved = providerStatus?.toLowerCase() === 'approved';
+
   const handleNewProductClick = () => {
     if (isStatusLoading) return;
-
-    // Normalize status to lowercase to be safe
-    const currentStatus = providerStatus?.toLowerCase();
-    console.log('Checking permission with status:', currentStatus);
-
-    if (currentStatus === 'approved') {
+    if (isApproved) {
       setIsWizardOpen(true);
     } else {
       setShowRestrictionDialog(true);
@@ -142,9 +223,9 @@ export default function ProductsPage() {
       key: 'name',
       label: t('provider.products.productName'),
       render: (product) => (
-        <div>
-          <p className="font-medium">{product.name}</p>
-          <p className="text-xs text-muted-foreground line-clamp-1">
+        <div className="min-w-[200px]">
+          <p className="font-semibold">{product.name}</p>
+          <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5">
             {product.description}
           </p>
         </div>
@@ -156,7 +237,7 @@ export default function ProductsPage() {
       render: (product) => {
         const price = product.variants?.[0]?.price;
         return (
-          <span className="font-medium">
+          <span className="font-bold text-lg">
             {price ? `$${parseFloat(price).toFixed(2)}` : '-'}
           </span>
         );
@@ -172,16 +253,21 @@ export default function ProductsPage() {
     {
       key: 'createdAt',
       label: t('provider.products.created'),
-      render: (product) => format(new Date(product.createdAt), 'MMM dd, yyyy'),
+      render: (product) => (
+        <span className="text-sm text-muted-foreground">
+          {format(new Date(product.createdAt), 'dd MMM yyyy')}
+        </span>
+      ),
     },
     {
       key: 'actions',
-      label: t('provider.products.actions'),
+      label: '',
       render: (product) => (
-        <div className="flex gap-2">
+        <div className="flex gap-1">
           <Button
             variant="ghost"
-            size="sm"
+            size="icon"
+            className="hover:bg-indigo-50 dark:hover:bg-indigo-950/30"
             onClick={() => router.push(`/dashboard/provider/products/${product.id}`)}
             title={t('common.edit')}
           >
@@ -189,7 +275,8 @@ export default function ProductsPage() {
           </Button>
           <Button
             variant="ghost"
-            size="sm"
+            size="icon"
+            className="hover:bg-red-50 dark:hover:bg-red-950/30"
             onClick={() => handleDelete(product.id, product.name)}
             disabled={product.isActive}
             title={t('provider.products.deleteProduct')}
@@ -203,40 +290,87 @@ export default function ProductsPage() {
 
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">{t('provider.products.title')}</h1>
+          <div className="flex items-center gap-3">
+            <h1 className="text-3xl font-bold">{t('provider.products.title')}</h1>
+            {isApproved && (
+              <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-400">
+                <ShieldCheck size={14} className="mr-1" />
+                Verificado
+              </Badge>
+            )}
+          </div>
           <p className="text-muted-foreground mt-2">
             {t('provider.products.subtitle')}
           </p>
         </div>
         <Button
           onClick={handleNewProductClick}
-          className="px-6 py-2.5 rounded-lg font-bold shadow-lg shadow-indigo-500/20 transition-all flex items-center gap-2 active:scale-95"
+          disabled={isStatusLoading}
+          className="px-6 py-2.5 rounded-xl font-bold shadow-lg shadow-primary/20 transition-all flex items-center gap-2 active:scale-95 hover:shadow-xl hover:shadow-primary/30"
+          size="lg"
         >
-          <Plus size={20} /> {t('provider.products.newProduct')}
+          <Plus size={20} />
+          <span className="hidden sm:inline">{t('provider.products.newProduct')}</span>
+          <span className="sm:hidden">Nuevo</span>
         </Button>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <StatCard label={t('provider.products.totalProducts')} value={data?.pagination?.total?.toString() || "0"} icon={Package} color="blue" />
-        <StatCard label={t('provider.products.stockCritical')} value="0" icon={CheckCircle2} color="red" />
-        <StatCard label={t('provider.products.salesToday')} value="$0" icon={ShoppingCart} color="green" />
-        <StatCard label={t('provider.products.activeClients')} value="0" icon={Users} color="purple" />
-      </div>
+      {/* Pending Approval Banner - Only show if not approved */}
+      {!isStatusLoading && !isApproved && providerStatus && (
+        <PendingApprovalBanner status={providerStatus} />
+      )}
 
-      <Card>
-        <CardHeader>
-          <CardTitle>{t('provider.products.filters')}</CardTitle>
+      {/* Stats Cards - Only show if approved */}
+      {isApproved && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <StatCard
+            label={t('provider.products.totalProducts')}
+            value={data?.pagination?.total?.toString() || "0"}
+            icon={Package}
+            color="blue"
+          />
+          <StatCard
+            label={t('provider.products.stockCritical')}
+            value="0"
+            icon={CheckCircle2}
+            color="red"
+          />
+          <StatCard
+            label={t('provider.products.salesToday')}
+            value="$0"
+            icon={ShoppingCart}
+            color="green"
+            trend="+0% hoy"
+          />
+          <StatCard
+            label={t('provider.products.activeClients')}
+            value="0"
+            icon={Users}
+            color="purple"
+          />
+        </div>
+      )}
+
+      {/* Filters Card */}
+      <Card className="border-0 shadow-md">
+        <CardHeader className="pb-4">
+          <div className="flex items-center gap-2">
+            <Search className="h-5 w-5 text-muted-foreground" />
+            <CardTitle className="text-lg">{t('provider.products.filters')}</CardTitle>
+          </div>
           <CardDescription>{t('provider.products.filtersDescription')}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-4">
             <div className="space-y-2">
-              <Label htmlFor="search">{t('common.search')}</Label>
+              <Label htmlFor="search" className="text-xs font-bold uppercase text-muted-foreground">
+                {t('common.search')}
+              </Label>
               <div className="relative">
-                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="search"
                   placeholder={t('provider.products.searchPlaceholder')}
@@ -245,13 +379,15 @@ export default function ProductsPage() {
                     setSearch(e.target.value);
                     setPage(1);
                   }}
-                  className="pl-8"
+                  className="pl-10 rounded-xl"
                 />
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="category">{t('products.category')}</Label>
+              <Label htmlFor="category" className="text-xs font-bold uppercase text-muted-foreground">
+                {t('products.category')}
+              </Label>
               <Select
                 value={category}
                 onValueChange={(value) => {
@@ -259,7 +395,7 @@ export default function ProductsPage() {
                   setPage(1);
                 }}
               >
-                <SelectTrigger id="category">
+                <SelectTrigger id="category" className="rounded-xl">
                   <SelectValue placeholder={t('provider.products.allCategories')} />
                 </SelectTrigger>
                 <SelectContent>
@@ -276,7 +412,9 @@ export default function ProductsPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="status">{t('products.status')}</Label>
+              <Label htmlFor="status" className="text-xs font-bold uppercase text-muted-foreground">
+                {t('products.status')}
+              </Label>
               <Select
                 value={status}
                 onValueChange={(value) => {
@@ -284,7 +422,7 @@ export default function ProductsPage() {
                   setPage(1);
                 }}
               >
-                <SelectTrigger id="status">
+                <SelectTrigger id="status" className="rounded-xl">
                   <SelectValue placeholder={t('provider.products.allStatuses')} />
                 </SelectTrigger>
                 <SelectContent>
@@ -297,7 +435,7 @@ export default function ProductsPage() {
             </div>
 
             <div className="space-y-2">
-              <Label>&nbsp;</Label>
+              <Label className="text-xs font-bold uppercase text-muted-foreground">&nbsp;</Label>
               <Button
                 variant="outline"
                 onClick={() => {
@@ -306,7 +444,7 @@ export default function ProductsPage() {
                   setSearch('');
                   setPage(1);
                 }}
-                className="w-full"
+                className="w-full rounded-xl"
               >
                 {t('provider.products.clearFilters')}
               </Button>
@@ -315,6 +453,7 @@ export default function ProductsPage() {
         </CardContent>
       </Card>
 
+      {/* Products Table */}
       <DataTable
         data={data?.data || []}
         columns={columns}
@@ -329,7 +468,7 @@ export default function ProductsPage() {
             : undefined
         }
         emptyState={{
-          icon: Package,
+          icon: search ? Search : Package,
           title: search
             ? t('provider.products.noProductsFound')
             : t('provider.products.noProducts'),
@@ -340,26 +479,44 @@ export default function ProductsPage() {
         }}
       />
 
+      {/* Product Creator Wizard */}
       {isWizardOpen && (
         <ProductCreatorWizard onClose={() => setIsWizardOpen(false)} />
       )}
 
-      {/* Restriction Dialog */}
+      {/* Restriction Dialog - Cleaned up without debug info */}
       <Dialog open={showRestrictionDialog} onOpenChange={setShowRestrictionDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{t('provider.products.restriction.title')}</DialogTitle>
-            <DialogDescription>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader className="text-center pb-4">
+            <div className="mx-auto w-16 h-16 rounded-full bg-amber-100 dark:bg-amber-950/50 flex items-center justify-center mb-4">
+              <Clock className="h-8 w-8 text-amber-500" />
+            </div>
+            <DialogTitle className="text-xl">
+              {t('provider.products.restriction.title')}
+            </DialogTitle>
+            <DialogDescription className="text-base pt-2">
               {t('provider.products.restriction.description')}
-              <div className="mt-2 text-xs text-muted-foreground p-2 bg-slate-100 dark:bg-slate-800 rounded break-all font-mono">
-                Debug Info: {debugInfo || 'Loading...'}
-                <br />
-                Current State: {providerStatus || 'null'}
-              </div>
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter>
-            <Button onClick={() => setShowRestrictionDialog(false)}>
+
+          <div className="bg-muted/50 rounded-xl p-4 text-center">
+            <p className="text-sm text-muted-foreground">
+              Estado actual de tu cuenta:
+            </p>
+            <Badge
+              variant="outline"
+              className="mt-2 text-amber-600 border-amber-300 bg-amber-50 dark:bg-amber-950/30"
+            >
+              <Clock size={14} className="mr-1" />
+              Pendiente de aprobación
+            </Badge>
+          </div>
+
+          <DialogFooter className="pt-4">
+            <Button
+              onClick={() => setShowRestrictionDialog(false)}
+              className="w-full rounded-xl"
+            >
               {t('provider.products.restriction.button')}
             </Button>
           </DialogFooter>

@@ -163,6 +163,7 @@ const createProductSchema = z.object({
   name: z.string().min(1),
   description: z.string().optional(),
   price: z.string().or(z.number()), // Base price
+  durationDays: z.number().optional().default(0), // Duration in days (0 = lifetime)
   imageUrl: z.string().optional(),
   category: z.string(),
 
@@ -229,14 +230,14 @@ export async function POST(request: NextRequest) {
         },
       });
 
-      // 2. Create Default Variant (for now, 1 variant per product based on wizard)
-      // In a full implementation, we'd loop through variants.
+      // 2. Create Default Variant with duration
       await tx.productVariant.create({
         data: {
           productId: newProduct.id,
-          name: 'Standard', // Default name
+          name: 'Standard',
           price: Number(data.price),
-          isRenewable: true, // Default
+          durationDays: data.durationDays ?? 0, // Use provided duration or default to lifetime (0)
+          isRenewable: true,
         },
       });
 

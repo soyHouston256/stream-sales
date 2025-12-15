@@ -30,6 +30,7 @@ model User {
   wallet                  Wallet?
   affiliateProfile        AffiliateProfile?
   providerProfile         ProviderProfile?
+  paymentValidatorProfile PaymentValidatorProfile?
   productsAsProvider      Product[]         @relation("ProviderProducts")
   // purchasesAsSeller       Purchase[]        @relation("SellerPurchases")
   // purchasesAsProvider     Purchase[]        @relation("ProviderPurchases")
@@ -62,6 +63,25 @@ model ProviderProfile {
   
   @@index([status])
   @@map("provider_profiles")
+}
+
+model PaymentValidatorProfile {
+  id              String    @id @default(cuid())
+  userId          String    @unique
+  status          String    @default("pending") // pending, approved, rejected, suspended
+  assignedCountry String?   // ISO country code (PE, MX, BO) - assigned by admin
+  applicationNote String?   @db.Text // Notes from validator
+  rejectionReason String?   @db.Text // Reason for rejection
+  approvedBy      String?   // Admin user ID who approved
+  approvedAt      DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([status])
+  @@index([assignedCountry])
+  @@map("payment_validator_profiles")
 }
 
 model Wallet {
@@ -456,37 +476,20 @@ model DisputeMessage {
 
 // ============================================
 // PAYMENT METHOD CONFIG (Per-Country Payment Settings)
+// Dynamic payment methods stored as JSON array
 // ============================================
 
 model PaymentMethodConfig {
-  id            String   @id @default(cuid())
-  countryCode   String   @unique // PE, BO, MX, etc. - Solo 1 config por país
-  validatorId   String   @unique // payment_validator user ID
+  id          String   @id @default(cuid())
+  countryCode String   @unique // PE, BO, MX, etc. - 1 config per country
+  validatorId String   @unique // payment_validator user ID
   
-  // Yape Config
-  yapeEnabled   Boolean  @default(false)
-  yapePhone     String?
-  yapeQrUrl     String?  // URL de imagen del QR
+  // Dynamic array of payment methods as JSON
+  // Structure: [{ id, name, type, color, enabled, phone?, qrImage?, walletAddress?, bankName?, accountNumber?, cci?, holderName?, instructions? }]
+  methods     Json     @default("[]")
   
-  // Plin Config  
-  plinEnabled   Boolean  @default(false)
-  plinPhone     String?
-  plinQrUrl     String?
-  
-  // Binance Config
-  binanceEnabled    Boolean  @default(false)
-  binanceWallet     String?  // TRC20 address
-  binanceQrUrl      String?
-  
-  // Bank Config
-  bankEnabled       Boolean  @default(false)
-  bankName          String?  // "BCP", "BBVA"
-  bankAccountNumber String?
-  bankCci           String?  // CCI for inter-bank transfers
-  bankHolderName    String?
-  
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   // Relations
   validator User @relation(fields: [validatorId], references: [id])

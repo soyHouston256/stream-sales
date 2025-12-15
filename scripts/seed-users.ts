@@ -92,6 +92,34 @@ async function main() {
             });
         }
 
+        // Create provider profile if role is provider (pending approval)
+        if (user.role === 'provider') {
+            await prisma.providerProfile.upsert({
+                where: { userId: upsertedUser.id },
+                update: {},
+                create: {
+                    userId: upsertedUser.id,
+                    status: 'pending', // Requires admin approval
+                    applicationNote: 'Solicitud de proveedor generada por seed',
+                },
+            });
+            console.log(`  -> ProviderProfile created (pending approval)`);
+        }
+
+        // Create payment validator profile if role is payment_validator (pending approval)
+        if (user.role === 'payment_validator') {
+            await prisma.paymentValidatorProfile.upsert({
+                where: { userId: upsertedUser.id },
+                update: {},
+                create: {
+                    userId: upsertedUser.id,
+                    status: 'pending', // Requires admin approval + country assignment
+                    applicationNote: 'Solicitud de validador generada por seed',
+                },
+            });
+            console.log(`  -> PaymentValidatorProfile created (pending approval)`);
+        }
+
         console.log(`User ${user.email} seeded with role ${user.role}`);
     }
 
