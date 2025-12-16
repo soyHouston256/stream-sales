@@ -587,26 +587,51 @@
     },
     "recharge": {
       "addFunds": "Add Funds",
-      "title": "Add Funds to Wallet",
-      "subtitle": "Request a recharge to add funds to your wallet",
+      "title": "Top Up Balance",
+      "subtitle": "Choose your preferred payment method",
       "currentBalance": "Current Balance",
-      "amountLabel": "Amount (USD)",
-      "amountPlaceholder": "100.00",
-      "amountHelp": "Minimum: $10.00 | Maximum: $10,000.00",
-      "paymentMethodLabel": "Payment Method",
-      "paymentMethodPlaceholder": "Select payment method",
-      "mockPayment": "Mock Payment (Development)",
-      "creditCard": "Credit Card",
-      "paypal": "PayPal",
-      "bankTransfer": "Bank Transfer",
-      "crypto": "Cryptocurrency",
-      "paymentDetailsLabel": "Payment Details (Optional)",
-      "paymentDetailsPlaceholder": "Enter email, account number, wallet address, or any relevant payment information...",
-      "paymentDetailsHelp": "Provide any additional information needed to process your payment",
-      "youWillReceive": "You will receive:",
-      "cancel": "Cancel",
-      "requesting": "Requesting...",
-      "requestRecharge": "Request Recharge"
+      "paymentData": "Payment Details",
+      "reportPayment": "Report Payment",
+      "reportDescription": "Enter your transfer details for validation.",
+      "amountTransferred": "Amount Transferred",
+      "holderName": "Account Holder Name (Source)",
+      "holderNamePlaceholder": "E.g. John Doe",
+      "paymentTime": "Exact payment time",
+      "thirdPartyWarning": "If you paid from a family member or friend's account, you <strong>must</strong> enter THEIR name below.",
+      "confirm": "Confirm",
+      "submitting": "Submitting...",
+      "copied": "Copied!",
+      "copiedToClipboard": "Data copied to clipboard",
+      "copyError": "Could not copy",
+      "validationTime": "Average validation: 5-10 minutes",
+      "fieldsRequired": "Required fields",
+      "fieldsRequiredDesc": "Please fill in the account holder name and payment time.",
+      "methods": {
+        "yape": {
+          "name": "Yape",
+          "cta": "Send via Yape",
+          "copyNumber": "Copy Phone Number"
+        },
+        "plin": {
+          "name": "Plin",
+          "cta": "Send via Plin",
+          "copyNumber": "Copy Phone Number"
+        },
+        "binance": {
+          "name": "Binance",
+          "cta": "Transfer",
+          "copyWallet": "Copy Wallet (TRC20)"
+        },
+        "banco": {
+          "name": "Bank",
+          "cta": "Transfer",
+          "accountLabel": "BCP Checking Account",
+          "cciLabel": "CCI",
+          "holderLabel": "Account Holder"
+        }
+      },
+      "noConfigTitle": "Payment methods not available",
+      "noConfigDesc": "No payment methods are configured for your country. Contact the administrator."
     },
     "hero": {
       "automatedDelivery": "Automated Delivery in 30 seconds",
@@ -1303,8 +1328,31 @@
       "withdrawals": "Withdrawals",
       "overviewStats": "Overview and statistics",
       "validateRecharges": "Validate recharges",
-      "validateWithdrawals": "Validate withdrawals"
+      "validateWithdrawals": "Validate withdrawals",
+      "paymentConfig": "Payment Methods"
     }
+  },
+  "paymentConfig": {
+    "title": "Payment Methods Configuration",
+    "subtitle": "Configure the payment methods available for your country",
+    "save": "Save Configuration",
+    "saveSuccess": "Configuration saved",
+    "saveSuccessDesc": "The payment methods have been updated successfully.",
+    "saveError": "Error saving",
+    "loadError": "Error loading configuration",
+    "noCountryWarning": "You must have a country code assigned to configure payment methods. Contact the administrator.",
+    "mobilePayment": "Mobile payment",
+    "cryptoPayment": "Cryptocurrency payment",
+    "bankTransfer": "Bank Transfer",
+    "bankTransferDesc": "Local bank accounts",
+    "phoneNumber": "Phone Number",
+    "qrImage": "QR Image",
+    "walletAddress": "Wallet Address",
+    "bankName": "Bank Name",
+    "accountNumber": "Account Number",
+    "cci": "CCI (Interbank Code)",
+    "holderName": "Account Holder Name",
+    "info": "This data will be visible to users in your country when they want to top up their balance. Only enabled methods will be shown."
   },
   "errors": {
     "generic": "An unexpected error occurred",

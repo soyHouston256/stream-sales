@@ -10,6 +10,7 @@ async function main() {
             password: 'Password@123',
             role: 'seller',
             name: 'Seller User',
+            countryCode: 'PE', // Peru
         },
         {
             email: 'provider@streamsales.com',
@@ -22,6 +23,7 @@ async function main() {
             password: 'Password@123',
             role: 'payment_validator',
             name: 'Payment Validator',
+            countryCode: 'PE', // Peru - must match seller country
         },
         {
             email: 'conciliator@streamsales.com',
@@ -40,6 +42,7 @@ async function main() {
             password: 'Password@123',
             role: 'affiliate',
             name: 'Affiliate User',
+            countryCode: 'PE', // Peru
         },
     ];
 
@@ -54,12 +57,14 @@ async function main() {
                 password: hashedPassword,
                 role: user.role,
                 name: user.name,
+                countryCode: (user as any).countryCode,
             },
             create: {
                 email: user.email,
                 password: hashedPassword,
                 role: user.role,
                 name: user.name,
+                countryCode: (user as any).countryCode,
             },
         });
 
@@ -85,6 +90,34 @@ async function main() {
                     status: 'active',
                 },
             });
+        }
+
+        // Create provider profile if role is provider (pending approval)
+        if (user.role === 'provider') {
+            await prisma.providerProfile.upsert({
+                where: { userId: upsertedUser.id },
+                update: {},
+                create: {
+                    userId: upsertedUser.id,
+                    status: 'pending', // Requires admin approval
+                    applicationNote: 'Solicitud de proveedor generada por seed',
+                },
+            });
+            console.log(`  -> ProviderProfile created (pending approval)`);
+        }
+
+        // Create payment validator profile if role is payment_validator (pending approval)
+        if (user.role === 'payment_validator') {
+            await prisma.paymentValidatorProfile.upsert({
+                where: { userId: upsertedUser.id },
+                update: {},
+                create: {
+                    userId: upsertedUser.id,
+                    status: 'pending', // Requires admin approval + country assignment
+                    applicationNote: 'Solicitud de validador generada por seed',
+                },
+            });
+            console.log(`  -> PaymentValidatorProfile created (pending approval)`);
         }
 
         console.log(`User ${user.email} seeded with role ${user.role}`);

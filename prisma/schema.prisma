@@ -30,6 +30,7 @@ model User {
   wallet                  Wallet?
   affiliateProfile        AffiliateProfile?
   providerProfile         ProviderProfile?
+  paymentValidatorProfile PaymentValidatorProfile?
   productsAsProvider      Product[]         @relation("ProviderProducts")
   // purchasesAsSeller       Purchase[]        @relation("SellerPurchases")
   // purchasesAsProvider     Purchase[]        @relation("ProviderPurchases")
@@ -41,8 +42,10 @@ model User {
   disputeMessages         DisputeMessage[]
   processedWithdrawals    Withdrawal[]      @relation("ProcessedWithdrawals")
   orders                  Order[]
+  paymentMethodConfig     PaymentMethodConfig?
 
   @@map("users")
+
 }
 
 model ProviderProfile {
@@ -60,6 +63,25 @@ model ProviderProfile {
   
   @@index([status])
   @@map("provider_profiles")
+}
+
+model PaymentValidatorProfile {
+  id              String    @id @default(cuid())
+  userId          String    @unique
+  status          String    @default("pending") // pending, approved, rejected, suspended
+  assignedCountry String?   // ISO country code (PE, MX, BO) - assigned by admin
+  applicationNote String?   @db.Text // Notes from validator
+  rejectionReason String?   @db.Text // Reason for rejection
+  approvedBy      String?   // Admin user ID who approved
+  approvedAt      DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([status])
+  @@index([assignedCountry])
+  @@map("payment_validator_profiles")
 }
 
 model Wallet {
@@ -450,4 +472,48 @@ model DisputeMessage {
   @@index([disputeId])
   @@index([createdAt])
   @@map("dispute_messages")
+}
+
+// ============================================
+// PAYMENT METHOD CONFIG (Per-Country Payment Settings)
+// Dynamic payment methods stored as JSON array
+// ============================================
+
+model PaymentMethodConfig {
+  id          String   @id @default(cuid())
+  countryCode String   @unique // PE, BO, MX, etc. - 1 config per country
+  validatorId String   @unique // payment_validator user ID
+  
+  // Dynamic array of payment methods as JSON
+  // Structure: [{ id, name, type, color, enabled, phone?, qrImage?, walletAddress?, bankName?, accountNumber?, cci?, holderName?, instructions? }]
+  methods     Json     @default("[]")
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  validator User @relation(fields: [validatorId], references: [id])
+
+  @@map("payment_method_configs")
+}
+
+// ============================================
+// AUDIT LOG (Security)
+// ============================================
+
+model AuditLog {
+  id           String   @id @default(cuid())
+  userId       String
+  action       String   // VIEW_CREDENTIALS, DECRYPT_ATTEMPT, DECRYPT_FAILED
+  resourceType String   // PURCHASE_CREDENTIALS, etc.
+  resourceId   String   // The ID of the resource being accessed
+  ipAddress    String?
+  userAgent    String?
+  metadata     String?  // JSON string for additional data
+  createdAt    DateTime @default(now())
+
+  @@index([userId])
+  @@index([resourceType, resourceId])
+  @@index([createdAt])
+  @@map("audit_logs")
 }

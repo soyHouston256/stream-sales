@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/infrastructure/database/prisma';
 import { verifyJWT } from '@/infrastructure/auth/jwt';
+import { encrypt } from '@/infrastructure/security/encryption';
 
 export const dynamic = 'force-dynamic';
 
@@ -163,6 +164,7 @@ const createProductSchema = z.object({
   name: z.string().min(1),
   description: z.string().optional(),
   price: z.string().or(z.number()), // Base price
+  durationDays: z.number().optional().default(0), // Duration in days (0 = lifetime)
   imageUrl: z.string().optional(),
   category: z.string(),
 
@@ -229,25 +231,32 @@ export async function POST(request: NextRequest) {
         },
       });
 
-      // 2. Create Default Variant (for now, 1 variant per product based on wizard)
-      // In a full implementation, we'd loop through variants.
+      // 2. Create Default Variant with duration
       await tx.productVariant.create({
         data: {
           productId: newProduct.id,
-          name: 'Standard', // Default name
+          name: 'Standard',
           price: Number(data.price),
-          isRenewable: true, // Default
+          durationDays: data.durationDays ?? 0, // Use provided duration or default to lifetime (0)
+          isRenewable: true,
         },
       });
 
       // 3. Create Inventory based on Category
-      if (data.category === 'streaming' || data.category === 'ai') {
+      // Streaming categories that need accounts/profiles
+      const streamingCategories = ['netflix', 'spotify', 'hbo', 'disney', 'prime', 'youtube', 'streaming', 'ai', 'other'];
+      const isStreamingProduct = streamingCategories.includes(data.category.toLowerCase());
+
+      if (isStreamingProduct) {
         if (data.email && data.password) {
+          // Store credentials directly - NO encryption here
+          // We use plain text since this API route stores directly to inventoryAccount
+          // The credentials will be encrypted when displayed via safeDecrypt
           const account = await tx.inventoryAccount.create({
             data: {
               productId: newProduct.id,
-              email: data.email!,
-              passwordHash: data.password!, // Should hash this
+              email: data.email,
+              passwordHash: data.password,
               platformType: data.platformType || 'unknown',
               totalSlots: data.accountType === 'full' ? 1 : (data.profiles?.length || 1),
               availableSlots: data.accountType === 'full' ? 1 : (data.profiles?.length || 1),
@@ -259,7 +268,7 @@ export async function POST(request: NextRequest) {
               data: data.profiles.map(p => ({
                 accountId: account.id,
                 profileName: p.name,
-                pinCode: p.pin,
+                pinCode: p.pin ? encrypt(p.pin) : null, // Encrypt PIN if present
                 status: 'available',
               })),
             });

@@ -13,11 +13,15 @@ export type EffectivePurchaseStatus =
 export type RechargeStatus = 'pending' | 'completed' | 'failed' | 'cancelled';
 
 export type PaymentMethod =
+  | 'yape'
+  | 'plin'
+  | 'binance'
+  | 'bank_transfer'
   | 'credit_card'
   | 'paypal'
-  | 'bank_transfer'
   | 'crypto'
   | 'mock';
+
 
 export type WalletTransactionType = 'credit' | 'debit' | 'transfer';
 
@@ -32,6 +36,9 @@ export interface MarketplaceProduct {
   durationDays?: number;
   imageUrl?: string;
   status: 'available'; // Solo available en marketplace
+  accountType?: 'full' | 'profile'; // Tipo de cuenta
+  totalSlots?: number; // Total de perfiles
+  availableSlots?: number; // Perfiles disponibles
   createdAt: string;
 }
 

@@ -83,11 +83,11 @@ export function StepBasicInfo({ data, onChange }: StepBasicInfoProps) {
                             <SelectValue placeholder="Select duration" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="0">{t('provider.products.durations.lifetime')}</SelectItem>
-                            <SelectItem value="30">{t('provider.products.durations.1month')}</SelectItem>
-                            <SelectItem value="90">{t('provider.products.durations.3months')}</SelectItem>
-                            <SelectItem value="180">{t('provider.products.durations.6months')}</SelectItem>
-                            <SelectItem value="365">{t('provider.products.durations.1year')}</SelectItem>
+                            <SelectItem value="0">{t('provider.products.durations.lifetime') || 'De por vida'}</SelectItem>
+                            <SelectItem value="30">{t('provider.products.durations.1month') || '1 Mes'}</SelectItem>
+                            <SelectItem value="90">{t('provider.products.durations.3months') || '3 Meses'}</SelectItem>
+                            <SelectItem value="180">{t('provider.products.durations.6months') || '6 Meses'}</SelectItem>
+                            <SelectItem value="365">{t('provider.products.durations.1year') || '1 Año'}</SelectItem>
                         </SelectContent>
                     </Select>
                 </div>

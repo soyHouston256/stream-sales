@@ -40,6 +40,13 @@ export const getAdminNavItems = (t: (key: string) => string): NavItem[] => [
     matchSubPaths: true,
   },
   {
+    title: 'Validadores de Pago',
+    href: '/dashboard/admin/payment-validators',
+    icon: DollarSign,
+    description: 'Gestionar validadores de pago',
+    matchSubPaths: true,
+  },
+  {
     title: t('navigation.recharges'),
     href: '/dashboard/admin/recharges',
     icon: Wallet,

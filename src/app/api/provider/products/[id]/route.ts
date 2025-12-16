@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/infrastructure/database/prisma';
 import { verifyJWT } from '@/infrastructure/auth/jwt';
+import { encrypt } from '@/infrastructure/security/encryption';
 
 export const dynamic = 'force-dynamic';
 
@@ -93,7 +94,7 @@ export async function GET(
     if (account) {
       accountDetails = {
         platformType: account.platformType,
-        accountType: account.totalSlots > 1 ? 'full' : 'profile', // Infer type
+        accountType: account.totalSlots > 1 ? 'profile' : 'full', // >1 slots = profile, 1 slot = full
         profiles: account.slots.map(s => ({ name: s.profileName, pin: s.pinCode })),
       };
     } else if (license) {
@@ -287,19 +288,47 @@ export async function PUT(
 
     // Update Inventory Account
     if (accountId && (data.accountEmail || data.accountPassword || data.accountDetails)) {
+      // Update basic account info - store as plain text (no encryption)
       await prisma.inventoryAccount.update({
         where: { id: accountId },
         data: {
           ...(data.accountEmail && { email: data.accountEmail }),
           ...(data.accountPassword && { passwordHash: data.accountPassword }),
-          // Update slots if profiles provided
-          ...(data.accountDetails?.profiles && {
-            // This is complex, for now let's assume we don't update slots via this simple endpoint
-            // or we would need to delete/re-create slots.
-            // Leaving as TODO or simple implementation if needed.
-          }),
         },
       });
+
+      // Update slots if profiles provided
+      if (data.accountDetails?.profiles && Array.isArray(data.accountDetails.profiles)) {
+        const profiles = data.accountDetails.profiles;
+
+        // Delete all existing slots for this account
+        await prisma.inventorySlot.deleteMany({
+          where: { accountId: accountId },
+        });
+
+        // Create new slots from the profiles data - encrypt PINs
+        if (profiles.length > 0) {
+          await prisma.inventorySlot.createMany({
+            data: profiles.map((p: { name: string; pin?: string }) => ({
+              accountId: accountId,
+              profileName: p.name,
+              pinCode: p.pin ? encrypt(p.pin) : null, // Encrypt PIN
+              status: 'available',
+            })),
+          });
+        }
+
+        // Update totalSlots and availableSlots on the account
+        await prisma.inventoryAccount.update({
+          where: { id: accountId },
+          data: {
+            totalSlots: profiles.length,
+            availableSlots: profiles.length,
+          },
+        });
+
+        console.log(`[UpdateProduct] Updated ${profiles.length} slots for account ${accountId}`);
+      }
     }
 
     // Update License

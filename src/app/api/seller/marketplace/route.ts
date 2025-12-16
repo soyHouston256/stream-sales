@@ -139,23 +139,41 @@ export async function GET(request: NextRequest) {
           orderBy: { price: 'asc' },
           take: 1,
         },
+        inventoryAccounts: {
+          select: {
+            id: true,
+            totalSlots: true,
+            availableSlots: true,
+          },
+        },
       },
     });
 
     // 7. Transform to response format
-    const data = products.map((product: any) => ({
-      id: product.id,
-      providerId: product.providerId,
-      providerName: product.provider.name || product.provider.email,
-      category: product.category,
-      name: product.name,
-      description: product.description || '',
-      price: product.variants[0]?.price.toString() || '0',
-      durationDays: product.variants[0]?.durationDays ?? 0,
-      imageUrl: product.imageUrl,
-      status: product.isActive ? 'available' : 'unavailable',
-      createdAt: product.createdAt.toISOString(),
-    }));
+    const data = products.map((product: any) => {
+      const account = product.inventoryAccounts[0];
+      const totalSlots = account?.totalSlots || 1;
+      const availableSlots = account?.availableSlots || 0;
+      // Determine account type: 'full' if totalSlots is 1, 'profile' if more than 1
+      const accountType = totalSlots > 1 ? 'profile' : 'full';
+
+      return {
+        id: product.id,
+        providerId: product.providerId,
+        providerName: product.provider.name || product.provider.email,
+        category: product.category,
+        name: product.name,
+        description: product.description || '',
+        price: product.variants[0]?.price.toString() || '0',
+        durationDays: product.variants[0]?.durationDays ?? 0,
+        imageUrl: product.imageUrl,
+        status: product.isActive ? 'available' : 'unavailable',
+        accountType, // 'full' or 'profile'
+        totalSlots,
+        availableSlots,
+        createdAt: product.createdAt.toISOString(),
+      };
+    });
 
     // 8. Return paginated response
     return NextResponse.json({
