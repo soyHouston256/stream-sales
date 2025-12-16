@@ -497,3 +497,23 @@ model PaymentMethodConfig {
   @@map("payment_method_configs")
 }
 
+// ============================================
+// AUDIT LOG (Security)
+// ============================================
+
+model AuditLog {
+  id           String   @id @default(cuid())
+  userId       String
+  action       String   // VIEW_CREDENTIALS, DECRYPT_ATTEMPT, DECRYPT_FAILED
+  resourceType String   // PURCHASE_CREDENTIALS, etc.
+  resourceId   String   // The ID of the resource being accessed
+  ipAddress    String?
+  userAgent    String?
+  metadata     String?  // JSON string for additional data
+  createdAt    DateTime @default(now())
+
+  @@index([userId])
+  @@index([resourceType, resourceId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}

@@ -36,6 +36,9 @@ export interface MarketplaceProduct {
   durationDays?: number;
   imageUrl?: string;
   status: 'available'; // Solo available en marketplace
+  accountType?: 'full' | 'profile'; // Tipo de cuenta
+  totalSlots?: number; // Total de perfiles
+  availableSlots?: number; // Perfiles disponibles
   createdAt: string;
 }
 

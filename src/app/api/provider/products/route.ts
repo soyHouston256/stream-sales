@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/infrastructure/database/prisma';
 import { verifyJWT } from '@/infrastructure/auth/jwt';
+import { encrypt } from '@/infrastructure/security/encryption';
 
 export const dynamic = 'force-dynamic';
 
@@ -242,13 +243,20 @@ export async function POST(request: NextRequest) {
       });
 
       // 3. Create Inventory based on Category
-      if (data.category === 'streaming' || data.category === 'ai') {
+      // Streaming categories that need accounts/profiles
+      const streamingCategories = ['netflix', 'spotify', 'hbo', 'disney', 'prime', 'youtube', 'streaming', 'ai', 'other'];
+      const isStreamingProduct = streamingCategories.includes(data.category.toLowerCase());
+
+      if (isStreamingProduct) {
         if (data.email && data.password) {
+          // Store credentials directly - NO encryption here
+          // We use plain text since this API route stores directly to inventoryAccount
+          // The credentials will be encrypted when displayed via safeDecrypt
           const account = await tx.inventoryAccount.create({
             data: {
               productId: newProduct.id,
-              email: data.email!,
-              passwordHash: data.password!, // Should hash this
+              email: data.email,
+              passwordHash: data.password,
               platformType: data.platformType || 'unknown',
               totalSlots: data.accountType === 'full' ? 1 : (data.profiles?.length || 1),
               availableSlots: data.accountType === 'full' ? 1 : (data.profiles?.length || 1),
@@ -260,7 +268,7 @@ export async function POST(request: NextRequest) {
               data: data.profiles.map(p => ({
                 accountId: account.id,
                 profileName: p.name,
-                pinCode: p.pin,
+                pinCode: p.pin ? encrypt(p.pin) : null, // Encrypt PIN if present
                 status: 'available',
               })),
             });

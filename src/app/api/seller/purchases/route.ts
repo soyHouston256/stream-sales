@@ -9,6 +9,7 @@ import { PrismaCommissionConfigRepository } from '@/infrastructure/repositories/
 import { PurchaseProductUseCase } from '@/application/use-cases/PurchaseProductUseCase';
 import { verifyJWT } from '@/infrastructure/auth/jwt';
 import { computeEffectiveFields } from '@/lib/utils/purchase-helpers';
+import { safeDecrypt } from '@/infrastructure/security/encryption';
 
 export const dynamic = 'force-dynamic';
 
@@ -175,6 +176,13 @@ export async function GET(request: NextRequest) {
                     email: true,
                   },
                 },
+                inventoryAccounts: {
+                  take: 1,
+                  select: {
+                    email: true,
+                    passwordHash: true,
+                  },
+                },
               },
             },
           },
@@ -216,15 +224,26 @@ export async function GET(request: NextRequest) {
           category: item.variant.product.category,
           name: item.variant.product.name,
           description: item.variant.product.description || '',
-          // Only show credentials if purchase is completed
-          accountEmail:
-            effectiveStatus === 'completed' || effectiveStatus === 'disputed'
-              ? item.variant.product.accountEmail || '***' // Schema might not have accountEmail on Product anymore? Check schema.
-              : '***',
-          accountPassword:
-            effectiveStatus === 'completed' || effectiveStatus === 'disputed'
-              ? item.variant.product.accountPassword || '***'
-              : '***',
+          // Get credentials from inventoryAccounts and decrypt
+          // Note: Order status uses 'paid' while legacy Purchase used 'completed'
+          accountEmail: (() => {
+            const isCompleted = effectiveStatus === 'completed' || effectiveStatus === 'paid' || effectiveStatus === 'disputed';
+            if (!isCompleted) {
+              return '***';
+            }
+            const account = item.variant.product.inventoryAccounts?.[0];
+            if (!account?.email) return '***';
+            return safeDecrypt(account.email);
+          })(),
+          accountPassword: (() => {
+            const isCompleted = effectiveStatus === 'completed' || effectiveStatus === 'paid' || effectiveStatus === 'disputed';
+            if (!isCompleted) {
+              return '***';
+            }
+            const account = item.variant.product.inventoryAccounts?.[0];
+            if (!account?.passwordHash) return '***';
+            return safeDecrypt(account.passwordHash);
+          })(),
           accountDetails: {},
         },
         provider: {
@@ -392,7 +411,67 @@ export async function POST(request: NextRequest) {
       productId,
     });
 
-    // 5. Return purchase result
+    // 5. Update Inventory - Decrement available slots
+    // Find the InventoryAccount for this product and update slots
+    const inventoryAccount = await prisma.inventoryAccount.findFirst({
+      where: { productId },
+      include: {
+        slots: {
+          where: { status: 'available' },
+          take: 1,
+        },
+      },
+    });
+
+    if (inventoryAccount) {
+      // If there are available slots, mark one as sold
+      if (inventoryAccount.slots.length > 0) {
+        const slotToSell = inventoryAccount.slots[0];
+
+        await prisma.$transaction([
+          // Mark slot as sold
+          prisma.inventorySlot.update({
+            where: { id: slotToSell.id },
+            data: { status: 'sold' },
+          }),
+          // Decrement available slots count
+          prisma.inventoryAccount.update({
+            where: { id: inventoryAccount.id },
+            data: {
+              availableSlots: {
+                decrement: 1,
+              },
+            },
+          }),
+        ]);
+
+        console.log(`[Purchase] Slot ${slotToSell.id} marked as sold. Remaining: ${inventoryAccount.availableSlots - 1}`);
+
+        // If no more slots available, deactivate the product
+        if (inventoryAccount.availableSlots - 1 <= 0) {
+          await prisma.product.update({
+            where: { id: productId },
+            data: { isActive: false },
+          });
+          console.log(`[Purchase] Product ${productId} deactivated - no more slots available`);
+        }
+      } else if (inventoryAccount.totalSlots === 1) {
+        // Full account - just decrement and deactivate
+        await prisma.$transaction([
+          prisma.inventoryAccount.update({
+            where: { id: inventoryAccount.id },
+            data: { availableSlots: 0 },
+          }),
+          prisma.product.update({
+            where: { id: productId },
+            data: { isActive: false },
+          }),
+        ]);
+        console.log(`[Purchase] Full account sold. Product ${productId} deactivated.`);
+      }
+    }
+
+    // 6. Return purchase result
     return NextResponse.json(result, { status: 201 });
   } catch (error: any) {
     console.error('Error creating purchase:', error);

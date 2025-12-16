@@ -98,22 +98,40 @@ export async function GET(request: NextRequest) {
           take: 1,
           orderBy: { price: 'asc' },
         },
+        inventoryAccounts: {
+          select: {
+            id: true,
+            totalSlots: true,
+            availableSlots: true,
+          },
+        },
       },
     });
 
     // 5. Transform to response format (hide sensitive data)
-    const data = products.map((product: any) => ({
-      id: product.id,
-      providerId: product.providerId,
-      providerName: product.provider.name || product.provider.email.split('@')[0],
-      category: product.category,
-      name: product.name,
-      description: product.description,
-      price: product.variants[0]?.price.toString() || '0.00',
-      durationDays: product.variants[0]?.durationDays ?? 0,
-      imageUrl: product.imageUrl,
-      createdAt: product.createdAt.toISOString(),
-    }));
+    const data = products.map((product: any) => {
+      const account = product.inventoryAccounts[0];
+      const totalSlots = account?.totalSlots || 1;
+      const availableSlots = account?.availableSlots || 0;
+      // 'profile' if multiple slots, 'full' if single slot
+      const accountType = totalSlots > 1 ? 'profile' : 'full';
+
+      return {
+        id: product.id,
+        providerId: product.providerId,
+        providerName: product.provider.name || product.provider.email.split('@')[0],
+        category: product.category,
+        name: product.name,
+        description: product.description,
+        price: product.variants[0]?.price.toString() || '0.00',
+        durationDays: product.variants[0]?.durationDays ?? 0,
+        imageUrl: product.imageUrl,
+        accountType,
+        totalSlots,
+        availableSlots,
+        createdAt: product.createdAt.toISOString(),
+      };
+    });
 
     // 6. Return paginated response
     return NextResponse.json({
