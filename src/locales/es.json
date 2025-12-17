@@ -1043,6 +1043,8 @@
       "accountCredentials": "Credenciales de la Cuenta",
       "email": "Correo",
       "password": "Contraseña",
+      "profile": "Perfil Asignado",
+      "pin": "PIN",
       "additionalDetails": "Detalles Adicionales",
       "productInfo": "Información del Producto",
       "description": "Descripción",

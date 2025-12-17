@@ -113,14 +113,17 @@ export class PurchaseProductUseCase {
       );
     }
 
-    // Validar que el producto no haya sido vendido ya
-    const existingPurchase = await this.purchaseRepository.findByProductId(
-      data.productId
-    );
+    // NOTE: For profile-based products, multiple purchases are allowed
+    // as long as there are available slots. Availability is validated
+    // by the API route checking inventoryAccount.availableSlots.
+    // The old validation below is commented out to support multi-slot products.
 
-    if (existingPurchase) {
-      throw new Error('Product already sold');
-    }
+    // const existingPurchase = await this.purchaseRepository.findByProductId(
+    //   data.productId
+    // );
+    // if (existingPurchase) {
+    //   throw new Error('Product already sold');
+    // }
 
     // ============================================
     // 2. VALIDAR WALLETS

@@ -1044,6 +1044,8 @@
       "accountCredentials": "Account Credentials",
       "email": "Email",
       "password": "Password",
+      "profile": "Assigned Profile",
+      "pin": "PIN",
       "additionalDetails": "Additional Details",
       "productInfo": "Product Information",
       "description": "Description",

@@ -165,6 +165,14 @@ export async function GET(request: NextRequest) {
             },
           },
         },
+        // Include assigned slot to get profile name and PIN
+        assignedSlot: {
+          select: {
+            id: true,
+            profileName: true,
+            pinCode: true,
+          },
+        },
         variant: {
           include: {
             product: {
@@ -244,7 +252,11 @@ export async function GET(request: NextRequest) {
             if (!account?.passwordHash) return '***';
             return safeDecrypt(account.passwordHash);
           })(),
-          accountDetails: {},
+          // Include assigned slot details (profile name and PIN)
+          accountDetails: item.assignedSlot ? {
+            profileName: item.assignedSlot.profileName || null,
+            pin: item.assignedSlot.pinCode ? safeDecrypt(item.assignedSlot.pinCode) : null,
+          } : {},
         },
         provider: {
           id: item.variant.product.provider.id,
@@ -391,7 +403,21 @@ export async function POST(request: NextRequest) {
 
     const { productId } = validationResult.data;
 
-    // 4. Execute purchase use case
+    // 4. Check slot availability BEFORE processing payment
+    const inventoryCheck = await prisma.inventoryAccount.findFirst({
+      where: { productId },
+      select: { availableSlots: true, totalSlots: true },
+    });
+
+    // For profile-based products, verify slots are available
+    if (inventoryCheck && inventoryCheck.totalSlots > 1 && inventoryCheck.availableSlots <= 0) {
+      return NextResponse.json(
+        { error: 'No slots available for this product' },
+        { status: 409 }
+      );
+    }
+
+    // 5. Execute purchase use case
     const walletRepository = new PrismaWalletRepository(prisma);
     const productRepository = new PrismaProductRepository(prisma);
     const purchaseRepository = new PrismaPurchaseRepository(prisma);

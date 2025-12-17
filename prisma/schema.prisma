@@ -257,6 +257,8 @@ model InventorySlot {
   orderItem OrderItem? // The slot is assigned to an order item
 
   @@index([accountId])
+  @@index([status])
+  @@index([accountId, status])
   @@map("inventory_slots")
 }
 
@@ -310,6 +312,9 @@ model Order {
   dispute     Dispute?
 
   @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+  @@index([userId, status])
   @@map("orders")
 }
 
@@ -331,6 +336,7 @@ model OrderItem {
   assignedContent DigitalContent?   @relation(fields: [assignedContentId], references: [id])
 
   @@index([orderId])
+  @@index([productVariantId])
   @@map("order_items")
 }
 
