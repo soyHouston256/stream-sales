@@ -100,11 +100,17 @@ export function RechargeDialog({ currentBalance, trigger, role = 'seller' }: Rec
     queryFn: async () => {
       if (!user?.countryCode) return null;
       const token = tokenManager.getToken();
-      const res = await fetch(`/api/exchange-rate/${user.countryCode}`, {
+      const encodedCountry = encodeURIComponent(user.countryCode);
+      console.log('[RechargeDialog] Fetching exchange rate for:', user.countryCode, 'encoded:', encodedCountry);
+      const res = await fetch(`/api/exchange-rate/${encodedCountry}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (!res.ok) return null;
+      if (!res.ok) {
+        console.log('[RechargeDialog] Exchange rate fetch failed:', res.status);
+        return null;
+      }
       const data = await res.json();
+      console.log('[RechargeDialog] Exchange rate data:', data);
       return data.data as {
         countryCode: string;
         currencyCode: string;

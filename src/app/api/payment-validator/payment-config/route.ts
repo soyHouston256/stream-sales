@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/infrastructure/database/prisma';
 import { verifyJWT } from '@/infrastructure/auth/jwt';
+import { normalizeCountryCode } from '@/lib/utils/countryCode';
 
 export const dynamic = 'force-dynamic';
 
@@ -154,6 +155,15 @@ export async function PUT(request: NextRequest) {
             );
         }
 
+        // Normalize country code to ISO format
+        const countryCode = normalizeCountryCode(profile.assignedCountry);
+        if (!countryCode) {
+            return NextResponse.json(
+                { error: `Invalid country code: ${profile.assignedCountry}` },
+                { status: 400 }
+            );
+        }
+
         // Parse and validate body
         const body = await request.json();
         const validation = updateConfigSchema.safeParse(body);
@@ -166,17 +176,17 @@ export async function PUT(request: NextRequest) {
 
         const { methods } = validation.data;
 
-        // Upsert config using assigned country from profile
+        // Upsert config using normalized country code
         const config = await prisma.paymentMethodConfig.upsert({
             where: { validatorId: user.id },
             update: {
                 methods: methods as unknown as any,
-                countryCode: profile.assignedCountry, // Always use admin-assigned country
+                countryCode: countryCode, // Use normalized ISO country code
                 updatedAt: new Date(),
             },
             create: {
                 validatorId: user.id,
-                countryCode: profile.assignedCountry,
+                countryCode: countryCode, // Use normalized ISO country code
                 methods: methods as unknown as any,
             },
         });

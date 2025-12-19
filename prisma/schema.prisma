@@ -43,6 +43,11 @@ model User {
   processedWithdrawals    Withdrawal[]      @relation("ProcessedWithdrawals")
   orders                  Order[]
   paymentMethodConfig     PaymentMethodConfig?
+  
+  // Validator fund management
+  validatorFunds            ValidatorFundEntry[]       @relation("ValidatorFunds")
+  validatorTransfers        ValidatorAdminTransfer[]   @relation("ValidatorTransfers")
+  adminProcessedTransfers   ValidatorAdminTransfer[]   @relation("AdminProcessedTransfers")
 
   @@map("users")
 
@@ -145,7 +150,8 @@ model Recharge {
   completedAt           DateTime?
 
   // Relations
-  wallet Wallet @relation(fields: [walletId], references: [id])
+  wallet             Wallet              @relation(fields: [walletId], references: [id])
+  validatorFundEntry ValidatorFundEntry?
 
   @@index([walletId])
   @@index([status])
@@ -542,4 +548,94 @@ model ExchangeRate {
   @@index([countryCode])
   @@index([isActive])
   @@map("exchange_rates")
+}
+
+// ============================================
+// VALIDATOR FUND MANAGEMENT
+// ============================================
+
+model ValidatorFundEntry {
+  id          String    @id @default(cuid())
+  validatorId String    // payment_validator user ID
+  rechargeId  String    @unique // linked to the approved recharge
+  amount      Decimal   @db.Decimal(19, 4)
+  status      String    @default("pending") // pending, transferred
+  transferId  String?   // FK to ValidatorAdminTransfer when included
+  createdAt   DateTime  @default(now())
+
+  // Relations
+  validator User                    @relation("ValidatorFunds", fields: [validatorId], references: [id])
+  recharge  Recharge                @relation(fields: [rechargeId], references: [id])
+  transfer  ValidatorAdminTransfer? @relation(fields: [transferId], references: [id])
+
+  @@index([validatorId])
+  @@index([status])
+  @@index([transferId])
+  @@map("validator_fund_entries")
+}
+
+model ValidatorAdminTransfer {
+  id               String    @id @default(cuid())
+  validatorId      String    // payment_validator user ID
+  totalAmount      Decimal   @db.Decimal(19, 4) // sum of fund entries
+  commissionAmount Decimal   @db.Decimal(19, 4) // validator keeps this
+  transferAmount   Decimal   @db.Decimal(19, 4) // sent to admin (total - commission)
+
+  // Payment proof (same as seller recharge)
+  paymentMethod  String    // yape, plin, binance, bank_transfer
+  holderName     String?   // name of the sender
+  paymentTime    String?   // time of payment
+  voucherUrl     String?   // uploaded voucher image
+  paymentDetails String?   @db.Text // additional notes
+
+  status          String    @default("pending") // pending, approved, rejected
+  rejectionReason String?   @db.Text
+  processedBy     String?   // admin user ID
+  processedAt     DateTime?
+
+  createdAt   DateTime  @default(now())
+  completedAt DateTime?
+
+  // Relations
+  validator       User                 @relation("ValidatorTransfers", fields: [validatorId], references: [id])
+  processedByUser User?                @relation("AdminProcessedTransfers", fields: [processedBy], references: [id])
+  fundEntries     ValidatorFundEntry[]
+
+  @@index([validatorId])
+  @@index([status])
+  @@index([processedBy])
+  @@map("validator_admin_transfers")
+}
+
+// ============================================
+// ADMIN PAYMENT METHODS (for receiving from validators)
+// ============================================
+
+model AdminPaymentMethod {
+  id        String   @id @default(cuid())
+  name      String   // e.g., "Yape Principal", "BCP Cuenta"
+  type      String   // mobile, bank, crypto
+  enabled   Boolean  @default(true)
+  color     String   @default("#3B82F6") // for UI display
+  
+  // For mobile wallets (Yape, Plin)
+  phone     String?
+  qrImage   String?  // URL to QR code image
+  
+  // For bank transfers
+  bankName       String?
+  accountNumber  String?
+  cci            String?  // CCI/CLABE
+  holderName     String?
+  
+  // For crypto
+  walletAddress String?
+  network       String?  // e.g., "TRC20", "BEP20"
+  
+  instructions String?  @db.Text // Special instructions
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("admin_payment_methods")
 }

@@ -8,6 +8,7 @@ import {
   UserCheck,
   Cog,
   Briefcase,
+  Send,
 } from 'lucide-react';
 import type { NavItem } from '../Sidebar';
 
@@ -40,10 +41,17 @@ export const getAdminNavItems = (t: (key: string) => string): NavItem[] => [
     matchSubPaths: true,
   },
   {
-    title: 'Validadores de Pago',
+    title: t('admin.navigation.paymentValidators'),
     href: '/dashboard/admin/payment-validators',
     icon: DollarSign,
-    description: 'Gestionar validadores de pago',
+    description: t('admin.navigation.paymentValidatorsDesc'),
+    matchSubPaths: true,
+  },
+  {
+    title: t('admin.navigation.validatorTransfers'),
+    href: '/dashboard/admin/validator-transfers',
+    icon: Send,
+    description: t('admin.navigation.validatorTransfersDesc'),
     matchSubPaths: true,
   },
   {

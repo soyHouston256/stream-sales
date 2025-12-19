@@ -12,6 +12,7 @@ import { Settings, Loader2, CheckCircle, AlertTriangle, Copy, Link2, ShieldCheck
 import { useToast } from '@/hooks/use-toast';
 import { tokenManager } from '@/lib/utils/tokenManager';
 import { ExchangeRateConfig } from '@/components/admin/ExchangeRateConfig';
+import { AdminPaymentMethodsConfig } from '@/components/admin/AdminPaymentMethodsConfig';
 
 export default function AdminSettingsPage() {
   const [approvalFee, setApprovalFee] = useState<string>('');
@@ -351,6 +352,9 @@ export default function AdminSettingsPage() {
 
       {/* Exchange Rate Configuration */}
       <ExchangeRateConfig />
+
+      {/* Admin Payment Methods Configuration */}
+      <AdminPaymentMethodsConfig />
 
       {/* Additional Settings (Future) */}
       <Card>

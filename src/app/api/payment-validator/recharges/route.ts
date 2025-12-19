@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/infrastructure/database/prisma';
 import { verifyPaymentValidator } from '@/infrastructure/auth/roleAuth';
+import { normalizeCountryCode, isoToPhoneMap } from '@/lib/utils/countryCode';
 
 export const dynamic = 'force-dynamic';
 
 /**
  * GET /api/payment-validator/recharges
  *
- * List all wallet recharges pending validation.
+ * List wallet recharges pending validation for the validator's assigned country.
  * Requires authentication and payment_validator or admin role.
  *
  * Query params:
@@ -51,7 +52,32 @@ export async function GET(request: NextRequest) {
       return auth.error;
     }
 
-    // 2. Parse query parameters
+    // 2. Get validator's assigned country
+    const validatorProfile = await prisma.paymentValidatorProfile.findUnique({
+      where: { userId: auth.userId },
+      select: { assignedCountry: true, status: true },
+    });
+
+    if (!validatorProfile || validatorProfile.status !== 'approved') {
+      return NextResponse.json(
+        { error: 'Validator profile not approved' },
+        { status: 403 }
+      );
+    }
+
+    const assignedCountry = validatorProfile.assignedCountry;
+    if (!assignedCountry) {
+      return NextResponse.json(
+        { error: 'No country assigned to this validator' },
+        { status: 400 }
+      );
+    }
+
+    // Normalize to ISO format and also get phone format for matching
+    const isoCountry = normalizeCountryCode(assignedCountry) || assignedCountry;
+    const phoneCountry = isoToPhoneMap[isoCountry] || assignedCountry;
+
+    // 3. Parse query parameters
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get('page') || '1', 10);
     const limit = Math.min(parseInt(searchParams.get('limit') || '10', 10), 50);
@@ -59,13 +85,21 @@ export async function GET(request: NextRequest) {
     const sortBy = searchParams.get('sortBy') || 'createdAt';
     const sortOrder = searchParams.get('sortOrder') || 'desc';
 
-    // 3. Build where clause
-    const where: any = {};
+    // 4. Build where clause - filter by user's country
+    const where: any = {
+      wallet: {
+        user: {
+          countryCode: {
+            in: [isoCountry, phoneCountry], // Match both ISO (CO) and phone (+57) formats
+          },
+        },
+      },
+    };
     if (status && status !== 'all') {
       where.status = status;
     }
 
-    // 4. Build order by clause
+    // 5. Build order by clause
     let orderBy: any = {};
     if (sortBy === 'amount') {
       orderBy.amount = sortOrder;
@@ -73,10 +107,10 @@ export async function GET(request: NextRequest) {
       orderBy.createdAt = sortOrder;
     }
 
-    // 5. Get total count
+    // 6. Get total count
     const total = await prisma.recharge.count({ where });
 
-    // 6. Get recharges with wallet and user data
+    // 7. Get recharges with wallet and user data
     const recharges = await prisma.recharge.findMany({
       where,
       skip: (page - 1) * limit,
@@ -91,6 +125,7 @@ export async function GET(request: NextRequest) {
                 name: true,
                 email: true,
                 role: true,
+                countryCode: true,
               },
             },
           },
