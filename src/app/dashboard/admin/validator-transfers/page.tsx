@@ -19,12 +19,29 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { format } from 'date-fns';
 import { es, enUS } from 'date-fns/locale';
 
+// Map country codes to full names
+const COUNTRY_NAMES: Record<string, string> = {
+    'PE': 'Perú',
+    'CO': 'Colombia',
+    'MX': 'México',
+    'AR': 'Argentina',
+    'CL': 'Chile',
+    'BO': 'Bolivia',
+    'EC': 'Ecuador',
+    'VE': 'Venezuela',
+    'BR': 'Brasil',
+    'UY': 'Uruguay',
+    'PY': 'Paraguay',
+    'US': 'Estados Unidos',
+};
+
 interface Transfer {
     id: string;
     validator: {
         id: string;
         name: string | null;
         email: string;
+        country: string | null;
     };
     totalAmount: string;
     commissionAmount: string;
@@ -364,10 +381,15 @@ export default function AdminValidatorTransfersPage() {
                             {/* Validator Info */}
                             <div className="bg-muted/50 p-4 rounded-lg flex items-center gap-3">
                                 <User className="w-8 h-8 text-muted-foreground" />
-                                <div>
+                                <div className="flex-1">
                                     <div className="font-medium">{selectedTransfer.validator.name || 'N/A'}</div>
                                     <div className="text-sm text-muted-foreground">{selectedTransfer.validator.email}</div>
                                 </div>
+                                {selectedTransfer.validator.country && (
+                                    <Badge variant="outline" className="text-sm">
+                                        🌍 {COUNTRY_NAMES[selectedTransfer.validator.country] || selectedTransfer.validator.country}
+                                    </Badge>
+                                )}
                             </div>
 
                             {/* Amount Summary */}

@@ -78,6 +78,11 @@ export async function GET(request: NextRequest) {
                             id: true,
                             name: true,
                             email: true,
+                            paymentValidatorProfile: {
+                                select: {
+                                    assignedCountry: true,
+                                },
+                            },
                         },
                     },
                     processedByUser: {
@@ -108,9 +113,14 @@ export async function GET(request: NextRequest) {
         ]);
 
         // 5. Format response
-        const data = transfers.map((transfer) => ({
+        const data = transfers.map((transfer: any) => ({
             id: transfer.id,
-            validator: transfer.validator,
+            validator: {
+                id: transfer.validator.id,
+                name: transfer.validator.name,
+                email: transfer.validator.email,
+                country: transfer.validator.paymentValidatorProfile?.assignedCountry || null,
+            },
             totalAmount: transfer.totalAmount.toString(),
             commissionAmount: transfer.commissionAmount.toString(),
             transferAmount: transfer.transferAmount.toString(),
