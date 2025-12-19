@@ -25,6 +25,7 @@ export default function EarningsPage() {
   const [page, setPage] = useState(1);
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+  const [withdrawalOpen, setWithdrawalOpen] = useState(false);
 
   const { data: balance, isLoading: balanceLoading } = useProviderBalance();
   const { data: transactionsData, isLoading: transactionsLoading } =
@@ -79,9 +80,8 @@ export default function EarningsPage() {
         const isPositive = tx.type === 'earning';
         return (
           <span
-            className={`font-medium ${
-              isPositive ? 'text-green-600' : 'text-red-600'
-            }`}
+            className={`font-medium ${isPositive ? 'text-green-600' : 'text-red-600'
+              }`}
           >
             {isPositive ? '+' : '-'}${tx.amount}
           </span>
@@ -105,7 +105,7 @@ export default function EarningsPage() {
     {
       key: 'createdAt',
       label: t('provider.date'),
-      render: (tx) => format(new Date(tx.createdAt), 'MMM dd, yyyy HH:mm'),
+      render: (tx) => format(new Date(tx.createdAt), 'MMM dd, yyyy hh:mm a'),
     },
   ];
 
@@ -173,7 +173,17 @@ export default function EarningsPage() {
             {t('provider.earnings.subtitle')}
           </p>
         </div>
-        <WithdrawalRequestDialog availableBalance={availableBalance} />
+        <WithdrawalRequestDialog
+          availableBalance={availableBalance}
+          open={withdrawalOpen}
+          onOpenChange={setWithdrawalOpen}
+          trigger={
+            <Button onClick={() => setWithdrawalOpen(true)}>
+              <DollarSign className="h-4 w-4 mr-2" />
+              {t('provider.withdrawal.title')}
+            </Button>
+          }
+        />
       </div>
 
       <div className="grid gap-4 md:grid-cols-4">
@@ -271,10 +281,10 @@ export default function EarningsPage() {
               pagination={
                 transactionsData
                   ? {
-                      currentPage: transactionsData.pagination.page,
-                      totalPages: transactionsData.pagination.totalPages,
-                      onPageChange: setPage,
-                    }
+                    currentPage: transactionsData.pagination.page,
+                    totalPages: transactionsData.pagination.totalPages,
+                    onPageChange: setPage,
+                  }
                   : undefined
               }
               emptyMessage={t('provider.earnings.noTransactions')}

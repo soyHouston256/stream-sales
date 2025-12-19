@@ -140,7 +140,7 @@ export function DisputeTimeline({ dispute, messages = [] }: DisputeTimelineProps
                 <h4 className="font-semibold text-sm">{event.title}</h4>
               </div>
               <span className="text-xs text-muted-foreground">
-                {format(new Date(event.timestamp), 'MMM d, yyyy HH:mm')}
+                {format(new Date(event.timestamp), 'MMM d, yyyy hh:mm a')}
               </span>
             </div>
 

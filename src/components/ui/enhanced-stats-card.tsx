@@ -21,29 +21,31 @@ interface EnhancedStatsCardProps {
 
 const variantStyles = {
   default: {
-    light: 'bg-gradient-to-br from-slate-50 to-slate-100',
-    dark: 'dark:bg-gradient-to-br dark:from-slate-900/50 dark:to-slate-800/50',
-    icon: 'text-slate-600 dark:text-slate-400',
+    iconContainer: 'bg-blue-600 text-white shadow-lg shadow-blue-500/20',
+    // Subtle gradient from dark to slightly tinted dark
+    background: 'bg-gradient-to-r from-[#0f111a] to-[#0f111a] hover:to-[#1e293b] border-blue-500/10',
+    // Large, soft, diffused glow (Ambience)
+    decorativeBlob: 'bg-blue-600/20 blur-[80px]',
   },
   success: {
-    light: 'bg-gradient-to-br from-green-50 to-emerald-100',
-    dark: 'dark:bg-gradient-to-br dark:from-green-950/30 dark:to-emerald-900/30',
-    icon: 'text-green-600 dark:text-green-400',
+    iconContainer: 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20',
+    background: 'bg-gradient-to-r from-[#0f111a] to-[#0f111a] hover:to-[#064e3b]/20 border-emerald-500/10',
+    decorativeBlob: 'bg-emerald-500/20 blur-[80px]',
   },
   warning: {
-    light: 'bg-gradient-to-br from-yellow-50 to-orange-100',
-    dark: 'dark:bg-gradient-to-br dark:from-yellow-950/30 dark:to-orange-900/30',
-    icon: 'text-yellow-600 dark:text-yellow-400',
+    iconContainer: 'bg-orange-500 text-white shadow-lg shadow-orange-500/20',
+    background: 'bg-gradient-to-r from-[#0f111a] to-[#0f111a] hover:to-[#431407]/20 border-orange-500/10',
+    decorativeBlob: 'bg-orange-500/20 blur-[80px]',
   },
   info: {
-    light: 'bg-gradient-to-br from-blue-50 to-cyan-100',
-    dark: 'dark:bg-gradient-to-br dark:from-blue-950/30 dark:to-cyan-900/30',
-    icon: 'text-blue-600 dark:text-blue-400',
+    iconContainer: 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/20',
+    background: 'bg-gradient-to-r from-[#0f111a] to-[#0f111a] hover:to-[#312e81]/20 border-indigo-500/10',
+    decorativeBlob: 'bg-indigo-500/20 blur-[80px]',
   },
   danger: {
-    light: 'bg-gradient-to-br from-red-50 to-rose-100',
-    dark: 'dark:bg-gradient-to-br dark:from-red-950/30 dark:to-rose-900/30',
-    icon: 'text-red-600 dark:text-red-400',
+    iconContainer: 'bg-red-500 text-white shadow-lg shadow-red-500/20',
+    background: 'bg-gradient-to-r from-[#0f111a] to-[#0f111a] hover:to-[#450a0a]/20 border-red-500/10',
+    decorativeBlob: 'bg-red-500/20 blur-[80px]',
   },
 };
 
@@ -59,19 +61,18 @@ export function EnhancedStatsCard({
   chartData,
 }: EnhancedStatsCardProps) {
   // eslint-disable-next-line security/detect-object-injection
-  const styles = variantStyles[variant];
+  const styles = variantStyles[variant] || variantStyles.default;
 
   if (isLoading) {
     return (
-      <Card className="transition-all duration-300 hover:shadow-lg">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <Skeleton className="h-4 w-24" />
-          <Skeleton className="h-4 w-4 rounded" />
-        </CardHeader>
-        <CardContent>
-          <Skeleton className="h-8 w-20 mb-2" />
-          <Skeleton className="h-3 w-32" />
-        </CardContent>
+      <Card className="transition-all duration-300 hover:shadow-lg bg-card/50">
+        <div className="flex items-center justify-between p-6">
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-8 w-16" />
+          </div>
+          <Skeleton className="h-14 w-14 rounded-2xl" />
+        </div>
       </Card>
     );
   }
@@ -79,63 +80,81 @@ export function EnhancedStatsCard({
   return (
     <Card
       className={cn(
-        'transition-all duration-300',
+        'transition-all duration-300 relative overflow-hidden group',
         'hover:shadow-lg hover:-translate-y-1',
-        'border-0 shadow-sm',
-        styles.light,
-        styles.dark
+        'backdrop-blur-sm',
+        styles.background
       )}
     >
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium">{title}</CardTitle>
-        <div className={cn('p-2 rounded-lg bg-white/50 dark:bg-black/20', 'transition-transform duration-200 hover:scale-110')}>
-          <Icon className={cn('h-4 w-4', styles.icon)} />
+      <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none" />
+
+      {/* Decorative Blob/Shadow behind icon - Localized glow */}
+      <div
+        className={cn(
+          "absolute -right-8 -top-8 h-32 w-32 rounded-full blur-[50px] pointer-events-none transition-opacity duration-500",
+          styles.decorativeBlob
+        )}
+      />
+
+      <div className="flex items-start justify-between p-6 relative z-10">
+        <div className="space-y-1 z-10">
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+            {title}
+          </p>
+          <h4 className="text-3xl font-bold tracking-tight mt-1">{value}</h4>
+
+          {description && (
+            <p className="text-xs text-muted-foreground mt-1 font-medium bg-secondary/10 px-2.5 py-1 rounded-full w-fit">
+              {description}
+            </p>
+          )}
+
+          {showTrend && trend && (
+            <div className="flex items-center gap-1.5 mt-2">
+              <span
+                className={cn(
+                  'flex items-center text-xs font-semibold px-2 py-0.5 rounded-full',
+                  trend.direction === 'up'
+                    ? 'text-green-500 bg-green-500/10'
+                    : 'text-red-500 bg-red-500/10'
+                )}
+              >
+                {trend.direction === 'up' ? (
+                  <TrendingUp className="h-3 w-3 mr-1" />
+                ) : (
+                  <TrendingDown className="h-3 w-3 mr-1" />
+                )}
+                {trend.value}
+              </span>
+            </div>
+          )}
         </div>
-      </CardHeader>
-      <CardContent>
-        <div className="text-2xl font-bold">{value}</div>
 
-        {description && (
-          <p className="text-xs text-muted-foreground mt-1">{description}</p>
-        )}
+        <div
+          className={cn(
+            'flex items-center justify-center h-14 w-14 rounded-2xl shadow-lg transition-transform group-hover:scale-110 duration-300',
+            styles.iconContainer
+          )}
+        >
+          <Icon className={cn('h-7 w-7', styles.icon)} />
+        </div>
+      </div>
 
-        {showTrend && trend && (
-          <div className="flex items-center gap-1 mt-2">
-            {trend.direction === 'up' ? (
-              <TrendingUp className="h-3 w-3 text-green-600 dark:text-green-400" />
-            ) : (
-              <TrendingDown className="h-3 w-3 text-red-600 dark:text-red-400" />
-            )}
-            <span
-              className={cn(
-                'text-xs font-medium',
-                trend.direction === 'up'
-                  ? 'text-green-600 dark:text-green-400'
-                  : 'text-red-600 dark:text-red-400'
-              )}
-            >
-              {trend.value}
-            </span>
-          </div>
-        )}
-
-        {chartData && chartData.length > 0 && (
-          <div className="h-[40px] w-full mt-3 opacity-50">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={chartData}>
-                <Line
-                  type="monotone"
-                  dataKey="value"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                  dot={false}
-                  className={styles.icon}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        )}
-      </CardContent>
+      {chartData && chartData.length > 0 && (
+        <div className="absolute bottom-0 left-0 right-0 h-16 opacity-10 pointer-events-none">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={chartData}>
+              <Line
+                type="monotone"
+                dataKey="value"
+                stroke="currentColor"
+                strokeWidth={4}
+                dot={false}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      )}
     </Card>
   );
 }

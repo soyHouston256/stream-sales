@@ -133,7 +133,7 @@ export default function TransactionsPage() {
         <div className="text-sm">
           <div>{format(new Date(tx.createdAt), 'dd MMM yyyy', { locale: es })}</div>
           <div className="text-muted-foreground text-xs">
-            {format(new Date(tx.createdAt), 'HH:mm:ss', { locale: es })}
+            {format(new Date(tx.createdAt), 'hh:mm:ss a', { locale: es })}
           </div>
         </div>
       ),

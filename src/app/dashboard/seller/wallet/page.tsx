@@ -30,6 +30,7 @@ import { Wallet, TrendingUp, Clock, Receipt } from 'lucide-react';
 
 export default function WalletPage() {
   const { t } = useLanguage();
+  const [rechargeOpen, setRechargeOpen] = useState(false);
   const [filters, setFilters] = useState<TransactionsFilters>({
     page: 1,
     limit: 10,
@@ -169,7 +170,17 @@ export default function WalletPage() {
             {t('seller.wallet.subtitle')}
           </p>
         </div>
-        <RechargeDialog currentBalance={balance?.balance} />
+        <RechargeDialog
+          currentBalance={balance?.balance}
+          open={rechargeOpen}
+          onOpenChange={setRechargeOpen}
+          trigger={
+            <Button onClick={() => setRechargeOpen(true)}>
+              <Wallet className="mr-2 h-4 w-4" />
+              {t('wallet.recharge')}
+            </Button>
+          }
+        />
       </div>
 
       {/* Stats Cards */}

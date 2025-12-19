@@ -338,11 +338,11 @@ export default function AdminSettingsPage() {
               <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
                 <div>
                   <span className="font-medium">Efectivo desde:</span>{' '}
-                  {new Date(data.data.effectiveFrom).toLocaleString()}
+                  {new Date(data.data.effectiveFrom).toLocaleString('es-ES', { hour12: true })}
                 </div>
                 <div>
                   <span className="font-medium">Última actualización:</span>{' '}
-                  {new Date(data.data.updatedAt).toLocaleString()}
+                  {new Date(data.data.updatedAt).toLocaleString('es-ES', { hour12: true })}
                 </div>
               </div>
             </div>

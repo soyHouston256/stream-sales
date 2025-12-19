@@ -28,8 +28,12 @@ import { formatCurrency } from '@/lib/utils/seller';
 import { format } from 'date-fns';
 import { Wallet, TrendingUp, Clock, Receipt } from 'lucide-react';
 
+import { useAuth } from '@/lib/auth/useAuth';
+
 export default function AffiliateWalletPage() {
   const { t } = useLanguage();
+  const { user } = useAuth();
+  const [rechargeOpen, setRechargeOpen] = useState(false);
   const [filters, setFilters] = useState<TransactionsFilters>({
     page: 1,
     limit: 10,
@@ -76,9 +80,8 @@ export default function AffiliateWalletPage() {
         const isPositive = transaction.type === 'credit';
         return (
           <span
-            className={`font-medium ${
-              isPositive ? 'text-green-600' : 'text-red-600'
-            }`}
+            className={`font-medium ${isPositive ? 'text-green-600' : 'text-red-600'
+              }`}
           >
             {isPositive ? '+' : '-'}
             {formatCurrency(transaction.amount)}
@@ -170,41 +173,33 @@ export default function AffiliateWalletPage() {
             {t('affiliate.wallet.subtitle')}
           </p>
         </div>
-        <RechargeDialog currentBalance={balance?.balance} role="affiliate" />
+        <RechargeDialog
+          currentBalance={balance?.balance}
+          role="affiliate"
+          open={rechargeOpen}
+          onOpenChange={setRechargeOpen}
+        />
       </div>
 
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="col-span-2 overflow-hidden relative border-2 shadow-lg hover:shadow-xl transition-all">
-          <div className="absolute inset-0 bg-gradient-to-br from-green-500 via-emerald-500 to-teal-500 opacity-5" />
-          <CardHeader className="pb-3 relative">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="p-2.5 rounded-xl bg-gradient-to-br from-green-500 via-emerald-500 to-teal-500 shadow-md">
-                <Wallet className="h-6 w-6 text-white" />
-              </div>
-              <CardDescription className="text-base font-medium">
-                {t('affiliate.wallet.currentBalance')}
-              </CardDescription>
-            </div>
-            <CardTitle className="text-5xl font-bold bg-gradient-to-br from-green-500 via-emerald-500 to-teal-500 bg-clip-text text-transparent">
-              {balance ? formatCurrency(balance.balance) : '$0.00'}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="relative">
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                {balance?.currency || 'USD'} • {balance?.status || 'active'}
-              </span>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="col-span-2">
+          <EnhancedStatsCard
+            title={t('affiliate.wallet.currentBalance')}
+            value={balance ? formatCurrency(balance.balance) : '$0.00'}
+            description={`${balance?.currency || 'USD'} • ${balance?.status || 'active'}`}
+            icon={Wallet}
+            variant="success"
+            isLoading={balanceLoading}
+          />
+        </div>
 
         <EnhancedStatsCard
           title={t('affiliate.wallet.totalRecharged')}
           value={formatCurrency(totalRecharged.toFixed(2))}
           description={t('affiliate.wallet.completedRecharges')}
           icon={TrendingUp}
-          variant="success"
+          variant="info"
           isLoading={rechargesLoading}
         />
 
@@ -227,8 +222,8 @@ export default function AffiliateWalletPage() {
               <CardDescription>
                 {pagination
                   ? t('affiliate.wallet.showingTransactions')
-                      .replace('{count}', transactions.length.toString())
-                      .replace('{total}', pagination.total.toString())
+                    .replace('{count}', transactions.length.toString())
+                    .replace('{total}', pagination.total.toString())
                   : t('affiliate.wallet.allTransactions')}
               </CardDescription>
             </div>

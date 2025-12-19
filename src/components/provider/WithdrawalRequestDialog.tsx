@@ -30,14 +30,28 @@ import { useLanguage } from '@/contexts/LanguageContext';
 interface WithdrawalRequestDialogProps {
   availableBalance: number;
   trigger?: React.ReactNode;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 export function WithdrawalRequestDialog({
   availableBalance,
   trigger,
+  open: controlledOpen,
+  onOpenChange: controlledOnOpenChange,
 }: WithdrawalRequestDialogProps) {
   const { t } = useLanguage();
-  const [open, setOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+
+  const isControlled = controlledOpen !== undefined;
+  const open = isControlled ? controlledOpen : internalOpen;
+  const setOpen = (value: boolean) => {
+    if (isControlled) {
+      controlledOnOpenChange?.(value);
+    } else {
+      setInternalOpen(value);
+    }
+  };
   const requestWithdrawal = useRequestWithdrawal();
 
   const {

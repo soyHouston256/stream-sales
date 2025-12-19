@@ -178,7 +178,7 @@ export default function ConciliatorHistoryPage() {
                             <div>
                               <p className="text-sm">{format(new Date(dispute.resolvedAt), 'MMM d, yyyy')}</p>
                               <p className="text-xs text-muted-foreground">
-                                {format(new Date(dispute.resolvedAt), 'HH:mm')}
+                                {format(new Date(dispute.resolvedAt), 'hh:mm a')}
                               </p>
                             </div>
                           ) : (

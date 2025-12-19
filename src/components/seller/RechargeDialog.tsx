@@ -41,6 +41,8 @@ interface RechargeDialogProps {
   currentBalance?: string;
   trigger?: React.ReactNode;
   role?: 'seller' | 'affiliate';
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 interface PaymentMethod {
@@ -65,12 +67,28 @@ const TYPE_ICONS = {
   crypto: Coins,
 };
 
-export function RechargeDialog({ currentBalance, trigger, role = 'seller' }: RechargeDialogProps) {
+export function RechargeDialog({
+  currentBalance,
+  trigger,
+  role = 'seller',
+  open: controlledOpen,
+  onOpenChange: controlledOnOpenChange,
+}: RechargeDialogProps) {
   const { t } = useLanguage();
   const { toast } = useToast();
   const { user } = useAuth();
-  const [open, setOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
   const [selectedMethod, setSelectedMethod] = useState<PaymentMethod | null>(null);
+
+  const isControlled = controlledOpen !== undefined;
+  const open = isControlled ? controlledOpen : internalOpen;
+  const setOpen = (value: boolean) => {
+    if (isControlled) {
+      controlledOnOpenChange?.(value);
+    } else {
+      setInternalOpen(value);
+    }
+  };
   const [copied, setCopied] = useState('');
   const [voucherUrl, setVoucherUrl] = useState<string>('');
 
