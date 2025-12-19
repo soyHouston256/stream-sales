@@ -19,9 +19,9 @@ import { EnhancedStatsCard } from '@/components/ui/enhanced-stats-card';
 import { calculateConversionRate } from '@/lib/utils/affiliate';
 
 export default function MarketingPage() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { data: affiliateInfo, isLoading: infoLoading } = useAffiliateInfo();
-  const { data: templates, isLoading: templatesLoading } = useMarketingTemplates();
+  const { data: templates, isLoading: templatesLoading } = useMarketingTemplates(language);
   const { data: stats, isLoading: statsLoading } = useMarketingStats();
 
   const conversionRate = stats

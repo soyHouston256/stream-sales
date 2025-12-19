@@ -69,7 +69,56 @@
     "loginSuccess": "Inicio de sesión exitoso",
     "registerSuccess": "Registro exitoso",
     "loginError": "Error al iniciar sesión",
-    "registerError": "Error al registrarse"
+    "registerError": "Error al registrarse",
+    "registerForm": {
+      "title": "Crear Cuenta",
+      "subtitle": "Completa tus datos para unirte a Stream Sales",
+      "email": "Email",
+      "emailPlaceholder": "tu@email.com",
+      "username": "Nombre de Usuario",
+      "usernamePlaceholder": "juan_perez",
+      "fullName": "Nombre Completo",
+      "fullNamePlaceholder": "Juan Pérez",
+      "password": "Contraseña",
+      "passwordPlaceholder": "Mínimo 6 caracteres",
+      "country": "País",
+      "phone": "Celular",
+      "phonePlaceholder": "999 999 999",
+      "accountType": "Tipo de Cuenta",
+      "referralCode": "Código de Referido",
+      "referralCodeOptional": "Opcional",
+      "referralCodePlaceholder": "Ingresa un código si tienes uno",
+      "referralCodeApplied": "✓ Código de referido aplicado automáticamente",
+      "createAccountBtn": "Crear Cuenta",
+      "creatingAccount": "Creando cuenta...",
+      "haveAccount": "¿Ya tienes una cuenta?",
+      "loginHere": "Inicia sesión aquí",
+      "other": "Otro",
+      "roles": {
+        "seller": "Vendedor",
+        "sellerDesc": "Vende productos y gana comisiones",
+        "affiliate": "Partner",
+        "affiliateDesc": "Refiere vendedores y gana comisiones"
+      },
+      "validation": {
+        "nameRequired": "El nombre es requerido",
+        "emailRequired": "El email es requerido",
+        "emailInvalid": "Email inválido",
+        "passwordMinLength": "La contraseña debe tener al menos 6 caracteres",
+        "roleRequired": "Debes seleccionar un rol",
+        "usernameMinLength": "El usuario debe tener al menos 3 caracteres",
+        "usernameMaxLength": "El usuario no puede tener más de 20 caracteres",
+        "usernamePattern": "Solo letras, números y guión bajo"
+      },
+      "errors": {
+        "emailExists": "Este email ya está registrado",
+        "genericError": "Ocurrió un error al crear la cuenta"
+      },
+      "success": {
+        "title": "Registro exitoso",
+        "description": "Tu cuenta ha sido creada correctamente"
+      }
+    }
   },
   "dashboard": {
     "title": "Panel de Control",
@@ -822,6 +871,15 @@
       "startReferring": "¡Comienza a Referir!",
       "subtitle": "Gestiona y rastrea todos tus referidos",
       "totalReferrals": "Referidos Totales",
+      "registeredWithCode": "Registrados con tu código",
+      "pendingApproval": "Pendientes",
+      "waitingApproval": "Esperando aprobación",
+      "approved": "Aprobados",
+      "activeSellers": "Vendedores activos",
+      "yourBalance": "Tu Saldo",
+      "availableForApprovals": "Disponible para aprobaciones",
+      "pendingTab": "Pendientes",
+      "allTab": "Todos",
       "active": "Activos",
       "inactive": "Inactivos",
       "thisMonth": "Este Mes",
@@ -846,7 +904,9 @@
       "of": "de",
       "previous": "Anterior",
       "next": "Siguiente",
-      "noReferrals": "No se encontraron referidos. Intenta ajustar tus filtros."
+      "noReferrals": "Aún no tienes referidos",
+      "noReferralsFiltered": "No se encontraron referidos con estos filtros",
+      "tryDifferentFilters": "Intenta ajustar tus filtros de búsqueda"
     },
     "marketing": {
       "title": "Material de Marketing",

@@ -69,7 +69,56 @@
     "loginSuccess": "Login successful",
     "registerSuccess": "Registration successful",
     "loginError": "Login failed",
-    "registerError": "Registration failed"
+    "registerError": "Registration failed",
+    "registerForm": {
+      "title": "Create Account",
+      "subtitle": "Complete your details to join Stream Sales",
+      "email": "Email",
+      "emailPlaceholder": "your@email.com",
+      "username": "Username",
+      "usernamePlaceholder": "john_doe",
+      "fullName": "Full Name",
+      "fullNamePlaceholder": "John Doe",
+      "password": "Password",
+      "passwordPlaceholder": "Minimum 6 characters",
+      "country": "Country",
+      "phone": "Phone",
+      "phonePlaceholder": "999 999 999",
+      "accountType": "Account Type",
+      "referralCode": "Referral Code",
+      "referralCodeOptional": "Optional",
+      "referralCodePlaceholder": "Enter a code if you have one",
+      "referralCodeApplied": "✓ Referral code applied automatically",
+      "createAccountBtn": "Create Account",
+      "creatingAccount": "Creating account...",
+      "haveAccount": "Already have an account?",
+      "loginHere": "Log in here",
+      "other": "Other",
+      "roles": {
+        "seller": "Seller",
+        "sellerDesc": "Sell products and earn commissions",
+        "affiliate": "Partner",
+        "affiliateDesc": "Refer sellers and earn commissions"
+      },
+      "validation": {
+        "nameRequired": "Name is required",
+        "emailRequired": "Email is required",
+        "emailInvalid": "Invalid email",
+        "passwordMinLength": "Password must be at least 6 characters",
+        "roleRequired": "You must select a role",
+        "usernameMinLength": "Username must be at least 3 characters",
+        "usernameMaxLength": "Username cannot exceed 20 characters",
+        "usernamePattern": "Only letters, numbers and underscore"
+      },
+      "errors": {
+        "emailExists": "This email is already registered",
+        "genericError": "An error occurred while creating the account"
+      },
+      "success": {
+        "title": "Registration successful",
+        "description": "Your account has been created successfully"
+      }
+    }
   },
   "dashboard": {
     "title": "Dashboard",
@@ -823,6 +872,15 @@
       "startReferring": "Start Referring!",
       "subtitle": "Manage and track all your referrals",
       "totalReferrals": "Total Referrals",
+      "registeredWithCode": "Registered with your code",
+      "pendingApproval": "Pending",
+      "waitingApproval": "Waiting for approval",
+      "approved": "Approved",
+      "activeSellers": "Active sellers",
+      "yourBalance": "Your Balance",
+      "availableForApprovals": "Available for approvals",
+      "pendingTab": "Pending",
+      "allTab": "All",
       "active": "Active",
       "inactive": "Inactive",
       "thisMonth": "This Month",
@@ -847,7 +905,9 @@
       "of": "of",
       "previous": "Previous",
       "next": "Next",
-      "noReferrals": "No referrals found. Try adjusting your filters."
+      "noReferrals": "No referrals yet",
+      "noReferralsFiltered": "No referrals found with these filters",
+      "tryDifferentFilters": "Try adjusting your search filters"
     },
     "marketing": {
       "title": "Marketing Materials",
