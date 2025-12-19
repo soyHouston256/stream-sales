@@ -2,7 +2,6 @@ import {
   LayoutDashboard,
   Users,
   Megaphone,
-  Clock,
   Wallet,
   Settings,
 } from 'lucide-react';
@@ -14,12 +13,6 @@ export const getAffiliateNavItems = (t: (key: string) => string): NavItem[] => [
     href: '/dashboard/affiliate',
     icon: LayoutDashboard,
     description: t('navigation.overviewStats'),
-  },
-  {
-    title: 'Referidos Pendientes',
-    href: '/dashboard/affiliate/referrals-pending',
-    icon: Clock,
-    description: 'Aprobar o rechazar referidos',
   },
   {
     title: t('navigation.referrals'),

@@ -4,6 +4,7 @@ import {
   TrendingUp,
   CreditCard,
   Settings,
+  Landmark,
 } from 'lucide-react';
 import type { NavItem } from '../Sidebar';
 
@@ -25,6 +26,12 @@ export const getPaymentValidatorNavItems = (t: (key: string) => string): NavItem
     href: '/dashboard/payment-validator/withdrawals',
     icon: TrendingUp,
     description: t('paymentValidator.navigation.validateWithdrawals'),
+  },
+  {
+    title: t('paymentValidator.navigation.myFund'),
+    href: '/dashboard/payment-validator/fund',
+    icon: Landmark,
+    description: t('paymentValidator.navigation.myFundDesc'),
   },
   {
     title: t('paymentValidator.navigation.paymentConfig'),

@@ -147,6 +147,16 @@ export async function PUT(
         },
       });
 
+      // 7.4. Create ValidatorFundEntry to track this amount for the validator
+      await tx.validatorFundEntry.create({
+        data: {
+          validatorId: auth.userId!,
+          rechargeId: recharge.id,
+          amount: recharge.amount,
+          status: 'pending',
+        },
+      });
+
       return {
         recharge: updatedRecharge,
         transaction,

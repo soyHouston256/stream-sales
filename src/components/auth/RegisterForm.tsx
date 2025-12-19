@@ -22,54 +22,57 @@ import {
 } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { ApiError } from '@/lib/api/client';
+import { useLanguage } from '@/contexts/LanguageContext';
 import type { UserRole } from '@/types/auth';
 
-// Register form validation schema
-const registerSchema = z.object({
-  name: z.string().min(1, 'El nombre es requerido'),
+// Register form validation schema - messages will be overridden with i18n
+const createRegisterSchema = (t: (key: string) => string) => z.object({
+  name: z.string().min(1, t('auth.registerForm.validation.nameRequired')),
   email: z
     .string()
-    .min(1, 'El email es requerido')
-    .email('Email inválido'),
+    .min(1, t('auth.registerForm.validation.emailRequired'))
+    .email(t('auth.registerForm.validation.emailInvalid')),
   password: z
     .string()
-    .min(6, 'La contraseña debe tener al menos 6 caracteres'),
+    .min(6, t('auth.registerForm.validation.passwordMinLength')),
   role: z.enum(['admin', 'provider', 'seller', 'affiliate', 'conciliator', 'payment_validator'], {
-    required_error: 'Debes seleccionar un rol',
+    required_error: t('auth.registerForm.validation.roleRequired'),
   }),
   referralCode: z.string().optional(),
   countryCode: z.string().optional(),
   phoneNumber: z.string().optional(),
   username: z
     .string()
-    .min(3, 'El usuario debe tener al menos 3 caracteres')
-    .max(20, 'El usuario no puede tener más de 20 caracteres')
-    .regex(/^[a-zA-Z0-9_]+$/, 'Solo letras, números y guión bajo')
+    .min(3, t('auth.registerForm.validation.usernameMinLength'))
+    .max(20, t('auth.registerForm.validation.usernameMaxLength'))
+    .regex(/^[a-zA-Z0-9_]+$/, t('auth.registerForm.validation.usernamePattern'))
     .optional(),
 });
 
-type RegisterFormData = z.infer<typeof registerSchema>;
-
-const roleOptions: { value: UserRole; label: string; description: string }[] = [
-  {
-    value: 'seller',
-    label: 'Vendedor',
-    description: 'Vende productos y gana comisiones',
-  },
-  {
-    value: 'affiliate',
-    label: 'Partner',
-    description: 'Refiere vendedores y gana comisiones',
-  },
-];
+type RegisterFormData = z.infer<ReturnType<typeof createRegisterSchema>>;
 
 export function RegisterForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { t } = useLanguage();
   const { register: registerUser } = useAuth();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [isUsernameManuallyEdited, setIsUsernameManuallyEdited] = useState(false);
+  const [referralFromUrl, setReferralFromUrl] = useState(false);
+
+  const roleOptions: { value: UserRole; label: string; description: string }[] = [
+    {
+      value: 'seller',
+      label: t('auth.registerForm.roles.seller'),
+      description: t('auth.registerForm.roles.sellerDesc'),
+    },
+    {
+      value: 'affiliate',
+      label: t('auth.registerForm.roles.affiliate'),
+      description: t('auth.registerForm.roles.affiliateDesc'),
+    },
+  ];
 
   const {
     register,
@@ -78,7 +81,7 @@ export function RegisterForm() {
     watch,
     setValue,
   } = useForm<RegisterFormData>({
-    resolver: zodResolver(registerSchema),
+    resolver: zodResolver(createRegisterSchema(t)),
     defaultValues: {
       role: 'seller',
       countryCode: '+51', // Default to Peru
@@ -111,6 +114,7 @@ export function RegisterForm() {
     const refCode = searchParams.get('ref');
     if (refCode) {
       setValue('referralCode', refCode);
+      setReferralFromUrl(true);
     }
   }, [searchParams, setValue]);
 
@@ -121,8 +125,8 @@ export function RegisterForm() {
       const response = await registerUser(data);
 
       toast({
-        title: 'Registro exitoso',
-        description: 'Tu cuenta ha sido creada correctamente',
+        title: t('auth.registerForm.success.title'),
+        description: t('auth.registerForm.success.description'),
       });
 
       // After successful registration, redirect to appropriate dashboard based on user role
@@ -139,18 +143,18 @@ export function RegisterForm() {
     } catch (error) {
       console.error('Registration error:', error);
 
-      let errorMessage = 'Ocurrió un error al crear la cuenta';
+      let errorMessage = t('auth.registerForm.errors.genericError');
 
       if (error instanceof ApiError) {
         if (error.status === 409 || error.message.includes('already exists')) {
-          errorMessage = 'Este email ya está registrado';
+          errorMessage = t('auth.registerForm.errors.emailExists');
         } else {
           errorMessage = error.message;
         }
       }
 
       toast({
-        title: 'Error al registrarse',
+        title: t('auth.registerError'),
         description: errorMessage,
         variant: 'destructive',
       });
@@ -163,20 +167,20 @@ export function RegisterForm() {
     <Card className="w-full max-w-lg">
       <CardHeader className="space-y-1">
         <CardTitle className="text-2xl font-bold text-center">
-          Crear Cuenta
+          {t('auth.registerForm.title')}
         </CardTitle>
         <CardDescription className="text-center">
-          Completa tus datos para unirte a Stream Sales
+          {t('auth.registerForm.subtitle')}
         </CardDescription>
       </CardHeader>
       <form onSubmit={handleSubmit(onSubmit)}>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">{t('auth.registerForm.email')}</Label>
             <Input
               id="email"
               type="email"
-              placeholder="tu@email.com"
+              placeholder={t('auth.registerForm.emailPlaceholder')}
               autoComplete="email"
               disabled={isLoading}
               {...register('email')}
@@ -195,11 +199,11 @@ export function RegisterForm() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="username">Nombre de Usuario</Label>
+            <Label htmlFor="username">{t('auth.registerForm.username')}</Label>
             <Input
               id="username"
               type="text"
-              placeholder="juan_perez"
+              placeholder={t('auth.registerForm.usernamePlaceholder')}
               autoComplete="username"
               disabled={isLoading}
               {...register('username', {
@@ -220,11 +224,11 @@ export function RegisterForm() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="name">Nombre Completo</Label>
+            <Label htmlFor="name">{t('auth.registerForm.fullName')}</Label>
             <Input
               id="name"
               type="text"
-              placeholder="Juan Pérez"
+              placeholder={t('auth.registerForm.fullNamePlaceholder')}
               autoComplete="name"
               disabled={isLoading}
               {...register('name')}
@@ -243,11 +247,11 @@ export function RegisterForm() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="password">Contraseña</Label>
+            <Label htmlFor="password">{t('auth.registerForm.password')}</Label>
             <Input
               id="password"
               type="password"
-              placeholder="Mínimo 6 caracteres"
+              placeholder={t('auth.registerForm.passwordPlaceholder')}
               autoComplete="new-password"
               disabled={isLoading}
               {...register('password')}
@@ -267,7 +271,7 @@ export function RegisterForm() {
 
           <div className="grid grid-cols-4 gap-2">
             <div className="col-span-1 space-y-2">
-              <Label htmlFor="countryCode">País</Label>
+              <Label htmlFor="countryCode">{t('auth.registerForm.country')}</Label>
               <select
                 id="countryCode"
                 className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
@@ -296,15 +300,15 @@ export function RegisterForm() {
                 <option value="+58">🇻🇪 +58</option>
                 <option value="+34">🇪🇸 +34</option>
                 <option value="+1">🇺🇸 +1</option>
-                <option value="">Otro</option>
+                <option value="">{t('auth.registerForm.other')}</option>
               </select>
             </div>
             <div className="col-span-3 space-y-2">
-              <Label htmlFor="phoneNumber">Celular</Label>
+              <Label htmlFor="phoneNumber">{t('auth.registerForm.phone')}</Label>
               <Input
                 id="phoneNumber"
                 type="tel"
-                placeholder="999 999 999"
+                placeholder={t('auth.registerForm.phonePlaceholder')}
                 autoComplete="tel"
                 disabled={isLoading}
                 {...register('phoneNumber')}
@@ -313,7 +317,7 @@ export function RegisterForm() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="role">Tipo de Cuenta</Label>
+            <Label htmlFor="role">{t('auth.registerForm.accountType')}</Label>
             <select
               id="role"
               className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
@@ -341,31 +345,37 @@ export function RegisterForm() {
 
           <div className="space-y-2">
             <Label htmlFor="referralCode">
-              Código de Referido{' '}
-              <span className="text-muted-foreground">(Opcional)</span>
+              {t('auth.registerForm.referralCode')}{' '}
+              <span className="text-muted-foreground">({t('auth.registerForm.referralCodeOptional')})</span>
             </Label>
             <Input
               id="referralCode"
               type="text"
-              placeholder="Ingresa un código si tienes uno"
-              disabled={isLoading}
+              placeholder={t('auth.registerForm.referralCodePlaceholder')}
+              disabled={isLoading || referralFromUrl}
+              className={referralFromUrl ? 'bg-muted cursor-not-allowed' : ''}
               {...register('referralCode')}
             />
+            {referralFromUrl && (
+              <p className="text-xs text-muted-foreground">
+                {t('auth.registerForm.referralCodeApplied')}
+              </p>
+            )}
           </div>
         </CardContent>
 
         <CardFooter className="flex flex-col space-y-4">
           <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? 'Creando cuenta...' : 'Crear Cuenta'}
+            {isLoading ? t('auth.registerForm.creatingAccount') : t('auth.registerForm.createAccountBtn')}
           </Button>
 
           <p className="text-sm text-center text-muted-foreground">
-            ¿Ya tienes una cuenta?{' '}
+            {t('auth.registerForm.haveAccount')}{' '}
             <Link
               href="/login"
               className="font-medium text-primary hover:underline"
             >
-              Inicia sesión aquí
+              {t('auth.registerForm.loginHere')}
             </Link>
           </p>
         </CardFooter>

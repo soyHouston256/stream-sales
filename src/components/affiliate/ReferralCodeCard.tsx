@@ -55,45 +55,24 @@ export function ReferralCodeCard({ code, link }: ReferralCodeCardProps) {
         <CardDescription>{t('affiliate.referralCard.subtitle')}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        {/* Referral Code */}
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-muted-foreground">{t('affiliate.referralCard.code')}</label>
-          <div className="flex items-center gap-2">
-            <div className="flex-1 rounded-lg border-2 border-primary bg-background/50 p-4 text-center">
-              <span className="text-3xl font-bold tracking-wider text-primary">{code}</span>
-            </div>
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={handleCopyCode}
-              className="h-14 w-14 shrink-0"
-            >
-              {codeCopied ? (
-                <Check className="h-5 w-5 text-green-600" />
-              ) : (
-                <Copy className="h-5 w-5" />
-              )}
-            </Button>
-          </div>
-        </div>
-
-        {/* Referral Link */}
+        {/* Referral Link - Now prominently displayed */}
         <div className="space-y-2">
           <label className="text-sm font-medium text-muted-foreground">{t('affiliate.referralCard.link')}</label>
           <div className="flex items-center gap-2">
-            <div className="flex-1 rounded-lg border bg-background/50 p-3">
-              <p className="truncate text-sm text-muted-foreground">{link}</p>
+            <div className="flex-1 rounded-lg border-2 border-primary bg-background/50 p-4 text-center">
+              <span className="text-xl font-bold tracking-wide text-primary break-all">{link}</span>
             </div>
-            <div className="flex shrink-0 gap-2">
+            <div className="flex shrink-0 gap-2 flex-col">
               <Button
                 variant="outline"
                 size="icon"
                 onClick={handleCopyLink}
+                className="h-10 w-10"
               >
                 {linkCopied ? (
-                  <Check className="h-4 w-4 text-green-600" />
+                  <Check className="h-5 w-5 text-green-600" />
                 ) : (
-                  <Copy className="h-4 w-4" />
+                  <Copy className="h-5 w-5" />
                 )}
               </Button>
               {isShareSupported() && (
@@ -101,11 +80,33 @@ export function ReferralCodeCard({ code, link }: ReferralCodeCardProps) {
                   variant="outline"
                   size="icon"
                   onClick={handleShare}
+                  className="h-10 w-10"
                 >
-                  <Share2 className="h-4 w-4" />
+                  <Share2 className="h-5 w-5" />
                 </Button>
               )}
             </div>
+          </div>
+        </div>
+
+        {/* Referral Code - Now secondary */}
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-muted-foreground">{t('affiliate.referralCard.code')}</label>
+          <div className="flex items-center gap-2">
+            <div className="flex-1 rounded-lg border bg-background/50 p-3">
+              <p className="text-center text-lg font-semibold text-muted-foreground">{code}</p>
+            </div>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={handleCopyCode}
+            >
+              {codeCopied ? (
+                <Check className="h-4 w-4 text-green-600" />
+              ) : (
+                <Copy className="h-4 w-4" />
+              )}
+            </Button>
           </div>
         </div>
 

@@ -5,9 +5,9 @@ import { tokenManager } from '@/lib/utils/tokenManager';
 import { useQuery } from '@tanstack/react-query';
 import { MarketingTemplate, MarketingStats } from '@/types/affiliate';
 
-async function fetchMarketingTemplates(): Promise<MarketingTemplate[]> {
+async function fetchMarketingTemplates(lang: string = 'es'): Promise<MarketingTemplate[]> {
   const token = tokenManager.getToken();
-  const response = await fetch('/api/affiliate/marketing/templates', {
+  const response = await fetch(`/api/affiliate/marketing/templates?lang=${lang}`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -37,10 +37,10 @@ async function fetchMarketingStats(): Promise<MarketingStats> {
   return data.stats;
 }
 
-export function useMarketingTemplates() {
+export function useMarketingTemplates(lang: string = 'es') {
   return useQuery({
-    queryKey: ['affiliate', 'marketing', 'templates'],
-    queryFn: fetchMarketingTemplates,
+    queryKey: ['affiliate', 'marketing', 'templates', lang],
+    queryFn: () => fetchMarketingTemplates(lang),
     staleTime: 10 * 60 * 1000, // 10 minutes - templates don't change often
   });
 }

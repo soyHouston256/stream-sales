@@ -1,31 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/infrastructure/database/prisma';
 import { verifyJWT } from '@/infrastructure/auth/jwt';
+import { normalizeCountryCode, isoToPhoneMap } from '@/lib/utils/countryCode';
 
 export const dynamic = 'force-dynamic';
-
-// Map phone country codes to ISO codes
-const phoneToIsoMap: Record<string, string> = {
-    '+51': 'PE', // Peru
-    '+52': 'MX', // Mexico
-    '+54': 'AR', // Argentina
-    '+55': 'BR', // Brazil
-    '+56': 'CL', // Chile
-    '+57': 'CO', // Colombia
-    '+58': 'VE', // Venezuela
-    '+591': 'BO', // Bolivia
-    '+593': 'EC', // Ecuador
-    '+595': 'PY', // Paraguay
-    '+598': 'UY', // Uruguay
-    '+1': 'US', // USA
-};
-
-function normalizeCountryCode(code: string): string {
-    if (code.startsWith('+')) {
-        return phoneToIsoMap[code] || code;
-    }
-    return code.toUpperCase();
-}
 
 interface PaymentMethod {
     id: string;
@@ -77,15 +55,17 @@ export async function GET(
         // Normalize the country code
         const countryCode = normalizeCountryCode(decodeURIComponent(rawCode));
 
-        if (countryCode.length !== 2) {
+        if (!countryCode || countryCode.length !== 2) {
             return NextResponse.json(
                 { error: `Invalid country code: ${rawCode}. Could not convert to ISO format.` },
                 { status: 400 }
             );
         }
 
-        // Find config for this country WITH validator approval check
-        const config = await prisma.paymentMethodConfig.findUnique({
+        console.log('[payment-config] Looking up config for countryCode:', countryCode, 'raw:', rawCode);
+
+        // Try to find config - first by normalized ISO code, then by original phone code
+        let config = await prisma.paymentMethodConfig.findUnique({
             where: { countryCode: countryCode },
             include: {
                 validator: {
@@ -101,6 +81,30 @@ export async function GET(
                 }
             },
         });
+
+        // If not found and original was a phone code, try with the phone code format
+        if (!config && rawCode.startsWith('+')) {
+            const decodedRaw = decodeURIComponent(rawCode);
+            console.log('[payment-config] Trying with phone code:', decodedRaw);
+            config = await prisma.paymentMethodConfig.findUnique({
+                where: { countryCode: decodedRaw },
+                include: {
+                    validator: {
+                        select: {
+                            id: true,
+                            paymentValidatorProfile: {
+                                select: {
+                                    status: true,
+                                    assignedCountry: true,
+                                }
+                            }
+                        }
+                    }
+                },
+            });
+        }
+
+        console.log('[payment-config] Config found:', config ? `Yes (validatorId: ${config.validatorId})` : 'No');
 
         if (!config) {
             return NextResponse.json(

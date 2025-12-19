@@ -221,7 +221,7 @@ export default function AffiliateDashboard() {
             <Button
               variant="default"
               size="sm"
-              onClick={() => router.push('/dashboard/affiliate/referrals-pending')}
+              onClick={() => router.push('/dashboard/affiliate/referrals')}
             >
               {t('affiliate.dashboard.reviewNow')}
             </Button>

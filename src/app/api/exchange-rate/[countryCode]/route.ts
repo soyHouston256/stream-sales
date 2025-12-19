@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/infrastructure/database/prisma';
 import { verifyJWT } from '@/infrastructure/auth/jwt';
+import { normalizeCountryCode } from '@/lib/utils/countryCode';
 
 export const dynamic = 'force-dynamic';
 
@@ -25,18 +26,21 @@ export async function GET(
             return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
         }
 
-        const { countryCode } = await params;
+        const { countryCode: rawCode } = await params;
+
+        // Normalize country code (handles +57 -> CO, etc.)
+        const countryCode = normalizeCountryCode(rawCode);
 
         if (!countryCode || countryCode.length !== 2) {
             return NextResponse.json(
-                { error: 'Invalid country code' },
+                { error: `Invalid country code: ${rawCode}` },
                 { status: 400 }
             );
         }
 
         const exchangeRate = await prisma.exchangeRate.findUnique({
             where: {
-                countryCode: countryCode.toUpperCase(),
+                countryCode: countryCode,
                 isActive: true,
             },
         });

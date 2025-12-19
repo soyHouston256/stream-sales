@@ -4,7 +4,7 @@ export const rechargeSchema = z.object({
   amount: z
     .number({ required_error: 'Amount is required' })
     .min(1, 'El monto mínimo es 1')
-    .max(10000, 'Maximum recharge is $10,000'),
+    .max(10000000, 'Maximum recharge exceeded'), // Allow high local currency amounts, USD limit enforced separately
   paymentMethod: z.enum(['yape', 'plin', 'binance', 'bank_transfer', 'credit_card', 'paypal', 'crypto', 'mock'], {
     required_error: 'Payment method is required',
   }),
