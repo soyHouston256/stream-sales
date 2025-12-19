@@ -135,7 +135,7 @@ export async function GET(request: NextRequest) {
             processedAt: transfer.processedAt?.toISOString() || null,
             createdAt: transfer.createdAt.toISOString(),
             completedAt: transfer.completedAt?.toISOString() || null,
-            fundEntries: transfer.fundEntries.map((entry) => ({
+            fundEntries: transfer.fundEntries.map((entry: { id: string; amount: { toString: () => string }; recharge: { id: string; amount: { toString: () => string }; paymentMethod: string; createdAt: Date } }) => ({
                 id: entry.id,
                 amount: entry.amount.toString(),
                 recharge: {
