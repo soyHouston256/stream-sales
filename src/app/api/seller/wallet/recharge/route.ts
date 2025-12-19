@@ -53,6 +53,7 @@ const rechargeSchema = z.object({
     'mock',
   ]),
   paymentDetails: z.string().optional(),
+  voucherUrl: z.string().url().optional().or(z.literal('')).transform(val => val || undefined),
 });
 
 
@@ -114,7 +115,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { amount, paymentMethod, paymentDetails } = validationResult.data;
+    const { amount, paymentMethod, paymentDetails, voucherUrl } = validationResult.data;
 
     // 5. Create recharge request
     const recharge = await prisma.recharge.create({
@@ -124,7 +125,10 @@ export async function POST(request: NextRequest) {
         paymentMethod,
         paymentGateway: 'manual', // For now, all recharges are manual/admin-approved
         status: 'pending',
-        metadata: paymentDetails ? { paymentDetails } : undefined,
+        metadata: {
+          ...(paymentDetails && { paymentDetails }),
+          ...(voucherUrl && { voucherUrl }),
+        },
       },
     });
 

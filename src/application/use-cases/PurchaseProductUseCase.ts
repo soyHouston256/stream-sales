@@ -94,7 +94,7 @@ export class PurchaseProductUseCase {
     private purchaseRepository: IPurchaseRepository,
     private userRepository: IUserRepository,
     private commissionConfigRepository: ICommissionConfigRepository
-  ) {}
+  ) { }
 
   async execute(data: PurchaseProductDTO): Promise<PurchaseProductResponse> {
     // ============================================
@@ -113,14 +113,17 @@ export class PurchaseProductUseCase {
       );
     }
 
-    // Validar que el producto no haya sido vendido ya
-    const existingPurchase = await this.purchaseRepository.findByProductId(
-      data.productId
-    );
+    // NOTE: For profile-based products, multiple purchases are allowed
+    // as long as there are available slots. Availability is validated
+    // by the API route checking inventoryAccount.availableSlots.
+    // The old validation below is commented out to support multi-slot products.
 
-    if (existingPurchase) {
-      throw new Error('Product already sold');
-    }
+    // const existingPurchase = await this.purchaseRepository.findByProductId(
+    //   data.productId
+    // );
+    // if (existingPurchase) {
+    //   throw new Error('Product already sold');
+    // }
 
     // ============================================
     // 2. VALIDAR WALLETS
@@ -240,11 +243,13 @@ export class PurchaseProductUseCase {
     // 6. ACTUALIZAR ESTADO DEL PRODUCTO
     // ============================================
 
-    // Primero reservar
-    product.reserve();
+    // NOTE: Product deactivation is now handled by the API route
+    // based on inventory slot availability. For profile-based products,
+    // the product should remain active until all slots are sold.
+    // The API route in /api/seller/purchases handles this logic.
 
-    // Luego marcar como vendido
-    product.markAsSold(data.sellerId);
+    // DO NOT call product.reserve() or product.markAsSold() here
+    // as it would deactivate the product prematurely for multi-slot products.
 
     // ============================================
     // 7. PERSISTIR TODO (IDEALMENTE EN TRANSACCIÓN DB)
@@ -256,8 +261,8 @@ export class PurchaseProductUseCase {
     // Guardar Purchase (audit trail)
     const savedPurchase = await this.purchaseRepository.save(purchase);
 
-    // Guardar Product actualizado
-    await this.productRepository.save(product);
+    // NOTE: We no longer save the product here since status is managed by API route
+    // await this.productRepository.save(product);
 
     // Guardar wallets actualizadas
     await this.walletRepository.save(sellerWallet);

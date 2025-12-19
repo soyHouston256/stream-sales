@@ -631,7 +631,12 @@
         }
       },
       "noConfigTitle": "Payment methods not available",
-      "noConfigDesc": "No payment methods are configured for your country. Contact the administrator."
+      "noConfigDesc": "No payment methods are configured for your country. Contact the administrator.",
+      "voucherLabel": "Payment Voucher (Optional)",
+      "voucherDescription": "Upload an image of your payment receipt for faster validation.",
+      "voucherUploaded": "Voucher uploaded successfully",
+      "youWillReceive": "You will receive:",
+      "exchangeRate": "Exchange rate"
     },
     "hero": {
       "automatedDelivery": "Automated Delivery in 30 seconds",
@@ -1044,6 +1049,8 @@
       "accountCredentials": "Account Credentials",
       "email": "Email",
       "password": "Password",
+      "profile": "Assigned Profile",
+      "pin": "PIN",
       "additionalDetails": "Additional Details",
       "productInfo": "Product Information",
       "description": "Description",
@@ -1243,8 +1250,8 @@
       "actions": "Actions",
       "approve": "Approve",
       "reject": "Reject",
-      "noRecharges": "No recharge requests found",
-      "noRechargesDesc": "There are no recharge requests to display at this time.",
+      "noRecharges": "No recharges",
+      "noRechargesDesc": "No recharge requests found with the current filters.",
       "previous": "Previous",
       "next": "Next",
       "page": "Page",
@@ -1253,7 +1260,7 @@
       "recharges": "recharges",
       "loading": "Loading...",
       "approveTitle": "Approve Recharge",
-      "approveDescription": "Are you sure you want to approve this recharge? The amount will be credited to the user's wallet.",
+      "approveDescription": "Verify the details before approving this request",
       "cancel": "Cancel",
       "approving": "Approving...",
       "rejectTitle": "Reject Recharge",
@@ -1264,7 +1271,15 @@
       "rejectionMaxLength": "Reason must not exceed 500 characters",
       "rejecting": "Rejecting...",
       "noPendingRecharges": "No pending recharges",
-      "noPendingRechargesDesc": "There are no recharge requests waiting for validation."
+      "noPendingRechargesDesc": "There are no recharge requests waiting for validation.",
+      "depositedAmount": "Deposited Amount",
+      "amountToCredit": "Amount to Credit",
+      "holderName": "Holder Name",
+      "paymentTime": "Payment Time",
+      "paymentVoucher": "Payment Voucher",
+      "clickToEnlarge": "Click on image to view full size",
+      "externalTxIdHint": "Enter the bank reference number if available",
+      "requestCreatedOn": "Request created on"
     },
     "withdrawals": {
       "title": "Validate Withdrawals",

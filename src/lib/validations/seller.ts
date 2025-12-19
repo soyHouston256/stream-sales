@@ -11,6 +11,7 @@ export const rechargeSchema = z.object({
   paymentDetails: z.string().optional(),
   holderName: z.string().optional(),
   paymentTime: z.string().optional(),
+  voucherUrl: z.string().url().optional().or(z.literal('')),
 });
 
 export type RechargeInput = z.infer<typeof rechargeSchema>;

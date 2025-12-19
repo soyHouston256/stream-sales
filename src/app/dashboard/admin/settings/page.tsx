@@ -11,6 +11,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Settings, Loader2, CheckCircle, AlertTriangle, Copy, Link2, ShieldCheck, UserPlus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { tokenManager } from '@/lib/utils/tokenManager';
+import { ExchangeRateConfig } from '@/components/admin/ExchangeRateConfig';
 
 export default function AdminSettingsPage() {
   const [approvalFee, setApprovalFee] = useState<string>('');
@@ -347,6 +348,9 @@ export default function AdminSettingsPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Exchange Rate Configuration */}
+      <ExchangeRateConfig />
 
       {/* Additional Settings (Future) */}
       <Card>

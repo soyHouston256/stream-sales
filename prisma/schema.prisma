@@ -257,6 +257,8 @@ model InventorySlot {
   orderItem OrderItem? // The slot is assigned to an order item
 
   @@index([accountId])
+  @@index([status])
+  @@index([accountId, status])
   @@map("inventory_slots")
 }
 
@@ -310,6 +312,9 @@ model Order {
   dispute     Dispute?
 
   @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+  @@index([userId, status])
   @@map("orders")
 }
 
@@ -331,6 +336,7 @@ model OrderItem {
   assignedContent DigitalContent?   @relation(fields: [assignedContentId], references: [id])
 
   @@index([orderId])
+  @@index([productVariantId])
   @@map("order_items")
 }
 
@@ -516,4 +522,24 @@ model AuditLog {
   @@index([resourceType, resourceId])
   @@index([createdAt])
   @@map("audit_logs")
+}
+
+// ============================================
+// EXCHANGE RATE CONFIGURATION
+// ============================================
+
+model ExchangeRate {
+  id           String   @id @default(cuid())
+  countryCode  String   @unique // PE, MX, CO, AR, etc.
+  countryName  String   // Peru, Mexico, Colombia, Argentina
+  currencyCode String   // PEN, MXN, COP, ARS
+  currencyName String   // Nuevo Sol, Peso Mexicano, etc.
+  rate         Decimal  @default(1) @db.Decimal(18, 6) // Rate to convert 1 USD to local currency
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([countryCode])
+  @@index([isActive])
+  @@map("exchange_rates")
 }

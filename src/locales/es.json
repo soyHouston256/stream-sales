@@ -630,7 +630,12 @@
         }
       },
       "noConfigTitle": "Métodos de pago no disponibles",
-      "noConfigDesc": "No hay métodos de pago configurados para tu país. Contacta al administrador."
+      "noConfigDesc": "No hay métodos de pago configurados para tu país. Contacta al administrador.",
+      "voucherLabel": "Comprobante de Pago (Opcional)",
+      "voucherDescription": "Sube una imagen del recibo de tu pago para una validación más rápida.",
+      "voucherUploaded": "Comprobante subido correctamente",
+      "youWillReceive": "Recibirás:",
+      "exchangeRate": "Tipo de cambio"
     },
     "hero": {
       "automatedDelivery": "Entrega Automatizada en 30 segundos",
@@ -1043,6 +1048,8 @@
       "accountCredentials": "Credenciales de la Cuenta",
       "email": "Correo",
       "password": "Contraseña",
+      "profile": "Perfil Asignado",
+      "pin": "PIN",
       "additionalDetails": "Detalles Adicionales",
       "productInfo": "Información del Producto",
       "description": "Descripción",
@@ -1245,8 +1252,8 @@
       "actions": "Acciones",
       "approve": "Aprobar",
       "reject": "Rechazar",
-      "noRecharges": "No se encontraron solicitudes de recarga",
-      "noRechargesDesc": "No hay solicitudes de recarga para mostrar en este momento.",
+      "noRecharges": "No hay recargas",
+      "noRechargesDesc": "No hay solicitudes de recarga con los filtros actuales.",
       "previous": "Anterior",
       "next": "Siguiente",
       "page": "Página",
@@ -1255,7 +1262,7 @@
       "recharges": "recargas",
       "loading": "Cargando...",
       "approveTitle": "Aprobar Recarga",
-      "approveDescription": "¿Estás seguro de que quieres aprobar esta recarga? El monto será acreditado a la billetera del usuario.",
+      "approveDescription": "Verifica los datos antes de aprobar esta solicitud",
       "cancel": "Cancelar",
       "approving": "Aprobando...",
       "rejectTitle": "Rechazar Recarga",
@@ -1266,7 +1273,15 @@
       "rejectionMaxLength": "La razón no debe exceder 500 caracteres",
       "rejecting": "Rechazando...",
       "noPendingRecharges": "No hay recargas pendientes",
-      "noPendingRechargesDesc": "No hay solicitudes de recarga esperando validación."
+      "noPendingRechargesDesc": "No hay solicitudes de recarga esperando validación.",
+      "depositedAmount": "Monto Depositado",
+      "amountToCredit": "Monto a Acreditar",
+      "holderName": "Nombre del Titular",
+      "paymentTime": "Hora del Pago",
+      "paymentVoucher": "Comprobante de Pago",
+      "clickToEnlarge": "Click en la imagen para ver en tamaño completo",
+      "externalTxIdHint": "Ingresa el número de referencia del banco si lo tienes",
+      "requestCreatedOn": "Solicitud creada el"
     },
     "withdrawals": {
       "title": "Validar Retiros",

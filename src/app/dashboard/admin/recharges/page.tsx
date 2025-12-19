@@ -366,8 +366,8 @@ export default function AdminRechargesPage() {
                 statusFilter === 'pending'
                   ? 'No hay solicitudes de recarga pendientes en este momento.'
                   : searchTerm
-                  ? 'No se encontraron recargas con los criterios de búsqueda.'
-                  : 'No hay recargas en este estado.'
+                    ? 'No se encontraron recargas con los criterios de búsqueda.'
+                    : 'No hay recargas en este estado.'
               }
               variant={searchTerm ? 'search' : 'default'}
             />
@@ -476,52 +476,149 @@ export default function AdminRechargesPage() {
         </CardContent>
       </Card>
 
-      {/* Approve Dialog */}
+      {/* Approve Dialog - Enhanced */}
       <Dialog open={showApproveDialog} onOpenChange={setShowApproveDialog}>
-        <DialogContent>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Aprobar Recarga</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              <CheckCircle className="h-5 w-5 text-green-600" />
+              Aprobar Recarga
+            </DialogTitle>
             <DialogDescription>
-              ¿Confirmar la aprobación de esta recarga?
+              Verifica los datos antes de aprobar esta solicitud
             </DialogDescription>
           </DialogHeader>
+
           {selectedRecharge && (
-            <div className="space-y-4">
-              <div>
-                <p className="text-sm font-medium">Usuario:</p>
-                <p className="text-sm text-muted-foreground">{selectedRecharge.user.name} ({selectedRecharge.user.email})</p>
+            <div className="space-y-6">
+              {/* User Info */}
+              <div className="bg-muted/50 p-4 rounded-lg">
+                <p className="text-xs uppercase font-bold text-muted-foreground mb-1">Usuario</p>
+                <p className="font-semibold">{selectedRecharge.user.name}</p>
+                <p className="text-sm text-muted-foreground">{selectedRecharge.user.email}</p>
               </div>
-              <div>
-                <p className="text-sm font-medium">Monto:</p>
-                <p className="text-2xl font-bold">${selectedRecharge.amount}</p>
+
+              {/* Amount Summary - Local and USD */}
+              <div className="grid grid-cols-2 gap-4">
+                {/* Local Amount Deposited */}
+                {selectedRecharge.metadata?.paymentDetails?.includes('Monto Local:') && (
+                  <div className="bg-blue-50 dark:bg-blue-950/30 p-4 rounded-lg border border-blue-200 dark:border-blue-900">
+                    <p className="text-xs uppercase font-bold text-blue-600 mb-1">Monto Depositado</p>
+                    <p className="text-2xl font-bold text-blue-600">
+                      {selectedRecharge.metadata.paymentDetails.match(/Monto Local:\s*([^,]+)/)?.[1]?.trim() || 'N/A'}
+                    </p>
+                    {selectedRecharge.metadata.paymentDetails.includes('Tipo Cambio:') && (
+                      <p className="text-xs text-muted-foreground mt-1">
+                        TC: 1 USD = {selectedRecharge.metadata.paymentDetails.match(/Tipo Cambio:\s*([^,]+)/)?.[1]?.trim() || '1'} {selectedRecharge.metadata.paymentDetails.match(/Moneda:\s*([^,]+)/)?.[1]?.trim() || ''}
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                {/* USD Amount to Credit */}
+                <div className="bg-green-50 dark:bg-green-950/30 p-4 rounded-lg border border-green-200 dark:border-green-900">
+                  <p className="text-xs uppercase font-bold text-green-600 mb-1">Monto a Acreditar</p>
+                  <p className="text-3xl font-bold text-green-600">${selectedRecharge.amount} USD</p>
+                </div>
               </div>
-              <div>
-                <p className="text-sm font-medium">Método de Pago:</p>
-                <p className="text-sm text-muted-foreground">{getPaymentMethodLabel(selectedRecharge.paymentMethod)}</p>
+
+              {/* Payment Method */}
+              <div className="bg-muted/30 p-4 rounded-lg">
+                <p className="text-xs uppercase font-bold text-muted-foreground mb-2">Método de Pago</p>
+                <Badge variant="outline" className="text-sm px-3 py-1">
+                  {getPaymentMethodLabel(selectedRecharge.paymentMethod)}
+                </Badge>
               </div>
+
+              {/* Payment Details - Parsed */}
               {selectedRecharge.metadata?.paymentDetails && (
-                <div>
-                  <p className="text-sm font-medium">Detalles del Pago:</p>
-                  <p className="text-sm text-muted-foreground">{selectedRecharge.metadata.paymentDetails}</p>
+                <div className="bg-muted/30 p-4 rounded-lg space-y-3">
+                  <p className="text-xs uppercase font-bold text-muted-foreground">Detalles del Pago</p>
+                  <div className="grid grid-cols-2 gap-4">
+                    {/* Parse and display holder name and time separately */}
+                    {selectedRecharge.metadata.paymentDetails.includes('Titular:') && (
+                      <div>
+                        <p className="text-xs text-muted-foreground">Nombre del Titular</p>
+                        <p className="font-medium">
+                          {selectedRecharge.metadata.paymentDetails.match(/Titular:\s*([^,]+)/)?.[1]?.trim() || 'N/A'}
+                        </p>
+                      </div>
+                    )}
+                    {selectedRecharge.metadata.paymentDetails.includes('Hora:') && (
+                      <div>
+                        <p className="text-xs text-muted-foreground">Hora del Pago</p>
+                        <p className="font-medium">
+                          {selectedRecharge.metadata.paymentDetails.match(/Hora:\s*([^,]+)/)?.[1]?.trim() || 'N/A'}
+                        </p>
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
-              <div>
-                <Label htmlFor="externalTxId">ID Transacción Externa (Opcional)</Label>
+
+              {/* Voucher Image */}
+              {selectedRecharge.metadata?.voucherUrl && (
+                <div className="bg-muted/30 p-4 rounded-lg">
+                  <p className="text-xs uppercase font-bold text-muted-foreground mb-3">Comprobante de Pago</p>
+                  <div className="border rounded-lg overflow-hidden bg-white">
+                    <img
+                      src={selectedRecharge.metadata.voucherUrl}
+                      alt="Comprobante de pago"
+                      className="w-full max-h-[400px] object-contain cursor-pointer"
+                      onClick={() => window.open(selectedRecharge.metadata.voucherUrl, '_blank')}
+                    />
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-2 text-center">
+                    Click en la imagen para ver en tamaño completo
+                  </p>
+                </div>
+              )}
+
+              {/* External Transaction ID Input */}
+              <div className="bg-blue-50 dark:bg-blue-950/30 p-4 rounded-lg border border-blue-200 dark:border-blue-900">
+                <Label htmlFor="externalTxId" className="text-xs uppercase font-bold text-blue-600">
+                  ID Transacción Externa (Opcional)
+                </Label>
+                <p className="text-xs text-muted-foreground mb-2">
+                  Ingresa el número de referencia del banco si lo tienes
+                </p>
                 <Input
                   id="externalTxId"
                   placeholder="ej: BANCO_REF_123456"
                   value={externalTxId}
                   onChange={(e) => setExternalTxId(e.target.value)}
+                  className="bg-white dark:bg-background"
                 />
+              </div>
+
+              {/* Request Date */}
+              <div className="text-sm text-muted-foreground text-center">
+                Solicitud creada el {new Date(selectedRecharge.createdAt).toLocaleDateString('es-ES', {
+                  day: '2-digit',
+                  month: 'long',
+                  year: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })}
               </div>
             </div>
           )}
-          <DialogFooter>
+
+          <DialogFooter className="mt-4 gap-2">
             <Button variant="outline" onClick={() => setShowApproveDialog(false)}>
               Cancelar
             </Button>
-            <Button onClick={confirmApprove} disabled={approveMutation.isPending}>
-              {approveMutation.isPending ? 'Aprobando...' : 'Confirmar Aprobación'}
+            <Button
+              onClick={confirmApprove}
+              disabled={approveMutation.isPending}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              {approveMutation.isPending ? 'Aprobando...' : (
+                <>
+                  <CheckCircle className="h-4 w-4 mr-2" />
+                  Aprobar Recarga
+                </>
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>

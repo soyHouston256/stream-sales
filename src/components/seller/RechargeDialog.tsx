@@ -28,8 +28,10 @@ import {
   AlertTriangle,
   Smartphone,
   Building2,
-  Coins
+  Coins,
+  Upload
 } from 'lucide-react';
+import { ImageUpload } from '@/components/shared/ImageUpload';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { tokenManager } from '@/lib/utils/tokenManager';
@@ -69,6 +71,7 @@ export function RechargeDialog({ currentBalance, trigger, role = 'seller' }: Rec
   const [open, setOpen] = useState(false);
   const [selectedMethod, setSelectedMethod] = useState<PaymentMethod | null>(null);
   const [copied, setCopied] = useState('');
+  const [voucherUrl, setVoucherUrl] = useState<string>('');
 
   const createSellerRecharge = useCreateRecharge();
   const createAffiliateRecharge = useCreateAffiliateRecharge();
@@ -90,6 +93,36 @@ export function RechargeDialog({ currentBalance, trigger, role = 'seller' }: Rec
     },
     enabled: open && !!user?.countryCode,
   });
+
+  // Fetch exchange rate for user's country
+  const { data: exchangeRateData } = useQuery({
+    queryKey: ['exchange-rate', user?.countryCode],
+    queryFn: async () => {
+      if (!user?.countryCode) return null;
+      const token = tokenManager.getToken();
+      const res = await fetch(`/api/exchange-rate/${user.countryCode}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) return null;
+      const data = await res.json();
+      return data.data as {
+        countryCode: string;
+        currencyCode: string;
+        currencyName: string;
+        rate: string;
+        isDefault: boolean;
+      };
+    },
+    enabled: open && !!user?.countryCode,
+  });
+
+  // Calculate USD equivalent from local currency amount
+  const exchangeRate = exchangeRateData?.rate ? parseFloat(exchangeRateData.rate) : 1;
+  const currencySymbol = exchangeRateData?.currencyCode === 'PEN' ? 'S/' :
+    exchangeRateData?.currencyCode === 'MXN' ? '$' :
+      exchangeRateData?.currencyCode === 'COP' ? '$' :
+        exchangeRateData?.currencyCode === 'ARS' ? '$' :
+          exchangeRateData?.currencyCode || 'S/';
 
   // Set first available method when config loads
   useEffect(() => {
@@ -113,6 +146,7 @@ export function RechargeDialog({ currentBalance, trigger, role = 'seller' }: Rec
   });
 
   const amount = watch('amount');
+  const amountInUSD = amount ? (amount / exchangeRate).toFixed(2) : '0.00';
 
   const copyToClipboard = async (text: string, type: string) => {
     try {
@@ -150,14 +184,22 @@ export function RechargeDialog({ currentBalance, trigger, role = 'seller' }: Rec
       return;
     }
 
+    // Calculate USD amount from local currency
+    const localAmount = data.amount;
+    const usdAmount = exchangeRate > 1 ? parseFloat((localAmount / exchangeRate).toFixed(2)) : localAmount;
+    const currencyCode = exchangeRateData?.currencyCode || 'USD';
+
     try {
       await createRecharge.mutateAsync({
         ...data,
-        paymentDetails: `Método: ${selectedMethod?.name}, Titular: ${data.holderName}, Hora: ${data.paymentTime}`,
+        amount: usdAmount, // Send USD amount as the wallet amount
+        paymentDetails: `Método: ${selectedMethod?.name}, Titular: ${data.holderName}, Hora: ${data.paymentTime}, Moneda: ${currencyCode}, Monto Local: ${currencySymbol}${localAmount}, Tipo Cambio: ${exchangeRate}${voucherUrl ? `, Voucher: ${voucherUrl}` : ''}`,
+        voucherUrl: voucherUrl || undefined,
       });
       setOpen(false);
       reset();
       setSelectedMethod(null);
+      setVoucherUrl('');
     } catch (error) {
       // Error handled by mutation
     }
@@ -167,10 +209,10 @@ export function RechargeDialog({ currentBalance, trigger, role = 'seller' }: Rec
     setValue('amount', amt, { shouldValidate: true });
   };
 
-  // Get currency based on method type
+  // Get currency based on method type (use exchange rate data)
   const getCurrency = () => {
-    if (!selectedMethod) return 'S/';
-    return selectedMethod.type === 'crypto' ? 'USDT' : 'S/';
+    if (!selectedMethod) return currencySymbol;
+    return selectedMethod.type === 'crypto' ? 'USDT' : currencySymbol;
   };
 
   return (
@@ -208,7 +250,7 @@ export function RechargeDialog({ currentBalance, trigger, role = 'seller' }: Rec
           <div className="flex flex-col md:flex-row min-h-[600px]">
 
             {/* --- LEFT COLUMN: PAYMENT METHODS --- */}
-            <div className="w-full md:w-5/12 bg-muted/30 border-r flex flex-col">
+            <div className="w-full md:w-1/2 bg-muted/30 border-r flex flex-col">
 
               {/* Header */}
               <div className="p-6 border-b">
@@ -226,7 +268,7 @@ export function RechargeDialog({ currentBalance, trigger, role = 'seller' }: Rec
                       type="button"
                       onClick={() => handleMethodChange(method)}
                       className={cn(
-                        "relative p-3 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2 border-2 group",
+                        "relative p-4 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2 border-2 group aspect-square",
                         selectedMethod?.id === method.id
                           ? `bg-background shadow-md`
                           : 'bg-background border-transparent hover:bg-muted'
@@ -389,7 +431,7 @@ export function RechargeDialog({ currentBalance, trigger, role = 'seller' }: Rec
             </div>
 
             {/* --- RIGHT COLUMN: FORM --- */}
-            <div className="w-full md:w-7/12 p-6 md:p-10 flex flex-col justify-center bg-background relative">
+            <div className="w-full md:w-1/2 p-6 md:p-8 flex flex-col justify-start bg-background relative overflow-y-auto">
 
               <form onSubmit={handleSubmit(onSubmit)} className="max-w-md mx-auto w-full">
                 <h2 className="text-2xl font-bold mb-1">{t('seller.recharge.reportPayment')}</h2>
@@ -414,6 +456,25 @@ export function RechargeDialog({ currentBalance, trigger, role = 'seller' }: Rec
                   </div>
                   {errors.amount && (
                     <p className="text-sm text-destructive mt-1">{errors.amount.message}</p>
+                  )}
+
+                  {/* USD Conversion Display */}
+                  {amount && amount > 0 && selectedMethod?.type !== 'crypto' && exchangeRate > 1 && (
+                    <div className="mt-3 p-3 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-lg">
+                      <div className="flex items-center justify-between">
+                        <div className="text-sm text-muted-foreground">
+                          {t('seller.recharge.youWillReceive')}
+                        </div>
+                        <div className="text-right">
+                          <p className="text-xl font-bold text-green-600 dark:text-green-400">
+                            ${amountInUSD} USD
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {t('seller.recharge.exchangeRate')}: 1 USD = {exchangeRate.toFixed(2)} {exchangeRateData?.currencyCode}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
                   )}
 
                   {/* Quick Amount Buttons */}
@@ -470,6 +531,27 @@ export function RechargeDialog({ currentBalance, trigger, role = 'seller' }: Rec
                       />
                     </div>
                   </div>
+                </div>
+
+                {/* Voucher Upload Section */}
+                <div className="mt-6">
+                  <Label className="block text-xs font-bold text-foreground mb-2">
+                    {t('seller.recharge.voucherLabel')}
+                  </Label>
+                  <p className="text-xs text-muted-foreground mb-3">
+                    {t('seller.recharge.voucherDescription')}
+                  </p>
+                  <ImageUpload
+                    value={voucherUrl}
+                    onChange={setVoucherUrl}
+                    disabled={createRecharge.isPending}
+                  />
+                  {voucherUrl && (
+                    <p className="text-xs text-green-600 mt-2 flex items-center gap-1">
+                      <Check size={14} />
+                      {t('seller.recharge.voucherUploaded')}
+                    </p>
+                  )}
                 </div>
 
                 {/* Submit Button */}

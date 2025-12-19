@@ -165,6 +165,14 @@ export async function GET(request: NextRequest) {
             },
           },
         },
+        // Include assigned slot to get profile name and PIN
+        assignedSlot: {
+          select: {
+            id: true,
+            profileName: true,
+            pinCode: true,
+          },
+        },
         variant: {
           include: {
             product: {
@@ -244,7 +252,11 @@ export async function GET(request: NextRequest) {
             if (!account?.passwordHash) return '***';
             return safeDecrypt(account.passwordHash);
           })(),
-          accountDetails: {},
+          // Include assigned slot details (profile name and PIN)
+          accountDetails: item.assignedSlot ? {
+            profileName: item.assignedSlot.profileName || null,
+            pin: item.assignedSlot.pinCode ? safeDecrypt(item.assignedSlot.pinCode) : null,
+          } : {},
         },
         provider: {
           id: item.variant.product.provider.id,
@@ -391,7 +403,21 @@ export async function POST(request: NextRequest) {
 
     const { productId } = validationResult.data;
 
-    // 4. Execute purchase use case
+    // 4. Check slot availability BEFORE processing payment
+    const inventoryCheck = await prisma.inventoryAccount.findFirst({
+      where: { productId },
+      select: { availableSlots: true, totalSlots: true },
+    });
+
+    // For profile-based products, verify slots are available
+    if (inventoryCheck && inventoryCheck.totalSlots > 1 && inventoryCheck.availableSlots <= 0) {
+      return NextResponse.json(
+        { error: 'No slots available for this product' },
+        { status: 409 }
+      );
+    }
+
+    // 5. Execute purchase use case
     const walletRepository = new PrismaWalletRepository(prisma);
     const productRepository = new PrismaProductRepository(prisma);
     const purchaseRepository = new PrismaPurchaseRepository(prisma);
@@ -424,17 +450,24 @@ export async function POST(request: NextRequest) {
     });
 
     if (inventoryAccount) {
-      // If there are available slots, mark one as sold
+      const orderItemId = result.purchase.id; // This is the OrderItem ID
+
+      // If there are available slots (profile-based product), sell ONE slot
       if (inventoryAccount.slots.length > 0) {
         const slotToSell = inventoryAccount.slots[0];
 
         await prisma.$transaction([
-          // Mark slot as sold
+          // 1. Mark slot as sold
           prisma.inventorySlot.update({
             where: { id: slotToSell.id },
             data: { status: 'sold' },
           }),
-          // Decrement available slots count
+          // 2. Link slot to the OrderItem (CRITICAL - this links the sold slot to the buyer's order)
+          prisma.orderItem.update({
+            where: { id: orderItemId },
+            data: { assignedSlotId: slotToSell.id },
+          }),
+          // 3. Decrement available slots count
           prisma.inventoryAccount.update({
             where: { id: inventoryAccount.id },
             data: {
@@ -445,18 +478,20 @@ export async function POST(request: NextRequest) {
           }),
         ]);
 
-        console.log(`[Purchase] Slot ${slotToSell.id} marked as sold. Remaining: ${inventoryAccount.availableSlots - 1}`);
+        const remainingSlots = inventoryAccount.availableSlots - 1;
+        console.log(`[Purchase] Slot ${slotToSell.id} assigned to OrderItem ${orderItemId}. Remaining slots: ${remainingSlots}`);
 
-        // If no more slots available, deactivate the product
-        if (inventoryAccount.availableSlots - 1 <= 0) {
+        // Only deactivate product if NO more slots available
+        if (remainingSlots <= 0) {
           await prisma.product.update({
             where: { id: productId },
             data: { isActive: false },
           });
-          console.log(`[Purchase] Product ${productId} deactivated - no more slots available`);
+          console.log(`[Purchase] Product ${productId} deactivated - all slots sold`);
         }
-      } else if (inventoryAccount.totalSlots === 1) {
-        // Full account - just decrement and deactivate
+      } else {
+        // Full account product (no slots, just the account itself)
+        // Deactivate immediately since there's no inventory management
         await prisma.$transaction([
           prisma.inventoryAccount.update({
             where: { id: inventoryAccount.id },
