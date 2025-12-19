@@ -3,7 +3,7 @@
 import { useAuth } from '@/lib/auth/useAuth';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Users, DollarSign, AlertCircle, TrendingUp, Wallet } from 'lucide-react';
-import { EnhancedStatsCard } from '@/components/ui/enhanced-stats-card';
+import { StatCard } from '@/components/ui/stat-card';
 import { SalesChart } from '@/components/admin/SalesChart';
 import { useAdminStats, useSalesData } from '@/lib/hooks/useAdminStats';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -33,55 +33,37 @@ export default function AdminDashboard() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <EnhancedStatsCard
-          title={t('admin.totalUsers')}
+        <StatCard
+          label={t('admin.totalUsers')}
           value={stats?.totalUsers ?? 0}
+          description={stats?.usersGrowth ? `${stats.usersGrowth > 0 ? '+' : ''}${stats.usersGrowth}% crecimiento` : undefined}
           icon={Users}
           isLoading={statsLoading}
-          variant="info"
-          showTrend={!!stats?.usersGrowth}
-          trend={
-            stats?.usersGrowth
-              ? {
-                value: `${stats.usersGrowth > 0 ? '+' : ''}${stats.usersGrowth}%`,
-                direction: stats.usersGrowth > 0 ? 'up' : 'down',
-              }
-              : undefined
-          }
-          chartData={generateSparklineData(stats?.usersGrowth && stats.usersGrowth > 0 ? 'up' : 'neutral')}
+          color="blue"
         />
-        <EnhancedStatsCard
-          title={t('admin.totalSales')}
+        <StatCard
+          label={t('admin.totalSales')}
           value={`$${stats?.totalSales ? Number(stats.totalSales).toFixed(2) : '0.00'}`}
+          description={stats?.salesGrowth ? `${stats.salesGrowth > 0 ? '+' : ''}${stats.salesGrowth}% vs mes anterior` : undefined}
           icon={DollarSign}
           isLoading={statsLoading}
-          variant="success"
-          showTrend={!!stats?.salesGrowth}
-          trend={
-            stats?.salesGrowth
-              ? {
-                value: `${stats.salesGrowth > 0 ? '+' : ''}${stats.salesGrowth}%`,
-                direction: stats.salesGrowth > 0 ? 'up' : 'down',
-              }
-              : undefined
-          }
-          chartData={generateSparklineData(stats?.salesGrowth && stats.salesGrowth > 0 ? 'up' : 'down')}
+          color="green"
         />
-        <EnhancedStatsCard
-          title={t('admin.commissionsGenerated')}
+        <StatCard
+          label={t('admin.commissionsGenerated')}
           value={`$${stats?.totalCommissions ? Number(stats.totalCommissions).toFixed(2) : '0.00'}`}
+          description="Comisiones totales"
           icon={TrendingUp}
           isLoading={statsLoading}
-          variant="success"
-          chartData={generateSparklineData('up')}
+          color="emerald"
         />
-        <EnhancedStatsCard
-          title={t('admin.activeDisputes')}
+        <StatCard
+          label={t('admin.activeDisputes')}
           value={stats?.activeDisputes ?? 0}
+          description="Disputas activas"
           icon={AlertCircle}
           isLoading={statsLoading}
-          variant={stats?.activeDisputes && stats.activeDisputes > 0 ? 'warning' : 'default'}
-          chartData={generateSparklineData(stats?.activeDisputes && stats.activeDisputes > 0 ? 'down' : 'neutral')}
+          color={stats?.activeDisputes && stats.activeDisputes > 0 ? 'orange' : 'purple'}
         />
       </div>
 

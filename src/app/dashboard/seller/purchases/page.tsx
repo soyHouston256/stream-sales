@@ -12,7 +12,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { DataTable, Column } from '@/components/admin/DataTable';
-import { EnhancedStatsCard } from '@/components/ui/enhanced-stats-card';
+import { StatCard } from '@/components/ui/stat-card';
 import { EmptyState } from '@/components/ui/empty-state';
 import { usePurchases } from '@/lib/hooks/usePurchases';
 import { Purchase, PurchasesFilters } from '@/types/seller';
@@ -156,28 +156,28 @@ export default function PurchasesPage() {
 
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-3">
-        <EnhancedStatsCard
-          title={t('purchases.page.totalPurchases')}
+        <StatCard
+          label={t('purchases.page.totalPurchases')}
           value={stats.totalPurchases}
           description={t('purchases.page.allTimePurchases')}
           icon={ShoppingBag}
-          variant="info"
+          color="blue"
           isLoading={isLoading && purchases.length === 0}
         />
-        <EnhancedStatsCard
-          title={t('purchases.page.totalSpent')}
+        <StatCard
+          label={t('purchases.page.totalSpent')}
           value={formatCurrency(stats.totalSpent)}
           description={t('purchases.page.totalAmountSpent')}
           icon={DollarSign}
-          variant="warning"
+          color="orange"
           isLoading={isLoading && purchases.length === 0}
         />
-        <EnhancedStatsCard
-          title={t('purchases.page.averagePrice')}
+        <StatCard
+          label={t('purchases.page.averagePrice')}
           value={formatCurrency(stats.averagePrice)}
           description={t('purchases.page.averagePurchasePrice')}
           icon={TrendingDown}
-          variant="success"
+          color="green"
           isLoading={isLoading && purchases.length === 0}
         />
       </div>

@@ -19,7 +19,7 @@ import NextImage from 'next/image';
 import { tokenManager } from '@/lib/utils/tokenManager';
 import { useToast } from '@/hooks/use-toast';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { EnhancedStatsCard } from '@/components/ui/enhanced-stats-card';
+import { StatCard } from '@/components/ui/stat-card';
 import { DataTable, Column } from '@/components/admin/DataTable';
 import { format } from 'date-fns';
 import { es, enUS } from 'date-fns/locale';
@@ -686,31 +686,31 @@ export default function ValidatorFundPage() {
             {/* Stats Cards - Same layout as seller wallet */}
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                 <div className="col-span-2">
-                    <EnhancedStatsCard
-                        title={t('paymentValidator.fund.availableBalance')}
+                    <StatCard
+                        label={t('paymentValidator.fund.availableBalance')}
                         value={`$${fundData?.balance || '0.00'}`}
                         description={`${fundData?.summary.pendingCount || 0} ${t('paymentValidator.fund.entriesPending')}`}
                         icon={Landmark}
-                        variant="success"
+                        color="green"
                         isLoading={fundLoading}
                     />
                 </div>
 
-                <EnhancedStatsCard
-                    title={t('paymentValidator.fund.transferredTotal')}
+                <StatCard
+                    label={t('paymentValidator.fund.transferredTotal')}
                     value={`$${fundData?.transferredTotal || '0.00'}`}
                     description={t('paymentValidator.fund.transfersCompleted')}
                     icon={ArrowUpRight}
-                    variant="info"
+                    color="blue"
                     isLoading={fundLoading}
                 />
 
-                <EnhancedStatsCard
-                    title={t('paymentValidator.fund.pendingTransfers')}
+                <StatCard
+                    label={t('paymentValidator.fund.pendingTransfers')}
                     value={pendingTransfersCount.toString()}
                     description={t('paymentValidator.fund.awaitingAdminApproval')}
                     icon={Clock}
-                    variant="warning"
+                    color="orange"
                     isLoading={transfersLoading}
                 />
             </div>

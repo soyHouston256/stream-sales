@@ -5,8 +5,9 @@ import { useAuth } from '@/lib/auth/useAuth';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Wallet, ShoppingBag, DollarSign, TrendingUp } from 'lucide-react';
-import { EnhancedStatsCard } from '@/components/ui/enhanced-stats-card';
+import { Badge } from '@/components/ui/badge';
+import { Wallet, ShoppingBag, DollarSign, TrendingUp, ShieldCheck } from 'lucide-react';
+import { StatCard } from '@/components/ui/stat-card';
 import { EmptyState } from '@/components/ui/empty-state';
 import { DataTable, Column } from '@/components/admin/DataTable';
 import { useSellerStats } from '@/lib/hooks/useSellerStats';
@@ -75,9 +76,16 @@ export default function SellerDashboard() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      {/* Header */}
+      <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">{t('seller.title')}</h1>
+          <div className="flex items-center gap-3">
+            <h1 className="text-3xl font-bold">{t('seller.title')}</h1>
+            <Badge className="bg-blue-100 text-blue-700 dark:bg-blue-950/50 dark:text-blue-400">
+              <ShieldCheck size={14} className="mr-1" />
+              Vendedor
+            </Badge>
+          </div>
           <p className="text-muted-foreground mt-2">
             {t('dashboard.welcome')}, {user?.name || user?.email}
           </p>
@@ -86,37 +94,37 @@ export default function SellerDashboard() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <EnhancedStatsCard
-          title={t('seller.walletBalance')}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard
+          label={t('seller.walletBalance')}
           value={stats ? formatCurrency(stats.walletBalance) : '$0.00'}
           description={t('seller.availableBalance')}
           icon={Wallet}
-          variant="success"
+          color="green"
           isLoading={statsLoading}
         />
-        <EnhancedStatsCard
-          title={t('seller.totalPurchases')}
+        <StatCard
+          label={t('seller.totalPurchases')}
           value={stats?.totalPurchases ?? 0}
           description={t('seller.lifetimePurchases')}
           icon={ShoppingBag}
-          variant="info"
+          color="blue"
           isLoading={statsLoading}
         />
-        <EnhancedStatsCard
-          title={t('seller.totalSpent')}
+        <StatCard
+          label={t('seller.totalSpent')}
           value={stats ? formatCurrency(stats.totalSpent) : '$0.00'}
           description={t('seller.lifetimeSpending')}
           icon={DollarSign}
-          variant="warning"
+          color="orange"
           isLoading={statsLoading}
         />
-        <EnhancedStatsCard
-          title={t('seller.thisMonth')}
+        <StatCard
+          label={t('seller.thisMonth')}
           value={stats?.thisMonthPurchases ?? 0}
           description={stats ? `${formatCurrency(stats.thisMonthSpent)} ${t('seller.spent')}` : `$0.00 ${t('seller.spent')}`}
           icon={TrendingUp}
-          variant="info"
+          color="indigo"
           isLoading={statsLoading}
         />
       </div>

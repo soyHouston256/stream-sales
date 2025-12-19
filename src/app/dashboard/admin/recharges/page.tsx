@@ -18,7 +18,7 @@ import { CheckCircle, XCircle, AlertCircle, Search, DollarSign, Inbox, Clock, Wa
 import { tokenManager } from '@/lib/utils/tokenManager';
 import { useToast } from '@/hooks/use-toast';
 import { EmptyState } from '@/components/ui/empty-state';
-import { EnhancedStatsCard } from '@/components/ui/enhanced-stats-card';
+import { StatCard } from '@/components/ui/stat-card';
 
 interface User {
   id: string;
@@ -261,39 +261,39 @@ export default function AdminRechargesPage() {
 
       {/* Summary Cards */}
       <div className="grid gap-4 md:grid-cols-4">
-        <EnhancedStatsCard
-          title="Pendientes"
+        <StatCard
+          label="Pendientes"
           value={rechargesData?.summary.pending ?? 0}
           description={`$${rechargesData?.summary.totalPendingAmount ?? '0.00'}`}
           icon={Clock}
-          variant="warning"
+          color="orange"
           isLoading={isLoading}
         />
 
-        <EnhancedStatsCard
-          title="Completadas"
+        <StatCard
+          label="Completadas"
           value={rechargesData?.summary.completed ?? 0}
           description={`$${rechargesData?.summary.totalCompletedAmount ?? '0.00'}`}
           icon={CheckCircle}
-          variant="success"
+          color="green"
           isLoading={isLoading}
         />
 
-        <EnhancedStatsCard
-          title="Fallidas"
+        <StatCard
+          label="Fallidas"
           value={rechargesData?.summary.failed ?? 0}
           description="Recargas que no se pudieron procesar"
           icon={XCircle}
-          variant="danger"
+          color="red"
           isLoading={isLoading}
         />
 
-        <EnhancedStatsCard
-          title="Canceladas"
+        <StatCard
+          label="Canceladas"
           value={rechargesData?.summary.cancelled ?? 0}
           description="Recargas rechazadas o canceladas"
           icon={AlertCircle}
-          variant="default"
+          color="purple"
           isLoading={isLoading}
         />
       </div>
@@ -429,7 +429,7 @@ export default function AdminRechargesPage() {
                             <Button
                               size="sm"
                               onClick={() => handleApprove(recharge)}
-                              variant="default"
+                              color="purple"
                             >
                               <CheckCircle className="h-4 w-4 mr-1" />
                               Aprobar

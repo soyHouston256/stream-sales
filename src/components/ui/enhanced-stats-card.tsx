@@ -136,7 +136,7 @@ export function EnhancedStatsCard({
             styles.iconContainer
           )}
         >
-          <Icon className={cn('h-7 w-7', styles.icon)} />
+          <Icon className="h-7 w-7" />
         </div>
       </div>
 

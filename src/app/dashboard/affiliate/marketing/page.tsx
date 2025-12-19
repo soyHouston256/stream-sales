@@ -15,7 +15,7 @@ import {
   ReferralCodeCard,
   ReferralTextTemplate,
 } from '@/components/affiliate';
-import { EnhancedStatsCard } from '@/components/ui/enhanced-stats-card';
+import { StatCard } from '@/components/ui/stat-card';
 import { calculateConversionRate } from '@/lib/utils/affiliate';
 
 export default function MarketingPage() {
@@ -59,30 +59,30 @@ export default function MarketingPage() {
         <p className="text-sm text-muted-foreground mb-4">{t('affiliate.marketing.trackPerformance')}</p>
 
         <div className="grid gap-4 md:grid-cols-3 mb-6">
-          <EnhancedStatsCard
-            title={t('affiliate.marketing.linkViews')}
+          <StatCard
+            label={t('affiliate.marketing.linkViews')}
             value={stats?.linkViews || 0}
             description={t('affiliate.marketing.linkViewsDesc')}
             icon={Eye}
-            variant="info"
+            color="blue"
             isLoading={statsLoading}
           />
 
-          <EnhancedStatsCard
-            title={t('affiliate.marketing.registrations')}
+          <StatCard
+            label={t('affiliate.marketing.registrations')}
             value={stats?.registrations || 0}
             description={t('affiliate.marketing.registrationsDesc')}
             icon={UserPlus}
-            variant="success"
+            color="green"
             isLoading={statsLoading}
           />
 
-          <EnhancedStatsCard
-            title={t('affiliate.marketing.conversionRate')}
+          <StatCard
+            label={t('affiliate.marketing.conversionRate')}
             value={`${conversionRate}%`}
             description={t('affiliate.marketing.conversionRateDesc')}
             icon={Percent}
-            variant="warning"
+            color="orange"
             isLoading={statsLoading}
           />
         </div>

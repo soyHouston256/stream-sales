@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { AlertCircle, CheckCircle, Clock, Inbox } from 'lucide-react';
 import { useConciliatorStats, useResolutionsByDay } from '@/lib/hooks/useConciliatorStats';
 import { useDisputes } from '@/lib/hooks/useDisputes';
-import { EnhancedStatsCard } from '@/components/ui/enhanced-stats-card';
+import { StatCard } from '@/components/ui/stat-card';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ResolutionsByDayChart } from '@/components/conciliator/ResolutionsByDayChart';
 import { DisputesTable } from '@/components/conciliator/DisputesTable';
@@ -53,36 +53,36 @@ export default function ConciliatorDashboard() {
           </>
         ) : stats ? (
           <>
-            <EnhancedStatsCard
-              title={t('conciliator.pendingDisputes')}
+            <StatCard
+              label={t('conciliator.pendingDisputes')}
               value={stats.pendingDisputes}
               description={t('conciliator.awaitingAssignment')}
               icon={Inbox}
-              variant="warning"
+              color="orange"
               isLoading={statsLoading}
             />
-            <EnhancedStatsCard
-              title={t('conciliator.myAssigned')}
+            <StatCard
+              label={t('conciliator.myAssigned')}
               value={stats.myAssigned}
               description={t('conciliator.underReview')}
               icon={Clock}
-              variant="info"
+              color="blue"
               isLoading={statsLoading}
             />
-            <EnhancedStatsCard
-              title={t('conciliator.resolvedToday')}
+            <StatCard
+              label={t('conciliator.resolvedToday')}
               value={stats.resolvedToday}
               description={t('conciliator.completedToday')}
               icon={CheckCircle}
-              variant="success"
+              color="green"
               isLoading={statsLoading}
             />
-            <EnhancedStatsCard
-              title={t('conciliator.totalResolved')}
+            <StatCard
+              label={t('conciliator.totalResolved')}
               value={stats.totalResolved}
               description={t('conciliator.lifetime')}
               icon={CheckCircle}
-              variant="success"
+              color="green"
               isLoading={statsLoading}
             />
           </>

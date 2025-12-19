@@ -15,10 +15,11 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { EnhancedStatsCard } from '@/components/ui/enhanced-stats-card';
-import { Users, Clock, CheckCircle, XCircle, ArrowRight, AlertCircle, Wallet, Plus, CreditCard } from 'lucide-react';
+import { StatCard } from '@/components/ui/stat-card';
+import { Users, Clock, CheckCircle, XCircle, ArrowRight, AlertCircle, Wallet, Plus, CreditCard, ShieldCheck } from 'lucide-react';
 import {
   useAffiliateInfo,
   useAffiliateStats,
@@ -140,17 +141,23 @@ export default function AffiliateDashboard() {
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold">{t('affiliate.title')}</h1>
+          <div className="flex items-center gap-3">
+            <h1 className="text-3xl font-bold">{t('affiliate.title')}</h1>
+            <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-400">
+              <ShieldCheck size={14} className="mr-1" />
+              Afiliado
+            </Badge>
+          </div>
           <p className="text-muted-foreground mt-2">
             {t('dashboard.welcome')}, {user?.name || user?.email}
           </p>
         </div>
         <div className="flex gap-2">
-          <Button onClick={() => router.push('/dashboard/affiliate/wallet')} variant="outline">
+          <Button onClick={() => router.push('/dashboard/affiliate/wallet')} variant="outline" className="rounded-xl">
             <CreditCard className="h-4 w-4 mr-2" />
             {t('affiliate.dashboard.viewTransactions')}
           </Button>
-          <Button onClick={() => router.push('/dashboard/affiliate/wallet')}>
+          <Button onClick={() => router.push('/dashboard/affiliate/wallet')} className="rounded-xl">
             <Plus className="h-4 w-4 mr-2" />
             {t('affiliate.dashboard.rechargeBalance')}
           </Button>
@@ -168,41 +175,41 @@ export default function AffiliateDashboard() {
       ) : null}
 
       {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Wallet Balance */}
-        <EnhancedStatsCard
-          title={t('affiliate.dashboard.availableBalance')}
+        <StatCard
+          label={t('affiliate.dashboard.availableBalance')}
           value={walletLoading ? '...' : formatCurrency(walletBalance?.balance || 0)}
           description={t('affiliate.dashboard.balanceDescription')}
           icon={Wallet}
-          variant="success"
+          color="green"
           isLoading={walletLoading}
         />
 
-        <EnhancedStatsCard
-          title={t('affiliate.dashboard.totalReferrals')}
+        <StatCard
+          label={t('affiliate.dashboard.totalReferrals')}
           value={stats?.totalReferrals || 0}
           description={t('affiliate.dashboard.registeredWithCode')}
           icon={Users}
-          variant="info"
+          color="blue"
           isLoading={statsLoading}
         />
 
-        <EnhancedStatsCard
-          title={t('affiliate.dashboard.pendingApproval')}
+        <StatCard
+          label={t('affiliate.dashboard.pendingApproval')}
           value={pendingReferrals.length}
           description={t('affiliate.dashboard.awaitingDecision')}
           icon={Clock}
-          variant="warning"
+          color="orange"
           isLoading={referralsLoading}
         />
 
-        <EnhancedStatsCard
-          title={t('affiliate.dashboard.approvedReferrals')}
+        <StatCard
+          label={t('affiliate.dashboard.approvedReferrals')}
           value={approvedReferrals.length}
           description={t('affiliate.dashboard.activeSellers')}
           icon={CheckCircle}
-          variant="success"
+          color="emerald"
           isLoading={referralsLoading}
         />
       </div>

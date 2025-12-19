@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { DataTable, Column } from '@/components/admin/DataTable';
-import { EnhancedStatsCard } from '@/components/ui/enhanced-stats-card';
+import { StatCard } from '@/components/ui/stat-card';
 import { EmptyState } from '@/components/ui/empty-state';
 import { WithdrawalRequestDialog } from '@/components/provider/WithdrawalRequestDialog';
 import {
@@ -187,39 +187,39 @@ export default function EarningsPage() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-4">
-        <EnhancedStatsCard
-          title={t('provider.earnings.availableBalance')}
+        <StatCard
+          label={t('provider.earnings.availableBalance')}
           value={balance ? `$${parseFloat(balance.balance).toFixed(2)}` : '$0.00'}
           description={t('provider.earnings.readyForWithdrawal')}
           icon={Wallet}
-          variant="success"
+          color="green"
           isLoading={balanceLoading}
         />
 
-        <EnhancedStatsCard
-          title={t('provider.earnings.totalEarnings')}
+        <StatCard
+          label={t('provider.earnings.totalEarnings')}
           value={balance ? `$${parseFloat(balance.totalEarnings).toFixed(2)}` : '$0.00'}
           description={t('provider.earnings.lifetimeEarnings')}
           icon={TrendingUp}
-          variant="info"
+          color="blue"
           isLoading={balanceLoading}
         />
 
-        <EnhancedStatsCard
-          title={t('provider.earnings.totalWithdrawn')}
+        <StatCard
+          label={t('provider.earnings.totalWithdrawn')}
           value={balance ? `$${parseFloat(balance.totalWithdrawals).toFixed(2)}` : '$0.00'}
           description={t('provider.earnings.successfullyWithdrawn')}
           icon={TrendingDown}
-          variant="warning"
+          color="orange"
           isLoading={balanceLoading}
         />
 
-        <EnhancedStatsCard
-          title={t('provider.earnings.pendingWithdrawals')}
+        <StatCard
+          label={t('provider.earnings.pendingWithdrawals')}
           value={balance ? `$${parseFloat(balance.pendingWithdrawals).toFixed(2)}` : '$0.00'}
           description={t('provider.earnings.awaitingApproval')}
           icon={DollarSign}
-          variant="warning"
+          color="orange"
           isLoading={balanceLoading}
         />
       </div>
