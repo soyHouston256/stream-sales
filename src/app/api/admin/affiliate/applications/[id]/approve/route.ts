@@ -118,7 +118,7 @@ export async function PUT(
       approvedAt: updatedProfile.approvedAt?.toISOString(),
       message: 'Affiliate application approved successfully',
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error approving affiliate application:', error);
     return NextResponse.json(
       { error: 'Internal server error' },

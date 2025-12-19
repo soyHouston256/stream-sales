@@ -5,22 +5,15 @@ import { ProductStatus } from '../../domain/value-objects/ProductStatus';
 import { IProductRepository } from '../../domain/repositories/IProductRepository';
 import * as crypto from 'crypto';
 
-type PrismaProduct = {
-  id: string;
-  name: string;
-  description: string;
-  price: Prisma.Decimal;
-  providerId: string;
-  category: string;
-  accountEmail: string;
-  accountPassword: string;
-  accountDetails: any;
-  imageUrl: string | null;
-  status: string;
-  createdAt: Date;
-  updatedAt: Date;
-  soldAt: Date | null;
-};
+/**
+ * Type for Product with variants and inventory accounts from Prisma queries
+ */
+type ProductWithInventory = Prisma.ProductGetPayload<{
+  include: {
+    variants: true;
+    inventoryAccounts: true;
+  };
+}>;
 
 /**
  * PrismaProductRepository
@@ -232,7 +225,7 @@ export class PrismaProductRepository implements IProductRepository {
       },
     });
 
-    return products.map((p: any) => this.toDomain(p));
+    return products.map((p) => this.toDomain(p));
   }
 
   /**
@@ -245,7 +238,7 @@ export class PrismaProductRepository implements IProductRepository {
     limit?: number;
     offset?: number;
   }): Promise<Product[]> {
-    const where: any = {
+    const where: Prisma.ProductWhereInput = {
       isActive: true,
     };
 
@@ -254,17 +247,18 @@ export class PrismaProductRepository implements IProductRepository {
     }
 
     if (filters?.minPrice !== undefined || filters?.maxPrice !== undefined) {
-      where.variants = {
-        some: {
-          price: {},
-        },
-      };
+      const priceFilter: Prisma.DecimalFilter<'ProductVariant'> = {};
       if (filters.minPrice !== undefined) {
-        where.variants.some.price.gte = filters.minPrice;
+        priceFilter.gte = filters.minPrice;
       }
       if (filters.maxPrice !== undefined) {
-        where.variants.some.price.lte = filters.maxPrice;
+        priceFilter.lte = filters.maxPrice;
       }
+      where.variants = {
+        some: {
+          price: priceFilter,
+        },
+      };
     }
 
     const products = await this.prisma.product.findMany({
@@ -278,7 +272,7 @@ export class PrismaProductRepository implements IProductRepository {
       },
     });
 
-    return products.map((p: any) => this.toDomain(p));
+    return products.map((p) => this.toDomain(p));
   }
 
   /**
@@ -294,7 +288,7 @@ export class PrismaProductRepository implements IProductRepository {
       },
     });
 
-    return products.map((p: any) => this.toDomain(p));
+    return products.map((p) => this.toDomain(p));
   }
 
   /**
@@ -311,7 +305,7 @@ export class PrismaProductRepository implements IProductRepository {
       },
     });
 
-    return products.map((p: any) => this.toDomain(p));
+    return products.map((p) => this.toDomain(p));
   }
 
   /**
@@ -353,7 +347,7 @@ export class PrismaProductRepository implements IProductRepository {
   /**
    * Convierte modelo de Prisma a entidad de dominio
    */
-  private toDomain(prismaProduct: any): Product {
+  private toDomain(prismaProduct: ProductWithInventory): Product {
     const variant = prismaProduct.variants?.[0];
     const account = prismaProduct.inventoryAccounts?.[0];
 

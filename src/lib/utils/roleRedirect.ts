@@ -16,13 +16,16 @@ const ROLE_DASHBOARD_MAP: Record<UserRole, string> = {
  * Returns the dashboard URL for a given user role
  */
 export function getDashboardRoute(role: UserRole): string {
-  return ROLE_DASHBOARD_MAP[role] || '/dashboard/seller';
+  // eslint-disable-next-line security/detect-object-injection
+  return Object.hasOwn(ROLE_DASHBOARD_MAP, role) ? ROLE_DASHBOARD_MAP[role] : '/dashboard/seller';
 }
 
 /**
  * Checks if a user has access to a specific route
  */
 export function canAccessRoute(userRole: UserRole, route: string): boolean {
-  const allowedRoute = ROLE_DASHBOARD_MAP[userRole];
+  // eslint-disable-next-line security/detect-object-injection
+  const allowedRoute = Object.hasOwn(ROLE_DASHBOARD_MAP, userRole) ? ROLE_DASHBOARD_MAP[userRole] : '/dashboard/seller';
   return route.startsWith(allowedRoute);
 }
+

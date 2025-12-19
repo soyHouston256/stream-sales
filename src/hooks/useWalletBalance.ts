@@ -29,6 +29,7 @@ async function fetchWalletBalance(
   role: keyof typeof WALLET_ENDPOINTS
 ): Promise<WalletBalanceData> {
   const token = tokenManager.getToken();
+  // eslint-disable-next-line security/detect-object-injection
   const endpoint = WALLET_ENDPOINTS[role];
 
   const response = await fetch(endpoint, {

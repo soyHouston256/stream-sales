@@ -165,6 +165,7 @@ export default function AdminAffiliatesPage() {
       active: { variant: 'default', icon: CheckCircle, label: t('admin.affiliates.active') },
     };
 
+    // eslint-disable-next-line security/detect-object-injection
     const config = variants[status] || variants.pending;
     const Icon = config.icon;
 

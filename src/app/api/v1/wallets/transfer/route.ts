@@ -5,6 +5,7 @@ import { PrismaWalletRepository } from '../../../../../infrastructure/repositori
 import { TransferMoneyUseCase } from '../../../../../application/use-cases/TransferMoneyUseCase';
 import { InsufficientBalanceException } from '../../../../../domain/exceptions/InsufficientBalanceException';
 import { verifyJWT } from '../../../../../infrastructure/auth/jwt';
+import { getErrorMessage, logError } from '../../../../../lib/utils/error-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -58,7 +59,7 @@ export const dynamic = 'force-dynamic';
 const transferSchema = z.object({
   toUserId: z.string().min(1, 'toUserId is required'),
   amount: z
-    .union([z.number().positive(), z.string().regex(/^\d+(\.\d+)?$/)], {
+    .union([z.number().positive(), z.string().refine((val) => !isNaN(Number(val)) && Number(val) > 0, 'Must be a positive number')], {
       errorMap: () => ({ message: 'Amount must be a positive number' }),
     })
     .transform((val) => (typeof val === 'string' ? parseFloat(val) : val)),
@@ -113,31 +114,32 @@ export async function POST(request: NextRequest) {
 
     // 4. Retornar resultado exitoso
     return NextResponse.json(result, { status: 200 });
-  } catch (error: any) {
-    console.error('POST /api/v1/wallets/transfer error:', error);
+  } catch (error: unknown) {
+    logError('POST /api/v1/wallets/transfer', error);
+    const message = getErrorMessage(error);
 
     // Manejo de errores específicos
-    if (error.message?.includes('jwt') || error.message?.includes('token')) {
+    if (message.includes('jwt') || message.includes('token')) {
       return NextResponse.json({ error: 'Invalid or expired token' }, { status: 401 });
     }
 
     if (error instanceof InsufficientBalanceException) {
-      return NextResponse.json({ error: error.message }, { status: 402 }); // Payment Required
+      return NextResponse.json({ error: message }, { status: 402 }); // Payment Required
     }
 
-    if (error.message?.includes('not found')) {
-      return NextResponse.json({ error: error.message }, { status: 404 });
+    if (message.includes('not found')) {
+      return NextResponse.json({ error: message }, { status: 404 });
     }
 
     if (
-      error.message?.includes('yourself') ||
-      error.message?.includes('Currency mismatch')
+      message.includes('yourself') ||
+      message.includes('Currency mismatch')
     ) {
-      return NextResponse.json({ error: error.message }, { status: 400 });
+      return NextResponse.json({ error: message }, { status: 400 });
     }
 
     return NextResponse.json(
-      { error: 'Internal server error', details: error.message },
+      { error: 'Internal server error' },
       { status: 500 }
     );
   }

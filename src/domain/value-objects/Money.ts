@@ -214,7 +214,8 @@ export class Money {
   toString(): string {
     const formatted = this.props.amount.toFixed(2);
     const [intPart, decPart] = formatted.split('.');
-    const intWithCommas = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    // Use locale-based formatting instead of regex to avoid ReDoS
+    const intWithCommas = Number(intPart).toLocaleString('en-US');
 
     const symbol = this.getCurrencySymbol();
     return `${symbol}${intWithCommas}.${decPart}`;

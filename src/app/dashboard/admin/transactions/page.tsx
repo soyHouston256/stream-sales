@@ -64,7 +64,9 @@ export default function TransactionsPage() {
       key: 'type',
       label: 'Tipo',
       render: (tx) => (
+        // eslint-disable-next-line security/detect-object-injection
         <Badge variant={typeColors[tx.type] || 'default'}>
+          {/* eslint-disable-next-line security/detect-object-injection */}
           {typeLabels[tx.type] || tx.type}
         </Badge>
       ),
@@ -196,10 +198,10 @@ export default function TransactionsPage() {
             pagination={
               data
                 ? {
-                    currentPage: data.pagination.page,
-                    totalPages: data.pagination.totalPages,
-                    onPageChange: setPage,
-                  }
+                  currentPage: data.pagination.page,
+                  totalPages: data.pagination.totalPages,
+                  onPageChange: setPage,
+                }
                 : undefined
             }
             emptyState={{
@@ -207,6 +209,7 @@ export default function TransactionsPage() {
               title: 'No hay transacciones',
               description:
                 typeFilter !== 'all'
+                  // eslint-disable-next-line security/detect-object-injection
                   ? `No hay transacciones de tipo ${typeLabels[typeFilter] || typeFilter}.`
                   : 'No se han registrado transacciones en el sistema todavía.',
               variant: 'default',

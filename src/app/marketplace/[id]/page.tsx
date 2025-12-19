@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -40,11 +40,7 @@ export default function ProductDetailsPage() {
   const [error, setError] = useState<string | null>(null);
   const [imageError, setImageError] = useState(false);
 
-  useEffect(() => {
-    fetchProductDetails();
-  }, [productId]);
-
-  const fetchProductDetails = async () => {
+  const fetchProductDetails = useCallback(async () => {
     try {
       setIsLoading(true);
       setError(null);
@@ -68,7 +64,11 @@ export default function ProductDetailsPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [productId]);
+
+  useEffect(() => {
+    fetchProductDetails();
+  }, [fetchProductDetails]);
 
   const handlePurchase = () => {
     const token = tokenManager.getToken();

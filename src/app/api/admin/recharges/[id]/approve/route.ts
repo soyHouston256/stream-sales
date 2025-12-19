@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/infrastructure/database/prisma';
 import { verifyJWT } from '@/infrastructure/auth/jwt';
-import { Decimal } from '@prisma/client/runtime/library';
+import { Prisma } from '@prisma/client';
 import crypto from 'crypto';
+import { isPrismaError, logError } from '@/lib/utils/error-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -121,7 +122,7 @@ export async function PUT(
       .digest('hex');
 
     // 8. Process recharge in a transaction
-    const result = await prisma.$transaction(async (tx: any) => {
+    const result = await prisma.$transaction(async (tx) => {
       // 8.1. Update wallet balance
       const updatedWallet = await tx.wallet.update({
         where: { id: recharge.walletId },
@@ -159,7 +160,7 @@ export async function PUT(
           completedAt: new Date(),
           externalTransactionId: externalTransactionId || recharge.externalTransactionId,
           metadata: {
-            ...((recharge.metadata as any) || {}),
+            ...((recharge.metadata as Prisma.JsonObject) || {}),
             approvedBy: payload.userId,
             approvedAt: new Date().toISOString(),
             transactionId: transaction.id,
@@ -193,15 +194,17 @@ export async function PUT(
       newWalletBalance: result.wallet.balance.toString(),
       message: 'Recharge approved successfully',
     });
-  } catch (error: any) {
-    console.error('Error approving recharge:', error);
+  } catch (error: unknown) {
+    logError('admin/recharges/approve', error);
 
     // Check for idempotency key conflict
-    if (error.code === 'P2002' && error.meta?.target?.includes('idempotencyKey')) {
-      return NextResponse.json(
-        { error: 'This recharge has already been processed' },
-        { status: 409 }
-      );
+    if (isPrismaError(error) && error.code === 'P2002') {
+      if (error.meta?.target?.includes('idempotencyKey')) {
+        return NextResponse.json(
+          { error: 'This recharge has already been processed' },
+          { status: 409 }
+        );
+      }
     }
 
     return NextResponse.json(
@@ -210,3 +213,4 @@ export async function PUT(
     );
   }
 }
+

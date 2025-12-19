@@ -81,6 +81,7 @@ export async function GET(request: NextRequest) {
     for (let i = 0; i < months; i++) {
       const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
       const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      // eslint-disable-next-line security/detect-object-injection
       monthlyData[monthKey] = 0;
     }
 
@@ -88,7 +89,9 @@ export async function GET(request: NextRequest) {
     affiliations.forEach((affiliation: any) => {
       const date = new Date(affiliation.createdAt);
       const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      // eslint-disable-next-line security/detect-object-injection
       if (monthlyData[monthKey] !== undefined) {
+        // eslint-disable-next-line security/detect-object-injection
         monthlyData[monthKey]++;
       }
     });
@@ -100,7 +103,7 @@ export async function GET(request: NextRequest) {
 
     // 8. Return data
     return NextResponse.json(result);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching referrals by month:', error);
     return NextResponse.json(
       { error: 'Internal server error' },

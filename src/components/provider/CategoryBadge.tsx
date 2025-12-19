@@ -92,7 +92,7 @@ export function CategoryBadge({
       className: 'bg-gray-500/10 text-gray-700 hover:bg-gray-500/20 border-gray-500/20',
     },
   };
-
+  // eslint-disable-next-line security/detect-object-injection
   const { label, icon: Icon, className: variantClass } = config[category] || config.other;
 
   return (

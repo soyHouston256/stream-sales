@@ -143,7 +143,7 @@ export async function GET(request: NextRequest) {
         totalPages: Math.ceil(total / limit),
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching marketplace products:', error);
     return NextResponse.json(
       { error: 'Internal server error' },

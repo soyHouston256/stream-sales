@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/infrastructure/database/prisma';
 import { verifyJWT } from '@/infrastructure/auth/jwt';
 import { ApproveReferralUseCase } from '@/application/use-cases/ApproveReferralUseCase';
+import { getErrorMessage, logError } from '@/lib/utils/error-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -101,24 +102,25 @@ export async function POST(
       },
       { status: 200 }
     );
-  } catch (error: any) {
-    console.error('Error approving referral:', error);
+  } catch (error: unknown) {
+    logError('affiliate/referrals/approve', error);
+    const message = getErrorMessage(error);
 
     // Handle specific errors
-    if (error.message.includes('not found')) {
-      return NextResponse.json({ error: error.message }, { status: 404 });
+    if (message.includes('not found')) {
+      return NextResponse.json({ error: message }, { status: 404 });
     }
 
-    if (error.message.includes('permission')) {
-      return NextResponse.json({ error: error.message }, { status: 403 });
+    if (message.includes('permission')) {
+      return NextResponse.json({ error: message }, { status: 403 });
     }
 
     if (
-      error.message.includes('pending') ||
-      error.message.includes('Insufficient balance') ||
-      error.message.includes('configuration')
+      message.includes('pending') ||
+      message.includes('Insufficient balance') ||
+      message.includes('configuration')
     ) {
-      return NextResponse.json({ error: error.message }, { status: 400 });
+      return NextResponse.json({ error: message }, { status: 400 });
     }
 
     // Generic error

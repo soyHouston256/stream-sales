@@ -124,7 +124,7 @@ export async function POST(
         email: updatedWithdrawal.processedByUser.email,
       } : null,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error approving withdrawal:', error);
     return NextResponse.json(
       { error: 'Internal server error' },

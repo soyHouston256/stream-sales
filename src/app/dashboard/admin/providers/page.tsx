@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -59,7 +59,7 @@ export default function AdminProvidersPage() {
     const [rejectionReason, setRejectionReason] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const fetchProfiles = async () => {
+    const fetchProfiles = useCallback(async () => {
         try {
             setIsLoading(true);
             const token = tokenManager.getToken();
@@ -82,11 +82,11 @@ export default function AdminProvidersPage() {
         } finally {
             setIsLoading(false);
         }
-    };
+    }, [t]);
 
     useEffect(() => {
         fetchProfiles();
-    }, []);
+    }, [fetchProfiles]);
 
     const handleApprove = async () => {
         if (!selectedProfile) return;
@@ -163,6 +163,7 @@ export default function AdminProvidersPage() {
             active: { variant: 'default', icon: CheckCircle, label: t('admin.providers.active') },
         };
 
+        // eslint-disable-next-line security/detect-object-injection
         const config = variants[status] || variants.pending;
         const Icon = config.icon;
 

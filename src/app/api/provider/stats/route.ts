@@ -139,7 +139,7 @@ export async function GET(request: NextRequest) {
       totalSales,
       thisMonthSales,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching provider stats:', error);
     return NextResponse.json(
       { error: 'Internal server error' },

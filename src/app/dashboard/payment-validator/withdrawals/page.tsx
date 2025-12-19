@@ -103,6 +103,7 @@ export default function PaymentValidatorWithdrawalsPage() {
       crypto: t('seller.wallet.crypto') || 'Cryptocurrency',
       mock: 'Mock Payment',
     };
+    // eslint-disable-next-line security/detect-object-injection
     return labels[method] || method;
   };
 
@@ -228,6 +229,7 @@ export default function PaymentValidatorWithdrawalsPage() {
       rejected: { variant: 'destructive', label: t('paymentValidator.withdrawals.rejected').toUpperCase() },
       completed: { variant: 'outline', label: t('paymentValidator.withdrawals.completed').toUpperCase() },
     };
+    // eslint-disable-next-line security/detect-object-injection
     const config = variants[status] || { variant: 'default', label: status.toUpperCase() };
     return <Badge variant={config.variant}>{config.label}</Badge>;
   };

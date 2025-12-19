@@ -148,7 +148,7 @@ export async function PUT(
       createdAt: updatedRecharge.createdAt.toISOString(),
       message: 'Recharge request rejected',
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error rejecting recharge:', error);
     return NextResponse.json(
       { error: 'Internal server error' },

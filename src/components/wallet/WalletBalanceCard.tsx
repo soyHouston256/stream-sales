@@ -48,6 +48,16 @@ export function WalletBalanceCard({
   const { t, language } = useLanguage();
   const locale = language === 'es' ? es : enUS;
 
+  const currentGradient = React.useMemo(() => {
+    // eslint-disable-next-line security/detect-object-injection
+    return VARIANT_GRADIENTS[variant] || VARIANT_GRADIENTS.seller;
+  }, [variant]);
+
+  const currentHoverGradient = React.useMemo(() => {
+    // eslint-disable-next-line security/detect-object-injection
+    return VARIANT_HOVER_GRADIENTS[variant] || VARIANT_HOVER_GRADIENTS.seller;
+  }, [variant]);
+
   // Format balance with proper currency symbol
   const formatCurrency = (amount: string | number): string => {
     const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
@@ -101,7 +111,7 @@ export function WalletBalanceCard({
       <div
         className={cn(
           'absolute inset-0 bg-gradient-to-br opacity-5',
-          VARIANT_GRADIENTS[variant]
+          currentGradient
         )}
         aria-hidden="true"
       />
@@ -112,8 +122,8 @@ export function WalletBalanceCard({
             className={cn(
               'p-3 rounded-xl bg-gradient-to-br shadow-md',
               'transition-all duration-300',
-              VARIANT_GRADIENTS[variant],
-              VARIANT_HOVER_GRADIENTS[variant]
+              currentGradient,
+              currentHoverGradient
             )}
             aria-hidden="true"
           >
@@ -135,7 +145,7 @@ export function WalletBalanceCard({
               'text-5xl md:text-6xl font-bold tracking-tight',
               'bg-gradient-to-br bg-clip-text text-transparent',
               'animate-in zoom-in duration-700',
-              VARIANT_GRADIENTS[variant]
+              currentGradient
             )}
             aria-live="polite"
             aria-atomic="true"
@@ -177,8 +187,8 @@ export function WalletBalanceCard({
                 'flex-1 min-w-[120px] font-semibold shadow-md',
                 'bg-gradient-to-r text-white',
                 'transition-all duration-300 hover:shadow-lg hover:scale-105',
-                VARIANT_GRADIENTS[variant],
-                VARIANT_HOVER_GRADIENTS[variant]
+                currentGradient,
+                currentHoverGradient
               )}
               aria-label={t('wallet.recharge')}
             >
@@ -219,7 +229,7 @@ export function WalletBalanceCard({
           className={cn(
             'absolute -top-1 -right-1 h-3 w-3 rounded-full',
             'bg-gradient-to-br',
-            VARIANT_GRADIENTS[variant],
+            currentGradient,
             'animate-pulse'
           )}
           aria-hidden="true"

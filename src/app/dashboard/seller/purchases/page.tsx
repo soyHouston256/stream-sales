@@ -40,7 +40,8 @@ export default function PurchasesPage() {
 
   const { data, isLoading } = usePurchases(filters);
 
-  const purchases = data?.data || [];
+  // Memoize purchases array to prevent unstable dependency
+  const purchases = useMemo(() => data?.data || [], [data?.data]);
   const pagination = data?.pagination;
 
   // Calculate stats from purchases

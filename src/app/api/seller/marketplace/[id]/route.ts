@@ -108,7 +108,7 @@ export async function GET(
       status: product.isActive ? 'available' : 'unavailable',
       createdAt: product.createdAt.toISOString(),
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching marketplace product:', error);
     return NextResponse.json(
       { error: 'Internal server error' },

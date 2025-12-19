@@ -58,6 +58,7 @@ export function EnhancedStatsCard({
   showTrend = false,
   chartData,
 }: EnhancedStatsCardProps) {
+  // eslint-disable-next-line security/detect-object-injection
   const styles = variantStyles[variant];
 
   if (isLoading) {

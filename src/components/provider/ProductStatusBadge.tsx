@@ -25,7 +25,9 @@ export function ProductStatusBadge({ status, className }: ProductStatusBadgeProp
   };
 
   return (
+    // eslint-disable-next-line security/detect-object-injection
     <Badge className={cn(variants[status], className)} variant="outline">
+      {/* eslint-disable-next-line security/detect-object-injection */}
       {labels[status]}
     </Badge>
   );

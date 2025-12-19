@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import Image from 'next/image';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -232,6 +233,7 @@ export default function AdminRechargesPage() {
       cancelled: { variant: 'secondary', label: 'Cancelado' },
     };
 
+    // eslint-disable-next-line security/detect-object-injection
     const config = variants[status] || { variant: 'default', label: status };
     return <Badge variant={config.variant}>{config.label}</Badge>;
   };
@@ -244,6 +246,7 @@ export default function AdminRechargesPage() {
       crypto: 'Criptomoneda',
       mock: 'Prueba',
     };
+    // eslint-disable-next-line security/detect-object-injection
     return labels[method] || method;
   };
 
@@ -561,11 +564,14 @@ export default function AdminRechargesPage() {
                 <div className="bg-muted/30 p-4 rounded-lg">
                   <p className="text-xs uppercase font-bold text-muted-foreground mb-3">Comprobante de Pago</p>
                   <div className="border rounded-lg overflow-hidden bg-white">
-                    <img
+                    <Image
                       src={selectedRecharge.metadata.voucherUrl}
                       alt="Comprobante de pago"
+                      width={500}
+                      height={400}
                       className="w-full max-h-[400px] object-contain cursor-pointer"
                       onClick={() => window.open(selectedRecharge.metadata.voucherUrl, '_blank')}
+                      unoptimized
                     />
                   </div>
                   <p className="text-xs text-muted-foreground mt-2 text-center">

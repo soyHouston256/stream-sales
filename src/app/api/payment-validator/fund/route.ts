@@ -110,7 +110,7 @@ export async function GET(request: NextRequest) {
                 transferredCount: transferredEntries.length,
             },
         });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Error fetching validator fund:', error);
         return NextResponse.json(
             { error: 'Internal server error' },

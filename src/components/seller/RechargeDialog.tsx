@@ -32,6 +32,7 @@ import {
   Upload
 } from 'lucide-react';
 import { ImageUpload } from '@/components/shared/ImageUpload';
+import NextImage from 'next/image';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { tokenManager } from '@/lib/utils/tokenManager';
@@ -388,10 +389,13 @@ export function RechargeDialog({ currentBalance, trigger, role = 'seller' }: Rec
                     <div className="flex flex-col items-center">
                       {selectedMethod.qrImage ? (
                         <div className="bg-white p-3 rounded-xl shadow-sm mb-3">
-                          <img
+                          <NextImage
                             src={selectedMethod.qrImage}
                             alt={`QR ${selectedMethod.name}`}
-                            className="w-40 h-40 rounded-lg object-contain"
+                            className="rounded-lg object-contain"
+                            width={160}
+                            height={160}
+                            unoptimized
                           />
                         </div>
                       ) : (

@@ -63,7 +63,8 @@ export default function AffiliateApplicationPage() {
       }, 3000);
     } catch (err: any) {
       console.error('Application error:', err);
-      setError(err.message || 'Failed to submit application');
+      const errorMessage = err instanceof Error ? err.message : 'Failed to submit application';
+      setError(errorMessage);
     } finally {
       setIsSubmitting(false);
     }

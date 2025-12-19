@@ -170,6 +170,7 @@ export function getCommissionTypeLabel(
     sale: 'Sale',
     bonus: 'Bonus',
   };
+  // eslint-disable-next-line security/detect-object-injection
   return labels[type];
 }
 
@@ -186,6 +187,7 @@ export function getReferralStatusLabel(
     inactive: 'Inactive',
     suspended: 'Suspended',
   };
+  // eslint-disable-next-line security/detect-object-injection
   return labels[status];
 }
 

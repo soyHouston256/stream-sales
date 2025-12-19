@@ -6,6 +6,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import NextImage from 'next/image';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -569,10 +570,13 @@ export default function PaymentConfigPage() {
                                     {/* QR Preview */}
                                     {method.qrImage && (
                                         <div className="flex justify-center">
-                                            <img
+                                            <NextImage
                                                 src={method.qrImage}
                                                 alt={`QR ${method.name}`}
+                                                width={96}
+                                                height={96}
                                                 className="w-24 h-24 rounded-lg object-contain bg-white"
+                                                unoptimized
                                             />
                                         </div>
                                     )}

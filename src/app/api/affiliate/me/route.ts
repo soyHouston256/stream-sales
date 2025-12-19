@@ -98,7 +98,7 @@ export async function GET(request: NextRequest) {
       createdAt: profile.createdAt.toISOString(),
       updatedAt: profile.updatedAt.toISOString(),
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching affiliate info:', error);
     return NextResponse.json(
       { error: 'Internal server error' },

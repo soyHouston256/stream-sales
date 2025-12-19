@@ -53,6 +53,17 @@ export interface Referral {
   createdAt: string; // Fecha de registro del referido
 }
 
+/**
+ * Metadata for commissions - stores additional info like purchase IDs
+ */
+export interface CommissionMetadata {
+  purchaseId?: string;
+  orderId?: string;
+  productName?: string;
+  productCategory?: string;
+  [key: string]: unknown;
+}
+
 export interface Commission {
   id: string;
   affiliateId: string;
@@ -64,7 +75,7 @@ export interface Commission {
   type: 'registration' | 'sale' | 'bonus';
   amount: string;
   status: 'pending' | 'paid' | 'rejected';
-  metadata?: any; // Info adicional (purchase ID si es sale, etc.)
+  metadata?: CommissionMetadata;
   createdAt: string;
   paidAt?: string;
 }

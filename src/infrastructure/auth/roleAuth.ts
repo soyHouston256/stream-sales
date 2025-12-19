@@ -77,7 +77,7 @@ export async function verifyUserRole(
       email: user.email,
       role: user.role,
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error verifying user role:', error);
     return {
       success: false,

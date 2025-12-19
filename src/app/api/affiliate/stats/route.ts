@@ -103,7 +103,7 @@ export async function GET(request: NextRequest) {
       pendingPayments,
       pendingPaymentsAmount: availableBalance.toFixed(2),
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching affiliate stats:', error);
     return NextResponse.json(
       { error: 'Internal server error' },

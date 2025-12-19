@@ -200,7 +200,7 @@ export async function GET(request: NextRequest) {
         },
       },
     }, { status: 200 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching marketing stats:', error);
     return NextResponse.json(
       { error: 'Internal server error' },

@@ -11,7 +11,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { CheckCircle, XCircle, Clock, Send, DollarSign, User, Image, ExternalLink } from 'lucide-react';
+import { CheckCircle, XCircle, Clock, Send, DollarSign, User, Image as ImageIcon, ExternalLink } from 'lucide-react';
+import NextImage from 'next/image';
 import { tokenManager } from '@/lib/utils/tokenManager';
 import { useToast } from '@/hooks/use-toast';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -214,6 +215,7 @@ export default function AdminValidatorTransfersPage() {
             binance: 'Binance Pay',
             bank_transfer: 'Transferencia Bancaria',
         };
+        // eslint-disable-next-line security/detect-object-injection
         return labels[method] || method;
     };
 
@@ -304,7 +306,7 @@ export default function AdminValidatorTransfersPage() {
                                                             size="sm"
                                                             onClick={() => handleViewVoucher(transfer)}
                                                         >
-                                                            <Image className="w-4 h-4" />
+                                                            <ImageIcon className="w-4 h-4" />
                                                         </Button>
                                                     )}
                                                     {transfer.status === 'pending' && (
@@ -462,10 +464,13 @@ export default function AdminValidatorTransfersPage() {
                                             rel="noopener noreferrer"
                                             className="block"
                                         >
-                                            <img
+                                            <NextImage
                                                 src={selectedTransfer.voucherUrl}
-                                                alt="Comprobante de pago"
+                                                alt={t('admin.validatorTransfers.paymentVoucher')}
+                                                width={400}
+                                                height={300}
                                                 className="max-h-64 mx-auto rounded-lg object-contain hover:opacity-90 transition-opacity cursor-pointer"
+                                                unoptimized
                                             />
                                         </a>
                                         <p className="text-xs text-muted-foreground text-center mt-2">
@@ -559,10 +564,13 @@ export default function AdminValidatorTransfersPage() {
                     </DialogHeader>
                     {selectedTransfer?.voucherUrl && (
                         <div className="flex justify-center">
-                            <img
+                            <NextImage
                                 src={selectedTransfer.voucherUrl}
-                                alt="Payment Voucher"
+                                alt={t('admin.validatorTransfers.paymentVoucher')}
+                                width={500}
+                                height={600}
                                 className="max-h-96 object-contain rounded-lg border"
+                                unoptimized
                             />
                         </div>
                     )}

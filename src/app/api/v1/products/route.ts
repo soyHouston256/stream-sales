@@ -5,6 +5,7 @@ import { PrismaProductRepository } from '../../../../infrastructure/repositories
 import { CreateProductUseCase } from '../../../../application/use-cases/CreateProductUseCase';
 import { ListProductsUseCase } from '../../../../application/use-cases/ListProductsUseCase';
 import { verifyJWT } from '../../../../infrastructure/auth/jwt';
+import { getErrorMessage, logError } from '../../../../lib/utils/error-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -50,7 +51,7 @@ export const dynamic = 'force-dynamic';
 const createProductSchema = z.object({
   category: z.string().min(1, 'Category is required'),
   price: z
-    .union([z.number().positive(), z.string().regex(/^\d+(\.\d+)?$/)], {
+    .union([z.number().positive(), z.string().refine((val) => !isNaN(Number(val)) && Number(val) > 0, 'Must be a positive number')], {
       errorMap: () => ({ message: 'Price must be a positive number' }),
     })
     .transform((val) => (typeof val === 'string' ? parseFloat(val) : val)),
@@ -118,20 +119,21 @@ export async function POST(request: NextRequest) {
 
     // 5. Retornar resultado exitoso
     return NextResponse.json(result, { status: 201 });
-  } catch (error: any) {
-    console.error('POST /api/v1/products error:', error);
+  } catch (error: unknown) {
+    logError('POST /api/v1/products', error);
+    const message = getErrorMessage(error);
 
     // Manejo de errores específicos
-    if (error.message?.includes('jwt') || error.message?.includes('token')) {
+    if (message.includes('jwt') || message.includes('token')) {
       return NextResponse.json({ error: 'Invalid or expired token' }, { status: 401 });
     }
 
-    if (error.message?.includes('required') || error.message?.includes('positive')) {
-      return NextResponse.json({ error: error.message }, { status: 400 });
+    if (message.includes('required') || message.includes('positive')) {
+      return NextResponse.json({ error: message }, { status: 400 });
     }
 
     return NextResponse.json(
-      { error: 'Internal server error', details: error.message },
+      { error: 'Internal server error' },
       { status: 500 }
     );
   }
@@ -214,11 +216,11 @@ export async function GET(request: NextRequest) {
 
     // 5. Retornar resultado
     return NextResponse.json(result, { status: 200 });
-  } catch (error: any) {
-    console.error('GET /api/v1/products error:', error);
+  } catch (error: unknown) {
+    logError('GET /api/v1/products', error);
 
     return NextResponse.json(
-      { error: 'Internal server error', details: error.message },
+      { error: 'Internal server error' },
       { status: 500 }
     );
   }

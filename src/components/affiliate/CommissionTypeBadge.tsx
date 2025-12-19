@@ -24,6 +24,7 @@ export function CommissionTypeBadge({ type }: CommissionTypeBadgeProps) {
     },
   };
 
+  // eslint-disable-next-line security/detect-object-injection
   const config = variants[type];
 
   return (
