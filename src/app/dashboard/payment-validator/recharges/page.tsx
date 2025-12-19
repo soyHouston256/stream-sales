@@ -351,60 +351,149 @@ export default function PaymentValidatorRechargesPage() {
         </CardContent>
       </Card>
 
-      {/* Approve Dialog */}
+      {/* Approve Dialog - Enhanced */}
       <Dialog open={showApproveDialog} onOpenChange={setShowApproveDialog}>
-        <DialogContent>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{t('paymentValidator.recharges.approveTitle')}</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              <CheckCircle className="h-5 w-5 text-green-600" />
+              {t('paymentValidator.recharges.approveTitle')}
+            </DialogTitle>
             <DialogDescription>
               {t('paymentValidator.recharges.approveDescription')}
             </DialogDescription>
           </DialogHeader>
+
           {selectedRecharge && (
-            <div className="space-y-4">
-              <div>
-                <p className="text-sm font-medium">{t('paymentValidator.recharges.user')}:</p>
-                <p className="text-sm text-muted-foreground">
-                  {selectedRecharge.user.name} ({selectedRecharge.user.email})
-                </p>
+            <div className="space-y-6">
+              {/* User Info */}
+              <div className="bg-muted/50 p-4 rounded-lg">
+                <p className="text-xs uppercase font-bold text-muted-foreground mb-1">{t('paymentValidator.recharges.user')}</p>
+                <p className="font-semibold">{selectedRecharge.user.name}</p>
+                <p className="text-sm text-muted-foreground">{selectedRecharge.user.email}</p>
               </div>
-              <div>
-                <p className="text-sm font-medium">{t('paymentValidator.recharges.amount')}:</p>
-                <p className="text-2xl font-bold">${selectedRecharge.amount}</p>
+
+              {/* Amount Summary - Local and USD */}
+              <div className="grid grid-cols-2 gap-4">
+                {/* Local Amount Deposited */}
+                {selectedRecharge.metadata?.paymentDetails?.includes('Monto Local:') && (
+                  <div className="bg-blue-50 dark:bg-blue-950/30 p-4 rounded-lg border border-blue-200 dark:border-blue-900">
+                    <p className="text-xs uppercase font-bold text-blue-600 mb-1">{t('paymentValidator.recharges.depositedAmount') || 'Deposited Amount'}</p>
+                    <p className="text-2xl font-bold text-blue-600">
+                      {selectedRecharge.metadata.paymentDetails.match(/Monto Local:\s*([^,]+)/)?.[1]?.trim() || 'N/A'}
+                    </p>
+                    {selectedRecharge.metadata.paymentDetails.includes('Tipo Cambio:') && (
+                      <p className="text-xs text-muted-foreground mt-1">
+                        TC: 1 USD = {selectedRecharge.metadata.paymentDetails.match(/Tipo Cambio:\s*([^,]+)/)?.[1]?.trim() || '1'} {selectedRecharge.metadata.paymentDetails.match(/Moneda:\s*([^,]+)/)?.[1]?.trim() || ''}
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                {/* USD Amount to Credit */}
+                <div className="bg-green-50 dark:bg-green-950/30 p-4 rounded-lg border border-green-200 dark:border-green-900">
+                  <p className="text-xs uppercase font-bold text-green-600 mb-1">{t('paymentValidator.recharges.amountToCredit') || 'Amount to Credit'}</p>
+                  <p className="text-3xl font-bold text-green-600">${selectedRecharge.amount} USD</p>
+                </div>
               </div>
-              <div>
-                <p className="text-sm font-medium">{t('paymentValidator.recharges.paymentMethod')}:</p>
-                <p className="text-sm text-muted-foreground">
+
+              {/* Payment Method */}
+              <div className="bg-muted/30 p-4 rounded-lg">
+                <p className="text-xs uppercase font-bold text-muted-foreground mb-2">{t('paymentValidator.recharges.paymentMethod')}</p>
+                <Badge variant="outline" className="text-sm px-3 py-1">
                   {getPaymentMethodLabel(selectedRecharge.paymentMethod)}
-                </p>
+                </Badge>
               </div>
+
+              {/* Payment Details - Parsed */}
               {selectedRecharge.metadata?.paymentDetails && (
-                <div>
-                  <p className="text-sm font-medium">{t('seller.wallet.paymentDetails') || 'Payment Details'}:</p>
-                  <p className="text-sm text-muted-foreground">
-                    {selectedRecharge.metadata.paymentDetails}
+                <div className="bg-muted/30 p-4 rounded-lg space-y-3">
+                  <p className="text-xs uppercase font-bold text-muted-foreground">{t('seller.wallet.paymentDetails') || 'Payment Details'}</p>
+                  <div className="grid grid-cols-2 gap-4">
+                    {/* Parse and display holder name and time separately */}
+                    {selectedRecharge.metadata.paymentDetails.includes('Titular:') && (
+                      <div>
+                        <p className="text-xs text-muted-foreground">{t('paymentValidator.recharges.holderName') || 'Holder Name'}</p>
+                        <p className="font-medium">
+                          {selectedRecharge.metadata.paymentDetails.match(/Titular:\s*([^,]+)/)?.[1]?.trim() || 'N/A'}
+                        </p>
+                      </div>
+                    )}
+                    {selectedRecharge.metadata.paymentDetails.includes('Hora:') && (
+                      <div>
+                        <p className="text-xs text-muted-foreground">{t('paymentValidator.recharges.paymentTime') || 'Payment Time'}</p>
+                        <p className="font-medium">
+                          {selectedRecharge.metadata.paymentDetails.match(/Hora:\s*([^,]+)/)?.[1]?.trim() || 'N/A'}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Voucher Image */}
+              {selectedRecharge.metadata?.voucherUrl && (
+                <div className="bg-muted/30 p-4 rounded-lg">
+                  <p className="text-xs uppercase font-bold text-muted-foreground mb-3">{t('paymentValidator.recharges.paymentVoucher') || 'Payment Voucher'}</p>
+                  <div className="border rounded-lg overflow-hidden bg-white">
+                    <img
+                      src={selectedRecharge.metadata.voucherUrl}
+                      alt={t('paymentValidator.recharges.paymentVoucher') || 'Payment Voucher'}
+                      className="w-full max-h-[400px] object-contain cursor-pointer"
+                      onClick={() => window.open(selectedRecharge.metadata.voucherUrl, '_blank')}
+                    />
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-2 text-center">
+                    {t('paymentValidator.recharges.clickToEnlarge') || 'Click on image to view full size'}
                   </p>
                 </div>
               )}
-              <div>
-                <Label htmlFor="externalTxId">
+
+              {/* External Transaction ID Input */}
+              <div className="bg-blue-50 dark:bg-blue-950/30 p-4 rounded-lg border border-blue-200 dark:border-blue-900">
+                <Label htmlFor="externalTxId" className="text-xs uppercase font-bold text-blue-600">
                   {t('seller.wallet.externalTransactionId') || 'External Transaction ID'} ({t('seller.wallet.optional') || 'Optional'})
                 </Label>
+                <p className="text-xs text-muted-foreground mb-2">
+                  {t('paymentValidator.recharges.externalTxIdHint') || 'Enter the bank reference number if available'}
+                </p>
                 <Input
                   id="externalTxId"
                   placeholder="e.g., BANK_REF_123456"
                   value={externalTxId}
                   onChange={(e) => setExternalTxId(e.target.value)}
+                  className="bg-white dark:bg-background"
                 />
+              </div>
+
+              {/* Request Date */}
+              <div className="text-sm text-muted-foreground text-center">
+                {t('paymentValidator.recharges.requestCreatedOn') || 'Request created on'} {new Date(selectedRecharge.createdAt).toLocaleDateString('es-ES', {
+                  day: '2-digit',
+                  month: 'long',
+                  year: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })}
               </div>
             </div>
           )}
-          <DialogFooter>
+
+          <DialogFooter className="mt-4 gap-2">
             <Button variant="outline" onClick={() => setShowApproveDialog(false)}>
               {t('paymentValidator.recharges.cancel')}
             </Button>
-            <Button onClick={confirmApprove} disabled={approveMutation.isPending}>
-              {approveMutation.isPending ? t('paymentValidator.recharges.approving') : t('paymentValidator.recharges.approve')}
+            <Button
+              onClick={confirmApprove}
+              disabled={approveMutation.isPending}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              {approveMutation.isPending ? t('paymentValidator.recharges.approving') : (
+                <>
+                  <CheckCircle className="h-4 w-4 mr-2" />
+                  {t('paymentValidator.recharges.approve')}
+                </>
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -113,6 +113,7 @@ export interface RechargeRequest {
   amount: number;
   paymentMethod: PaymentMethod;
   paymentDetails?: string; // Email, account number, wallet address
+  voucherUrl?: string; // URL of uploaded payment voucher/receipt
 }
 
 export interface PurchaseRequest {
