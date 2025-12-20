@@ -30,6 +30,7 @@ export function StepInventory({ data, onChange }: StepInventoryProps) {
 
     const updateProfile = (index: number, field: 'name' | 'pin', value: string) => {
         const newProfiles = [...data.profiles];
+        // eslint-disable-next-line security/detect-object-injection
         newProfiles[index][field] = value;
         onChange({ profiles: newProfiles });
     };

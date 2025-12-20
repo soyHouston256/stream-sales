@@ -107,7 +107,7 @@ export async function GET(request: NextRequest) {
 
     // 6. Return history
     return NextResponse.json(history);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching commission history:', error);
     return NextResponse.json(
       { error: 'Internal server error' },

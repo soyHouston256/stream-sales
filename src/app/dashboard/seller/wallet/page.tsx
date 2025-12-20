@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import {
   Select,
   SelectContent,
@@ -12,7 +13,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { DataTable, Column } from '@/components/admin/DataTable';
-import { EnhancedStatsCard } from '@/components/ui/enhanced-stats-card';
+import { StatCard } from '@/components/ui/stat-card';
 import {
   useWalletBalance,
   useWalletTransactions,
@@ -26,10 +27,11 @@ import {
 } from '@/components/seller';
 import { formatCurrency } from '@/lib/utils/seller';
 import { format } from 'date-fns';
-import { Wallet, TrendingUp, Clock, Receipt } from 'lucide-react';
+import { Wallet, TrendingUp, Clock, Receipt, Filter } from 'lucide-react';
 
 export default function WalletPage() {
   const { t } = useLanguage();
+  const [rechargeOpen, setRechargeOpen] = useState(false);
   const [filters, setFilters] = useState<TransactionsFilters>({
     page: 1,
     limit: 10,
@@ -162,61 +164,87 @@ export default function WalletPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      {/* Header */}
+      <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">{t('seller.wallet.title')}</h1>
-          <p className="text-muted-foreground mt-1">
+          <div className="flex items-center gap-3">
+            <h1 className="text-3xl font-bold">{t('seller.wallet.title')}</h1>
+            {balance?.status === 'active' && (
+              <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-400">
+                <Wallet size={14} className="mr-1" />
+                {balance.status}
+              </Badge>
+            )}
+          </div>
+          <p className="text-muted-foreground mt-2">
             {t('seller.wallet.subtitle')}
           </p>
         </div>
-        <RechargeDialog currentBalance={balance?.balance} />
+        <RechargeDialog
+          currentBalance={balance?.balance}
+          open={rechargeOpen}
+          onOpenChange={setRechargeOpen}
+          trigger={
+            <Button
+              onClick={() => setRechargeOpen(true)}
+              className="px-6 py-2.5 rounded-xl font-bold shadow-lg shadow-primary/20 transition-all flex items-center gap-2 active:scale-95 hover:shadow-xl hover:shadow-primary/30"
+              size="lg"
+            >
+              <Wallet size={20} />
+              <span className="hidden sm:inline">{t('wallet.recharge')}</span>
+              <span className="sm:hidden">Agregar</span>
+            </Button>
+          }
+        />
       </div>
 
       {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <div className="col-span-2">
-          <EnhancedStatsCard
-            title={t('seller.wallet.currentBalance')}
-            value={balance ? formatCurrency(balance.balance) : '$0.00'}
-            description={`${balance?.currency || 'USD'} • ${balance?.status || 'active'}`}
-            icon={Wallet}
-            variant="success"
-            isLoading={balanceLoading}
-          />
-        </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <StatCard
+          label={t('seller.wallet.currentBalance')}
+          value={balance ? formatCurrency(balance.balance) : '$0.00'}
+          description={`${balance?.currency || 'USD'} • ${balance?.status || 'active'}`}
+          icon={Wallet}
+          color="green"
+          isLoading={balanceLoading}
+        />
 
-        <EnhancedStatsCard
-          title={t('seller.wallet.totalRecharged')}
+        <StatCard
+          label={t('seller.wallet.totalRecharged')}
           value={formatCurrency(totalRecharged.toFixed(2))}
           description={t('seller.wallet.lifetimeRecharges')}
           icon={TrendingUp}
-          variant="info"
+          color="blue"
           isLoading={rechargesLoading}
         />
 
-        <EnhancedStatsCard
-          title={t('seller.wallet.pendingRecharges')}
-          value={pendingRecharges.length}
+        <StatCard
+          label={t('seller.wallet.pendingRecharges')}
+          value={pendingRecharges.length.toString()}
           description={formatCurrency(pendingAmount.toFixed(2))}
           icon={Clock}
-          variant="warning"
+          color="orange"
           isLoading={rechargesLoading}
         />
       </div>
 
-      {/* Transactions */}
-      <Card>
-        <CardHeader>
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div>
-              <CardTitle>{t('seller.wallet.transactionHistory')}</CardTitle>
-              <CardDescription>
-                {pagination
-                  ? `${t('seller.wallet.showing')} ${transactions.length} ${t('seller.wallet.of')} ${pagination.total} ${t('seller.wallet.transactions')}`
-                  : t('seller.wallet.allTransactions')}
-              </CardDescription>
-            </div>
-            <div className="flex items-center gap-2 w-full sm:w-auto">
+      {/* Filters Card */}
+      <Card className="border-0 shadow-md">
+        <CardHeader className="pb-4">
+          <div className="flex items-center gap-2">
+            <Filter className="h-5 w-5 text-muted-foreground" />
+            <CardTitle className="text-lg">{t('seller.wallet.transactionHistory')}</CardTitle>
+          </div>
+          <CardDescription>
+            {pagination
+              ? `${t('seller.wallet.showing')} ${transactions.length} ${t('seller.wallet.of')} ${pagination.total} ${t('seller.wallet.transactions')}`
+              : t('seller.wallet.allTransactions')}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {/* Filter Section */}
+            <div className="flex items-center gap-2">
               <Select
                 value={filters.type || 'all'}
                 onValueChange={(value) =>
@@ -227,7 +255,7 @@ export default function WalletPage() {
                   }))
                 }
               >
-                <SelectTrigger className="w-full sm:w-[180px]">
+                <SelectTrigger className="w-[200px] rounded-xl">
                   <SelectValue placeholder={t('seller.wallet.filterByType')} />
                 </SelectTrigger>
                 <SelectContent>
@@ -238,59 +266,64 @@ export default function WalletPage() {
                 </SelectContent>
               </Select>
             </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <DataTable
-            data={transactions}
-            columns={transactionColumns}
-            isLoading={transactionsLoading}
-            emptyMessage={t('seller.wallet.noTransactions')}
-            emptyState={{
-              icon: Receipt,
-              title: filters.type ? t('seller.wallet.noTransactionsFiltered') : t('seller.wallet.noTransactions'),
-              description: filters.type
-                ? t('seller.wallet.tryDifferentFilter')
-                : t('seller.wallet.transactionsAppearHere'),
-              variant: filters.type ? 'search' : 'default',
-            }}
-          />
 
-          {/* Pagination */}
-          {pagination && pagination.totalPages > 1 && (
-            <div className="flex items-center justify-center gap-2 mt-4">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() =>
-                  setFilters((prev) => ({ ...prev, page: prev.page! - 1 }))
-                }
-                disabled={filters.page === 1}
-              >
-                {t('seller.wallet.previous')}
-              </Button>
-              <span className="text-sm text-muted-foreground">
-                {t('seller.wallet.page')} {filters.page} {t('seller.wallet.of')} {pagination.totalPages}
-              </span>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() =>
-                  setFilters((prev) => ({ ...prev, page: prev.page! + 1 }))
-                }
-                disabled={filters.page === pagination.totalPages}
-              >
-                {t('seller.wallet.next')}
-              </Button>
-            </div>
-          )}
+            {/* Transactions Table */}
+            <DataTable
+              data={transactions}
+              columns={transactionColumns}
+              isLoading={transactionsLoading}
+              emptyMessage={t('seller.wallet.noTransactions')}
+              emptyState={{
+                icon: Receipt,
+                title: filters.type ? t('seller.wallet.noTransactionsFiltered') : t('seller.wallet.noTransactions'),
+                description: filters.type
+                  ? t('seller.wallet.tryDifferentFilter')
+                  : t('seller.wallet.transactionsAppearHere'),
+                variant: filters.type ? 'search' : 'default',
+              }}
+            />
+
+            {/* Pagination */}
+            {pagination && pagination.totalPages > 1 && (
+              <div className="flex items-center justify-center gap-2 mt-4">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="rounded-xl"
+                  onClick={() =>
+                    setFilters((prev) => ({ ...prev, page: prev.page! - 1 }))
+                  }
+                  disabled={filters.page === 1}
+                >
+                  {t('seller.wallet.previous')}
+                </Button>
+                <span className="text-sm text-muted-foreground">
+                  {t('seller.wallet.page')} {filters.page} {t('seller.wallet.of')} {pagination.totalPages}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="rounded-xl"
+                  onClick={() =>
+                    setFilters((prev) => ({ ...prev, page: prev.page! + 1 }))
+                  }
+                  disabled={filters.page === pagination.totalPages}
+                >
+                  {t('seller.wallet.next')}
+                </Button>
+              </div>
+            )}
+          </div>
         </CardContent>
       </Card>
 
       {/* Recharges */}
-      <Card>
-        <CardHeader>
-          <CardTitle>{t('seller.wallet.rechargeHistory')}</CardTitle>
+      <Card className="border-0 shadow-md">
+        <CardHeader className="pb-4">
+          <div className="flex items-center gap-2">
+            <Wallet className="h-5 w-5 text-muted-foreground" />
+            <CardTitle className="text-lg">{t('seller.wallet.rechargeHistory')}</CardTitle>
+          </div>
           <CardDescription>
             {t('seller.wallet.allRechargeRequests')}
           </CardDescription>

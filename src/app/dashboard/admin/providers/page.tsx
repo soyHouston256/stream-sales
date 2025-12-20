@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -33,7 +33,7 @@ import {
 } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { EnhancedStatsCard } from '@/components/ui/enhanced-stats-card';
+import { StatCard } from '@/components/ui/stat-card';
 import { EmptyState } from '@/components/ui/empty-state';
 
 interface ProviderProfile {
@@ -59,7 +59,7 @@ export default function AdminProvidersPage() {
     const [rejectionReason, setRejectionReason] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const fetchProfiles = async () => {
+    const fetchProfiles = useCallback(async () => {
         try {
             setIsLoading(true);
             const token = tokenManager.getToken();
@@ -82,11 +82,11 @@ export default function AdminProvidersPage() {
         } finally {
             setIsLoading(false);
         }
-    };
+    }, [t]);
 
     useEffect(() => {
         fetchProfiles();
-    }, []);
+    }, [fetchProfiles]);
 
     const handleApprove = async () => {
         if (!selectedProfile) return;
@@ -163,6 +163,7 @@ export default function AdminProvidersPage() {
             active: { variant: 'default', icon: CheckCircle, label: t('admin.providers.active') },
         };
 
+        // eslint-disable-next-line security/detect-object-injection
         const config = variants[status] || variants.pending;
         const Icon = config.icon;
 
@@ -198,30 +199,30 @@ export default function AdminProvidersPage() {
 
             {/* Stats */}
             <div className="grid gap-4 md:grid-cols-3">
-                <EnhancedStatsCard
-                    title={t('admin.providers.pendingRequests')}
+                <StatCard
+                    label={t('admin.providers.pendingRequests')}
                     value={pendingCount}
                     description={t('admin.providers.waitingReview')}
                     icon={Clock}
-                    variant="warning"
+                    color="orange"
                     isLoading={isLoading}
                 />
 
-                <EnhancedStatsCard
-                    title={t('admin.providers.approvedProviders')}
+                <StatCard
+                    label={t('admin.providers.approvedProviders')}
                     value={approvedCount}
                     description={t('admin.providers.activePlatform')}
                     icon={CheckCircle}
-                    variant="success"
+                    color="green"
                     isLoading={isLoading}
                 />
 
-                <EnhancedStatsCard
-                    title={t('admin.providers.totalRequests')}
+                <StatCard
+                    label={t('admin.providers.totalRequests')}
                     value={profiles.length}
                     description={t('admin.providers.historic')}
                     icon={Users}
-                    variant="info"
+                    color="blue"
                     isLoading={isLoading}
                 />
             </div>
@@ -275,7 +276,7 @@ export default function AdminProvidersPage() {
                                                     <>
                                                         <Button
                                                             size="sm"
-                                                            variant="default"
+                                                            color="purple"
                                                             onClick={() => {
                                                                 setSelectedProfile(profile);
                                                                 setActionType('approve');

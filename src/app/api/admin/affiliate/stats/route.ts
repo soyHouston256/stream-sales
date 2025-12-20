@@ -300,7 +300,7 @@ export async function GET(request: NextRequest) {
         growthRate: growthRate.toFixed(2),
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching affiliate statistics:', error);
     return NextResponse.json(
       { error: 'Internal server error' },

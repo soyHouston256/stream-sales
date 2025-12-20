@@ -90,7 +90,7 @@ export default function CommissionsPage() {
       label: 'Fecha de Cambio',
       render: (item) => (
         <div className="text-sm text-muted-foreground">
-          {format(new Date(item.createdAt), 'dd MMM yyyy HH:mm', { locale: es })}
+          {format(new Date(item.createdAt), 'dd MMM yyyy hh:mm a', { locale: es })}
         </div>
       ),
     },
@@ -218,7 +218,7 @@ export default function CommissionsPage() {
                 {config?.updatedAt && (
                   <div className="text-sm text-muted-foreground">
                     Última actualización:{' '}
-                    {format(new Date(config.updatedAt), 'dd MMM yyyy HH:mm', {
+                    {format(new Date(config.updatedAt), 'dd MMM yyyy hh:mm a', {
                       locale: es,
                     })}
                   </div>

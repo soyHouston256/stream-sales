@@ -246,7 +246,7 @@ export async function GET(request: NextRequest) {
         totalCompletedAmount: totalCompletedAmount.toFixed(2),
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching recharges:', error);
     return NextResponse.json(
       { error: 'Internal server error' },

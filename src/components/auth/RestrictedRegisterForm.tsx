@@ -74,7 +74,7 @@ export function RestrictedRegisterForm({ allowedRole }: RestrictedRegisterFormPr
     const { toast } = useToast();
     const [isLoading, setIsLoading] = useState(false);
     const [isUsernameManuallyEdited, setIsUsernameManuallyEdited] = useState(false);
-
+    // eslint-disable-next-line security/detect-object-injection
     const config = roleConfig[allowedRole];
 
     const {

@@ -13,6 +13,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { CheckCircle, XCircle, Wallet } from 'lucide-react';
+import NextImage from 'next/image';
 import { tokenManager } from '@/lib/utils/tokenManager';
 import { useToast } from '@/hooks/use-toast';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -169,6 +170,7 @@ export default function PaymentValidatorRechargesPage() {
       failed: 'destructive',
       cancelled: 'outline',
     };
+    // eslint-disable-next-line security/detect-object-injection
     return <Badge variant={variants[status] || 'default'}>{status.toUpperCase()}</Badge>;
   };
 
@@ -180,6 +182,7 @@ export default function PaymentValidatorRechargesPage() {
       crypto: t('seller.wallet.crypto') || 'Cryptocurrency',
       mock: 'Mock Payment',
     };
+    // eslint-disable-next-line security/detect-object-injection
     return labels[method] || method;
   };
 
@@ -436,11 +439,14 @@ export default function PaymentValidatorRechargesPage() {
                 <div className="bg-muted/30 p-4 rounded-lg">
                   <p className="text-xs uppercase font-bold text-muted-foreground mb-3">{t('paymentValidator.recharges.paymentVoucher') || 'Payment Voucher'}</p>
                   <div className="border rounded-lg overflow-hidden bg-white">
-                    <img
+                    <NextImage
                       src={selectedRecharge.metadata.voucherUrl}
                       alt={t('paymentValidator.recharges.paymentVoucher') || 'Payment Voucher'}
+                      width={600}
+                      height={400}
                       className="w-full max-h-[400px] object-contain cursor-pointer"
                       onClick={() => window.open(selectedRecharge.metadata.voucherUrl, '_blank')}
+                      unoptimized
                     />
                   </div>
                   <p className="text-xs text-muted-foreground mt-2 text-center">

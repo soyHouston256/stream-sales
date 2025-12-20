@@ -54,7 +54,7 @@ export function exportTransactionsToCSV(transactions: Transaction[]) {
     tx.amount.toString(),
     tx.sourceUser?.email || tx.sourceWalletId,
     tx.destinationUser?.email || tx.destinationWalletId || 'N/A',
-    new Date(tx.createdAt).toLocaleString('es-ES'),
+    new Date(tx.createdAt).toLocaleString('es-ES', { hour12: true }),
     tx.description || 'N/A',
   ]);
 

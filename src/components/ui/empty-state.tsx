@@ -40,6 +40,7 @@ export function EmptyState({
   variant = 'default',
   className,
 }: EmptyStateProps) {
+  // eslint-disable-next-line security/detect-object-injection
   const config = variantConfig[variant];
   const Icon = icon || config.icon;
 

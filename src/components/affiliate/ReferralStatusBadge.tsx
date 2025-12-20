@@ -25,6 +25,7 @@ export function ReferralStatusBadge({ status }: ReferralStatusBadgeProps) {
     },
   };
 
+  // eslint-disable-next-line security/detect-object-injection
   const config = variants[status];
 
   return (

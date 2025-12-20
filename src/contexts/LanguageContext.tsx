@@ -40,10 +40,16 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 
   const t = (key: string): string => {
     const keys = key.split('.');
-    let value: any = translationsMap[language];
+    // eslint-disable-next-line security/detect-object-injection
+    let value: Record<string, unknown> | string | undefined = translationsMap[language] as Record<string, unknown>;
 
     for (const k of keys) {
-      value = value?.[k];
+      if (typeof value === 'object' && value !== null) {
+        // eslint-disable-next-line security/detect-object-injection
+        value = value[k] as Record<string, unknown> | string | undefined;
+      } else {
+        value = undefined;
+      }
       if (value === undefined) {
         console.warn(`Translation key not found: ${key}`);
         return key;

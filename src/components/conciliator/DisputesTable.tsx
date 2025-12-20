@@ -105,7 +105,7 @@ export function DisputesTable({ disputes, showAssignButton = false, showConcilia
               <TableCell>
                 <p className="text-sm">{format(new Date(dispute.createdAt), 'MMM d, yyyy')}</p>
                 <p className="text-xs text-muted-foreground">
-                  {format(new Date(dispute.createdAt), 'HH:mm')}
+                  {format(new Date(dispute.createdAt), 'hh:mm a')}
                 </p>
               </TableCell>
               <TableCell>

@@ -73,15 +73,18 @@ export function truncateText(text: string, maxLength: number): string {
 /**
  * Parse account details JSON safely
  */
-export function parseAccountDetails(accountDetails: any): Record<string, any> | null {
+export function parseAccountDetails(accountDetails: unknown): Record<string, unknown> | null {
   if (!accountDetails) return null;
 
   try {
     if (typeof accountDetails === 'string') {
-      return JSON.parse(accountDetails);
+      return JSON.parse(accountDetails) as Record<string, unknown>;
     }
-    return accountDetails;
-  } catch (error) {
+    if (typeof accountDetails === 'object') {
+      return accountDetails as Record<string, unknown>;
+    }
+    return null;
+  } catch {
     return null;
   }
 }

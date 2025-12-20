@@ -73,7 +73,7 @@ export async function GET(request: NextRequest) {
         updatedAt: config.updatedAt.toISOString(),
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching referral approval fee:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
@@ -196,7 +196,7 @@ export async function POST(request: NextRequest) {
       },
       { status: 200 }
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error updating referral approval fee:', error);
     return NextResponse.json(
       { error: 'Internal server error' },

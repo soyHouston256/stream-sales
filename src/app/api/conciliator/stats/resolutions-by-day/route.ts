@@ -68,6 +68,7 @@ export async function GET(request: Request) {
       const date = new Date();
       date.setDate(date.getDate() - i);
       const dateStr = date.toISOString().split('T')[0]; // YYYY-MM-DD
+      // eslint-disable-next-line security/detect-object-injection
       resolutionsByDay[dateStr] = 0;
     }
 
@@ -75,7 +76,9 @@ export async function GET(request: Request) {
     resolvedDisputes.forEach((dispute) => {
       if (dispute.resolvedAt) {
         const dateStr = dispute.resolvedAt.toISOString().split('T')[0];
+        // eslint-disable-next-line security/detect-object-injection
         if (resolutionsByDay[dateStr] !== undefined) {
+          // eslint-disable-next-line security/detect-object-injection
           resolutionsByDay[dateStr]++;
         }
       }

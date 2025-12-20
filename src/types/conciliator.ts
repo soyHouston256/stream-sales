@@ -4,6 +4,33 @@ export type ResolutionType = 'refund_seller' | 'favor_provider' | 'partial_refun
 export type ProductCategory = 'netflix' | 'spotify' | 'hbo' | 'disney' | 'prime' | 'youtube' | 'other';
 export type UserRole = 'admin' | 'provider' | 'seller' | 'affiliate' | 'conciliator';
 
+/**
+ * Account details types for different product categories
+ */
+export interface StreamingAccountDetails {
+  email?: string;
+  password?: string;
+  profiles?: { name: string; pin?: string }[];
+  platformType?: string;
+}
+
+export interface LicenseAccountDetails {
+  licenseKey?: string;
+  activationType?: 'serial' | 'email_invite';
+}
+
+export interface DigitalContentDetails {
+  resourceUrl?: string;
+  liveDate?: string;
+  contentType?: 'live_meet' | 'recorded_iframe' | 'ebook_drive';
+}
+
+export type AccountDetails =
+  | StreamingAccountDetails
+  | LicenseAccountDetails
+  | DigitalContentDetails
+  | Record<string, unknown>;
+
 export interface Dispute {
   id: string;
   purchaseId: string;
@@ -33,7 +60,7 @@ export interface Dispute {
       price: string;
       accountEmail?: string; // Solo si soy conciliator
       accountPassword?: string;
-      accountDetails?: any;
+      accountDetails?: AccountDetails;
     };
   };
   seller: {

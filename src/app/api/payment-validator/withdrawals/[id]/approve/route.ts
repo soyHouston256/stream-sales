@@ -127,7 +127,7 @@ export async function POST(
       },
       message: 'Withdrawal approved successfully. Please complete the payment to finalize.',
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error approving withdrawal:', error);
     return NextResponse.json(
       { error: 'Internal server error' },

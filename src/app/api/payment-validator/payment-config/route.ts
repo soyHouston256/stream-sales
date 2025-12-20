@@ -3,6 +3,8 @@ import { z } from 'zod';
 import { prisma } from '@/infrastructure/database/prisma';
 import { verifyJWT } from '@/infrastructure/auth/jwt';
 import { normalizeCountryCode } from '@/lib/utils/countryCode';
+import { Prisma } from '@prisma/client';
+import { isPrismaError, logError } from '@/lib/utils/error-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -180,14 +182,14 @@ export async function PUT(request: NextRequest) {
         const config = await prisma.paymentMethodConfig.upsert({
             where: { validatorId: user.id },
             update: {
-                methods: methods as unknown as any,
+                methods: methods as Prisma.InputJsonValue,
                 countryCode: countryCode, // Use normalized ISO country code
                 updatedAt: new Date(),
             },
             create: {
                 validatorId: user.id,
                 countryCode: countryCode, // Use normalized ISO country code
-                methods: methods as unknown as any,
+                methods: methods as Prisma.InputJsonValue,
             },
         });
 
@@ -196,11 +198,11 @@ export async function PUT(request: NextRequest) {
                 methods: config.methods as PaymentMethod[]
             }
         });
-    } catch (error: any) {
-        console.error('Error updating payment config:', error);
+    } catch (error: unknown) {
+        logError('payment-validator/payment-config', error);
 
         // Handle unique constraint error
-        if (error.code === 'P2002' && error.meta?.target?.includes('countryCode')) {
+        if (isPrismaError(error) && error.code === 'P2002' && error.meta?.target?.includes('countryCode')) {
             return NextResponse.json(
                 { error: 'Another payment validator is already assigned to this country.' },
                 { status: 409 }

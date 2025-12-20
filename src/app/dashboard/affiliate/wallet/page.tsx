@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import {
   Select,
   SelectContent,
@@ -12,7 +13,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { DataTable, Column } from '@/components/admin/DataTable';
-import { EnhancedStatsCard } from '@/components/ui/enhanced-stats-card';
+import { StatCard } from '@/components/ui/stat-card';
 import {
   useAffiliateWalletBalance,
   useAffiliateWalletTransactions,
@@ -26,10 +27,14 @@ import {
 } from '@/components/seller';
 import { formatCurrency } from '@/lib/utils/seller';
 import { format } from 'date-fns';
-import { Wallet, TrendingUp, Clock, Receipt } from 'lucide-react';
+import { Wallet, TrendingUp, Clock, Receipt, Filter } from 'lucide-react';
+
+import { useAuth } from '@/lib/auth/useAuth';
 
 export default function AffiliateWalletPage() {
   const { t } = useLanguage();
+  const { user } = useAuth();
+  const [rechargeOpen, setRechargeOpen] = useState(false);
   const [filters, setFilters] = useState<TransactionsFilters>({
     page: 1,
     limit: 10,
@@ -76,9 +81,8 @@ export default function AffiliateWalletPage() {
         const isPositive = transaction.type === 'credit';
         return (
           <span
-            className={`font-medium ${
-              isPositive ? 'text-green-600' : 'text-red-600'
-            }`}
+            className={`font-medium ${isPositive ? 'text-green-600' : 'text-red-600'
+              }`}
           >
             {isPositive ? '+' : '-'}
             {formatCurrency(transaction.amount)}
@@ -163,75 +167,78 @@ export default function AffiliateWalletPage() {
 
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">{t('affiliate.wallet.title')}</h1>
+          <div className="flex items-center gap-3">
+            <h1 className="text-3xl font-bold">{t('affiliate.wallet.title')}</h1>
+            {balance?.status === 'active' && (
+              <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-400">
+                <Wallet size={14} className="mr-1" />
+                {balance.status}
+              </Badge>
+            )}
+          </div>
           <p className="text-muted-foreground mt-2">
             {t('affiliate.wallet.subtitle')}
           </p>
         </div>
-        <RechargeDialog currentBalance={balance?.balance} role="affiliate" />
+        <RechargeDialog
+          currentBalance={balance?.balance}
+          role="affiliate"
+          open={rechargeOpen}
+          onOpenChange={setRechargeOpen}
+        />
       </div>
 
       {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="col-span-2 overflow-hidden relative border-2 shadow-lg hover:shadow-xl transition-all">
-          <div className="absolute inset-0 bg-gradient-to-br from-green-500 via-emerald-500 to-teal-500 opacity-5" />
-          <CardHeader className="pb-3 relative">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="p-2.5 rounded-xl bg-gradient-to-br from-green-500 via-emerald-500 to-teal-500 shadow-md">
-                <Wallet className="h-6 w-6 text-white" />
-              </div>
-              <CardDescription className="text-base font-medium">
-                {t('affiliate.wallet.currentBalance')}
-              </CardDescription>
-            </div>
-            <CardTitle className="text-5xl font-bold bg-gradient-to-br from-green-500 via-emerald-500 to-teal-500 bg-clip-text text-transparent">
-              {balance ? formatCurrency(balance.balance) : '$0.00'}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="relative">
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                {balance?.currency || 'USD'} • {balance?.status || 'active'}
-              </span>
-            </div>
-          </CardContent>
-        </Card>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <StatCard
+          label={t('affiliate.wallet.currentBalance')}
+          value={balance ? formatCurrency(balance.balance) : '$0.00'}
+          description={`${balance?.currency || 'USD'} • ${balance?.status || 'active'}`}
+          icon={Wallet}
+          color="green"
+          isLoading={balanceLoading}
+        />
 
-        <EnhancedStatsCard
-          title={t('affiliate.wallet.totalRecharged')}
+        <StatCard
+          label={t('affiliate.wallet.totalRecharged')}
           value={formatCurrency(totalRecharged.toFixed(2))}
           description={t('affiliate.wallet.completedRecharges')}
           icon={TrendingUp}
-          variant="success"
+          color="blue"
           isLoading={rechargesLoading}
         />
 
-        <EnhancedStatsCard
-          title={t('affiliate.wallet.pendingRecharges')}
-          value={pendingRecharges.length}
+        <StatCard
+          label={t('affiliate.wallet.pendingRecharges')}
+          value={pendingRecharges.length.toString()}
           description={formatCurrency(pendingAmount.toFixed(2))}
           icon={Clock}
-          variant="warning"
+          color="orange"
           isLoading={rechargesLoading}
         />
       </div>
 
       {/* Transactions */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle>{t('affiliate.wallet.transactionHistory')}</CardTitle>
-              <CardDescription>
-                {pagination
-                  ? t('affiliate.wallet.showingTransactions')
-                      .replace('{count}', transactions.length.toString())
-                      .replace('{total}', pagination.total.toString())
-                  : t('affiliate.wallet.allTransactions')}
-              </CardDescription>
-            </div>
+      <Card className="border-0 shadow-md">
+        <CardHeader className="pb-4">
+          <div className="flex items-center gap-2">
+            <Filter className="h-5 w-5 text-muted-foreground" />
+            <CardTitle className="text-lg">{t('affiliate.wallet.transactionHistory')}</CardTitle>
+          </div>
+          <CardDescription>
+            {pagination
+              ? t('affiliate.wallet.showingTransactions')
+                .replace('{count}', transactions.length.toString())
+                .replace('{total}', pagination.total.toString())
+              : t('affiliate.wallet.allTransactions')}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {/* Filter Section */}
             <div className="flex items-center gap-2">
               <Select
                 value={filters.type || 'all'}
@@ -243,7 +250,7 @@ export default function AffiliateWalletPage() {
                   }))
                 }
               >
-                <SelectTrigger className="w-40">
+                <SelectTrigger className="w-[200px] rounded-xl">
                   <SelectValue placeholder={t('affiliate.wallet.filterByType')} />
                 </SelectTrigger>
                 <SelectContent>
@@ -254,57 +261,64 @@ export default function AffiliateWalletPage() {
                 </SelectContent>
               </Select>
             </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <DataTable
-            data={transactions}
-            columns={transactionColumns}
-            isLoading={transactionsLoading}
-            emptyMessage={t('affiliate.wallet.noTransactions')}
-            emptyState={{
-              icon: Receipt,
-              title: filters.type ? t('affiliate.wallet.noTransactions') : t('affiliate.wallet.noTransactions'),
-              description: filters.type
-                ? t('affiliate.wallet.tryDifferentFilter')
-                : t('affiliate.wallet.transactionsAppear'),
-              variant: filters.type ? 'search' : 'default',
-            }}
-          />
 
-          {/* Pagination */}
-          {pagination && pagination.totalPages > 1 && (
-            <div className="flex items-center justify-center gap-2 mt-4">
-              <Button
-                variant="outline"
-                onClick={() =>
-                  setFilters((prev) => ({ ...prev, page: prev.page! - 1 }))
-                }
-                disabled={filters.page === 1}
-              >
-                {t('affiliate.wallet.previous')}
-              </Button>
-              <span className="text-sm text-muted-foreground">
-                {t('affiliate.wallet.page')} {filters.page} {t('affiliate.wallet.of')} {pagination.totalPages}
-              </span>
-              <Button
-                variant="outline"
-                onClick={() =>
-                  setFilters((prev) => ({ ...prev, page: prev.page! + 1 }))
-                }
-                disabled={filters.page === pagination.totalPages}
-              >
-                {t('affiliate.wallet.next')}
-              </Button>
-            </div>
-          )}
+            {/* Transactions Table */}
+            <DataTable
+              data={transactions}
+              columns={transactionColumns}
+              isLoading={transactionsLoading}
+              emptyMessage={t('affiliate.wallet.noTransactions')}
+              emptyState={{
+                icon: Receipt,
+                title: filters.type ? t('affiliate.wallet.noTransactions') : t('affiliate.wallet.noTransactions'),
+                description: filters.type
+                  ? t('affiliate.wallet.tryDifferentFilter')
+                  : t('affiliate.wallet.transactionsAppear'),
+                variant: filters.type ? 'search' : 'default',
+              }}
+            />
+
+            {/* Pagination */}
+            {pagination && pagination.totalPages > 1 && (
+              <div className="flex items-center justify-center gap-2 mt-4">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="rounded-xl"
+                  onClick={() =>
+                    setFilters((prev) => ({ ...prev, page: prev.page! - 1 }))
+                  }
+                  disabled={filters.page === 1}
+                >
+                  {t('affiliate.wallet.previous')}
+                </Button>
+                <span className="text-sm text-muted-foreground">
+                  {t('affiliate.wallet.page')} {filters.page} {t('affiliate.wallet.of')} {pagination.totalPages}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="rounded-xl"
+                  onClick={() =>
+                    setFilters((prev) => ({ ...prev, page: prev.page! + 1 }))
+                  }
+                  disabled={filters.page === pagination.totalPages}
+                >
+                  {t('affiliate.wallet.next')}
+                </Button>
+              </div>
+            )}
+          </div>
         </CardContent>
       </Card>
 
       {/* Recharges */}
-      <Card>
-        <CardHeader>
-          <CardTitle>{t('affiliate.wallet.rechargeHistory')}</CardTitle>
+      <Card className="border-0 shadow-md">
+        <CardHeader className="pb-4">
+          <div className="flex items-center gap-2">
+            <Wallet className="h-5 w-5 text-muted-foreground" />
+            <CardTitle className="text-lg">{t('affiliate.wallet.rechargeHistory')}</CardTitle>
+          </div>
           <CardDescription>
             {t('affiliate.wallet.allRecharges')}
           </CardDescription>

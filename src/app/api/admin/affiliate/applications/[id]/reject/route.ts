@@ -127,7 +127,7 @@ export async function PUT(
       rejectionReason: updatedProfile.rejectionReason,
       message: 'Affiliate application rejected',
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error rejecting affiliate application:', error);
     return NextResponse.json(
       { error: 'Internal server error' },

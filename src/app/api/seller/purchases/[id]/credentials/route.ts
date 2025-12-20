@@ -216,7 +216,7 @@ export async function GET(
             category: orderItem.variant.product.category,
         });
 
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Error fetching credentials:', error);
         return NextResponse.json(
             { error: 'Internal server error' },

@@ -33,7 +33,7 @@ import {
 } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { EnhancedStatsCard } from '@/components/ui/enhanced-stats-card';
+import { StatCard } from '@/components/ui/stat-card';
 import { EmptyState } from '@/components/ui/empty-state';
 
 interface AffiliateApplication {
@@ -165,6 +165,7 @@ export default function AdminAffiliatesPage() {
       active: { variant: 'default', icon: CheckCircle, label: t('admin.affiliates.active') },
     };
 
+    // eslint-disable-next-line security/detect-object-injection
     const config = variants[status] || variants.pending;
     const Icon = config.icon;
 
@@ -199,30 +200,30 @@ export default function AdminAffiliatesPage() {
 
       {/* Stats */}
       <div className="grid gap-4 md:grid-cols-3">
-        <EnhancedStatsCard
-          title={t('admin.affiliates.pendingApplications')}
+        <StatCard
+          label={t('admin.affiliates.pendingApplications')}
           value={pendingCount}
           description={t('admin.affiliates.awaitingReview')}
           icon={Clock}
-          variant="warning"
+          color="orange"
           isLoading={isLoading}
         />
 
-        <EnhancedStatsCard
-          title={t('admin.affiliates.approved')}
+        <StatCard
+          label={t('admin.affiliates.approved')}
           value={applications.filter(app => app.status === 'approved').length}
           description={t('admin.affiliates.activeAffiliates')}
           icon={CheckCircle}
-          variant="success"
+          color="green"
           isLoading={isLoading}
         />
 
-        <EnhancedStatsCard
-          title={t('admin.affiliates.totalApplications')}
+        <StatCard
+          label={t('admin.affiliates.totalApplications')}
           value={applications.length}
           description={t('admin.affiliates.allTime')}
           icon={Users}
-          variant="info"
+          color="blue"
           isLoading={isLoading}
         />
       </div>
@@ -282,7 +283,7 @@ export default function AdminAffiliatesPage() {
                           <>
                             <Button
                               size="sm"
-                              variant="default"
+                              color="purple"
                               onClick={() => {
                                 setSelectedApp(app);
                                 setActionType('approve');

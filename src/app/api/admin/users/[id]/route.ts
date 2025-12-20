@@ -152,7 +152,7 @@ export async function PUT(
       updatedAt: updatedUser.updatedAt.toISOString(),
       status: data.status || 'active', // Return requested status or default
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error updating user:', error);
     return NextResponse.json(
       { error: 'Internal server error' },

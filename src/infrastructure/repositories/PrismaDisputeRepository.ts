@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Prisma } from '@prisma/client';
 import { Dispute } from '../../domain/entities/Dispute';
 import {
   IDisputeRepository,
@@ -6,6 +6,59 @@ import {
 } from '../../domain/repositories/IDisputeRepository';
 import { DisputeStatus } from '../../domain/value-objects/DisputeStatus';
 import { ResolutionType } from '../../domain/value-objects/ResolutionType';
+/**
+ * Base type for Dispute from Prisma (without relations)
+ * Used as minimum type for toDomain conversion
+ */
+type DisputeBase = Prisma.DisputeGetPayload<{
+  select: {
+    id: true;
+    orderId: true;
+    sellerId: true;
+    providerId: true;
+    conciliatorId: true;
+    openedBy: true;
+    reason: true;
+    status: true;
+    resolution: true;
+    resolutionType: true;
+    createdAt: true;
+    assignedAt: true;
+    resolvedAt: true;
+  };
+}>;
+
+/**
+ * Type for Dispute with all common relations from Prisma queries
+ */
+type DisputeWithRelations = DisputeBase & {
+  order?: {
+    id: string;
+    totalAmount: Prisma.Decimal;
+    status: string;
+    createdAt: Date;
+    items?: Array<{
+      variant: {
+        price: Prisma.Decimal;
+        product: {
+          id: string;
+          name: string;
+          category: string;
+        };
+      };
+    }>;
+  };
+  seller?: { id: string; name: string | null; email: string };
+  provider?: { id: string; name: string | null; email: string };
+  conciliator?: { id: string; name: string | null; email: string } | null;
+};
+
+/**
+ * Type for Dispute stats queries
+ */
+type DisputeForStats = Prisma.DisputeGetPayload<{
+  select: { assignedAt: true; resolvedAt: true };
+}>;
 
 /**
  * PrismaDisputeRepository
@@ -160,7 +213,7 @@ export class PrismaDisputeRepository implements IDisputeRepository {
       },
     });
 
-    return disputes.map((d: any) => this.toDomain(d));
+    return disputes.map((d) => this.toDomain(d));
   }
 
   /**
@@ -170,7 +223,7 @@ export class PrismaDisputeRepository implements IDisputeRepository {
     conciliatorId: string,
     status?: string
   ): Promise<Dispute[]> {
-    const where: any = { conciliatorId };
+    const where: Prisma.DisputeWhereInput = { conciliatorId };
 
     if (status) {
       where.status = status;
@@ -299,7 +352,7 @@ export class PrismaDisputeRepository implements IDisputeRepository {
     closed: number;
     avgResolutionTimeHours: number;
   }> {
-    const where: any = conciliatorId ? { conciliatorId } : {};
+    const where: Prisma.DisputeWhereInput = conciliatorId ? { conciliatorId } : {};
 
     const [total, open, underReview, resolved, closed, resolvedDisputes] =
       await Promise.all([
@@ -324,7 +377,7 @@ export class PrismaDisputeRepository implements IDisputeRepository {
     // Calcular tiempo promedio de resolución
     let avgResolutionTimeHours = 0;
     if (resolvedDisputes.length > 0) {
-      const totalHours = resolvedDisputes.reduce((sum: number, d: any) => {
+      const totalHours = resolvedDisputes.reduce((sum: number, d: DisputeForStats) => {
         if (d.assignedAt && d.resolvedAt) {
           const hours =
             (d.resolvedAt.getTime() - d.assignedAt.getTime()) /
@@ -354,10 +407,10 @@ export class PrismaDisputeRepository implements IDisputeRepository {
   /**
    * Construye la cláusula WHERE de Prisma desde filtros
    */
-  private buildWhereClause(filters?: DisputeFilters): any {
+  private buildWhereClause(filters?: DisputeFilters): Prisma.DisputeWhereInput {
     if (!filters) return {};
 
-    const where: any = {};
+    const where: Prisma.DisputeWhereInput = {};
 
     if (filters.status) {
       where.status = filters.status;
@@ -392,14 +445,14 @@ export class PrismaDisputeRepository implements IDisputeRepository {
   /**
    * Convierte de Prisma model a Domain entity
    */
-  private toDomain(prismaDispute: any): Dispute {
+  private toDomain(prismaDispute: DisputeWithRelations): Dispute {
     return Dispute.fromPersistence({
       id: prismaDispute.id,
       purchaseId: prismaDispute.orderId,
       sellerId: prismaDispute.sellerId,
       providerId: prismaDispute.providerId,
       conciliatorId: prismaDispute.conciliatorId,
-      openedBy: prismaDispute.openedBy,
+      openedBy: prismaDispute.openedBy as 'seller' | 'provider',
       reason: prismaDispute.reason,
       status: DisputeStatus.fromPersistence(prismaDispute.status),
       resolution: prismaDispute.resolution,
@@ -415,7 +468,7 @@ export class PrismaDisputeRepository implements IDisputeRepository {
   /**
    * Convierte a formato JSON con relaciones incluidas
    */
-  private toJSONWithRelations(prismaDispute: any): any {
+  private toJSONWithRelations(prismaDispute: DisputeWithRelations): Record<string, unknown> {
     const dispute = this.toDomain(prismaDispute);
     const json = dispute.toJSON();
 

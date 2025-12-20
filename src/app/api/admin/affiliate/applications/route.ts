@@ -138,7 +138,8 @@ export async function GET(request: NextRequest) {
 
     statusGroups.forEach((group) => {
       const s = group.status as keyof typeof summary;
-      if (summary.hasOwnProperty(s)) {
+      if (Object.hasOwn(summary, s)) {
+        // eslint-disable-next-line security/detect-object-injection
         summary[s] = group._count.status;
       }
     });
@@ -201,7 +202,7 @@ export async function GET(request: NextRequest) {
       },
       summary,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching affiliate applications:', error);
     return NextResponse.json(
       { error: 'Internal server error' },

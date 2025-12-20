@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
 import {
   Select,
   SelectContent,
@@ -22,11 +23,11 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
-import { EnhancedStatsCard } from '@/components/ui/enhanced-stats-card';
+import { StatCard } from '@/components/ui/stat-card';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Users, Eye, Search, Filter, Clock, CheckCircle, XCircle, Wallet, Info } from 'lucide-react';
+import { Users, Eye, Search, Filter, Clock, CheckCircle, XCircle, Wallet, Info, ShieldCheck } from 'lucide-react';
 import { useReferrals } from '@/lib/hooks';
 import { ReferralFilters, Referral } from '@/types/affiliate';
 import {
@@ -149,48 +150,56 @@ export default function ReferralsPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold">{t('affiliate.referrals.title')}</h1>
-        <p className="text-muted-foreground mt-2">
-          {t('affiliate.referrals.subtitle')}
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <div className="flex items-center gap-3">
+            <h1 className="text-3xl font-bold">{t('affiliate.referrals.title')}</h1>
+            <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-400">
+              <ShieldCheck size={14} className="mr-1" />
+              Afiliado
+            </Badge>
+          </div>
+          <p className="text-muted-foreground mt-2">
+            {t('affiliate.referrals.subtitle')}
+          </p>
+        </div>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-4">
-        <EnhancedStatsCard
-          title={t('affiliate.referrals.totalReferrals') || "Total Referidos"}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard
+          label={t('affiliate.referrals.totalReferrals') || "Total Referidos"}
           value={totalReferrals}
           description={t('affiliate.referrals.registeredWithCode') || "Registrados con tu código"}
           icon={Users}
-          variant="info"
+          color="blue"
           isLoading={isLoadingAll}
         />
 
-        <EnhancedStatsCard
-          title={t('affiliate.referrals.pendingApproval') || "Pendientes"}
+        <StatCard
+          label={t('affiliate.referrals.pendingApproval') || "Pendientes"}
           value={pendingCount}
           description={t('affiliate.referrals.waitingApproval') || "Esperando aprobación"}
           icon={Clock}
-          variant="warning"
+          color="orange"
           isLoading={isLoadingPending}
         />
 
-        <EnhancedStatsCard
-          title={t('affiliate.referrals.approved') || "Aprobados"}
+        <StatCard
+          label={t('affiliate.referrals.approved') || "Aprobados"}
           value={approvedCount}
           description={t('affiliate.referrals.activeSellers') || "Vendedores activos"}
           icon={CheckCircle}
-          variant="success"
+          color="green"
           isLoading={isLoadingAll}
         />
 
-        <EnhancedStatsCard
-          title={t('affiliate.referrals.yourBalance') || "Tu Saldo"}
+        <StatCard
+          label={t('affiliate.referrals.yourBalance') || "Tu Saldo"}
           value={`$${affiliateBalance}`}
           description={t('affiliate.referrals.availableForApprovals') || "Disponible para aprobaciones"}
           icon={Wallet}
-          variant="default"
+          color="purple"
           isLoading={false}
         />
       </div>
@@ -216,18 +225,21 @@ export default function ReferralsPage() {
         {/* Pending Referrals Tab */}
         <TabsContent value="pending" className="space-y-4">
           {/* Info Alert */}
-          <Alert>
-            <Info className="h-4 w-4" />
-            <AlertDescription>
+          <Alert className="border-blue-200 bg-blue-50 dark:bg-blue-950/30 dark:border-blue-900">
+            <Info className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+            <AlertDescription className="text-blue-900 dark:text-blue-100">
               <strong>{t('affiliate.pendingReferrals.howItWorksTitle') || "¿Cómo funciona?"}</strong>{' '}
               {(t('affiliate.pendingReferrals.howItWorksDescription') ||
                 "Para aprobar un referido debes pagar una cuota de {fee} USD desde tu saldo de afiliado.").replace('{fee}', `$${approvalFee}`)}
             </AlertDescription>
           </Alert>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>{t('affiliate.pendingReferrals.waitingApproval') || "Esperando Aprobación"}</CardTitle>
+          <Card className="border-0 shadow-md">
+            <CardHeader className="pb-4">
+              <div className="flex items-center gap-2">
+                <Clock className="h-5 w-5 text-muted-foreground" />
+                <CardTitle className="text-lg">{t('affiliate.pendingReferrals.waitingApproval') || "Esperando Aprobación"}</CardTitle>
+              </div>
               <CardDescription>
                 {t('affiliate.pendingReferrals.reviewDecide') || "Revisa y decide si aprobar o rechazar"}
               </CardDescription>
@@ -274,6 +286,7 @@ export default function ReferralsPage() {
                               <Button
                                 variant="default"
                                 size="sm"
+                                className="rounded-xl"
                                 onClick={() => handleApprove(referral)}
                               >
                                 <CheckCircle className="mr-1 h-4 w-4" />
@@ -282,6 +295,7 @@ export default function ReferralsPage() {
                               <Button
                                 variant="outline"
                                 size="sm"
+                                className="rounded-xl"
                                 onClick={() => handleReject(referral)}
                               >
                                 <XCircle className="mr-1 h-4 w-4" />
@@ -308,9 +322,12 @@ export default function ReferralsPage() {
 
         {/* All Referrals Tab */}
         <TabsContent value="all" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>{t('affiliate.referrals.allReferrals')}</CardTitle>
+          <Card className="border-0 shadow-md">
+            <CardHeader className="pb-4">
+              <div className="flex items-center gap-2">
+                <Users className="h-5 w-5 text-muted-foreground" />
+                <CardTitle className="text-lg">{t('affiliate.referrals.allReferrals')}</CardTitle>
+              </div>
               <CardDescription>{t('affiliate.referrals.completeList')}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -320,12 +337,12 @@ export default function ReferralsPage() {
                   <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                   <Input
                     placeholder={t('affiliate.referrals.searchPlaceholder')}
-                    className="pl-10"
+                    className="pl-10 rounded-xl"
                     onChange={(e) => handleSearch(e.target.value)}
                   />
                 </div>
                 <Select defaultValue="all" onValueChange={handleStatusFilter}>
-                  <SelectTrigger className="w-full md:w-[180px]">
+                  <SelectTrigger className="w-full md:w-[180px] rounded-xl">
                     <Filter className="mr-2 h-4 w-4" />
                     <SelectValue placeholder={t('affiliate.status')} />
                   </SelectTrigger>
@@ -337,7 +354,7 @@ export default function ReferralsPage() {
                   </SelectContent>
                 </Select>
                 <Select defaultValue="all" onValueChange={handleRoleFilter}>
-                  <SelectTrigger className="w-full md:w-[180px]">
+                  <SelectTrigger className="w-full md:w-[180px] rounded-xl">
                     <SelectValue placeholder={t('affiliate.role')} />
                   </SelectTrigger>
                   <SelectContent>
@@ -414,6 +431,7 @@ export default function ReferralsPage() {
                         <Button
                           variant="outline"
                           size="sm"
+                          className="rounded-xl"
                           onClick={() => handlePageChange(allFilters.page! - 1)}
                           disabled={allFilters.page === 1}
                         >
@@ -422,6 +440,7 @@ export default function ReferralsPage() {
                         <Button
                           variant="outline"
                           size="sm"
+                          className="rounded-xl"
                           onClick={() => handlePageChange(allFilters.page! + 1)}
                           disabled={allFilters.page === allData?.pagination?.totalPages}
                         >

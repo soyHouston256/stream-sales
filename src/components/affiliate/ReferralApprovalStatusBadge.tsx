@@ -42,7 +42,9 @@ export function ReferralApprovalStatusBadge({
   };
 
   // Fallback to pending if status is invalid or undefined
+  // eslint-disable-next-line security/detect-object-injection
   const currentStatus = status && config[status] ? status : 'pending';
+  // eslint-disable-next-line security/detect-object-injection
   const { label, icon: Icon, className: statusClassName } = config[currentStatus];
 
   return (

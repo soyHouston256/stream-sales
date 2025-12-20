@@ -151,7 +151,7 @@ export async function GET(request: NextRequest) {
       salesGrowth: parseFloat(salesGrowth.toFixed(2)),
       usersGrowth: parseFloat(usersGrowth.toFixed(2)),
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching admin stats:', error);
     return NextResponse.json(
       { error: 'Internal server error' },

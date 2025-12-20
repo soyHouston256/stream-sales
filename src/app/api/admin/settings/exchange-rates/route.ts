@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/infrastructure/database/prisma';
 import { verifyJWT } from '@/infrastructure/auth/jwt';
+import { Prisma } from '@prisma/client';
+import { isPrismaError, logError } from '@/lib/utils/error-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -154,7 +156,7 @@ export async function PUT(request: NextRequest) {
             );
         }
 
-        const updateData: any = {};
+        const updateData: Prisma.ExchangeRateUpdateInput = {};
         if (validation.data.countryCode) updateData.countryCode = validation.data.countryCode.toUpperCase();
         if (validation.data.countryName) updateData.countryName = validation.data.countryName;
         if (validation.data.currencyCode) updateData.currencyCode = validation.data.currencyCode.toUpperCase();
@@ -170,11 +172,11 @@ export async function PUT(request: NextRequest) {
         return NextResponse.json({
             data: { ...exchangeRate, rate: exchangeRate.rate.toString() },
         });
-    } catch (error: any) {
-        if (error?.code === 'P2025') {
+    } catch (error: unknown) {
+        if (isPrismaError(error) && error.code === 'P2025') {
             return NextResponse.json({ error: 'Exchange rate not found' }, { status: 404 });
         }
-        console.error('Error updating exchange rate:', error);
+        logError('admin/settings/exchange-rates/PUT', error);
         return NextResponse.json(
             { error: 'Internal server error' },
             { status: 500 }
@@ -205,11 +207,11 @@ export async function DELETE(request: NextRequest) {
         });
 
         return NextResponse.json({ success: true });
-    } catch (error: any) {
-        if (error?.code === 'P2025') {
+    } catch (error: unknown) {
+        if (isPrismaError(error) && error.code === 'P2025') {
             return NextResponse.json({ error: 'Exchange rate not found' }, { status: 404 });
         }
-        console.error('Error deleting exchange rate:', error);
+        logError('admin/settings/exchange-rates/DELETE', error);
         return NextResponse.json(
             { error: 'Internal server error' },
             { status: 500 }

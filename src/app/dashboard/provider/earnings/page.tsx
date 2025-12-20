@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { DataTable, Column } from '@/components/admin/DataTable';
-import { EnhancedStatsCard } from '@/components/ui/enhanced-stats-card';
+import { StatCard } from '@/components/ui/stat-card';
 import { EmptyState } from '@/components/ui/empty-state';
 import { WithdrawalRequestDialog } from '@/components/provider/WithdrawalRequestDialog';
 import {
@@ -25,6 +25,7 @@ export default function EarningsPage() {
   const [page, setPage] = useState(1);
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+  const [withdrawalOpen, setWithdrawalOpen] = useState(false);
 
   const { data: balance, isLoading: balanceLoading } = useProviderBalance();
   const { data: transactionsData, isLoading: transactionsLoading } =
@@ -79,9 +80,8 @@ export default function EarningsPage() {
         const isPositive = tx.type === 'earning';
         return (
           <span
-            className={`font-medium ${
-              isPositive ? 'text-green-600' : 'text-red-600'
-            }`}
+            className={`font-medium ${isPositive ? 'text-green-600' : 'text-red-600'
+              }`}
           >
             {isPositive ? '+' : '-'}${tx.amount}
           </span>
@@ -105,7 +105,7 @@ export default function EarningsPage() {
     {
       key: 'createdAt',
       label: t('provider.date'),
-      render: (tx) => format(new Date(tx.createdAt), 'MMM dd, yyyy HH:mm'),
+      render: (tx) => format(new Date(tx.createdAt), 'MMM dd, yyyy hh:mm a'),
     },
   ];
 
@@ -173,43 +173,53 @@ export default function EarningsPage() {
             {t('provider.earnings.subtitle')}
           </p>
         </div>
-        <WithdrawalRequestDialog availableBalance={availableBalance} />
+        <WithdrawalRequestDialog
+          availableBalance={availableBalance}
+          open={withdrawalOpen}
+          onOpenChange={setWithdrawalOpen}
+          trigger={
+            <Button onClick={() => setWithdrawalOpen(true)}>
+              <DollarSign className="h-4 w-4 mr-2" />
+              {t('provider.withdrawal.title')}
+            </Button>
+          }
+        />
       </div>
 
       <div className="grid gap-4 md:grid-cols-4">
-        <EnhancedStatsCard
-          title={t('provider.earnings.availableBalance')}
+        <StatCard
+          label={t('provider.earnings.availableBalance')}
           value={balance ? `$${parseFloat(balance.balance).toFixed(2)}` : '$0.00'}
           description={t('provider.earnings.readyForWithdrawal')}
           icon={Wallet}
-          variant="success"
+          color="green"
           isLoading={balanceLoading}
         />
 
-        <EnhancedStatsCard
-          title={t('provider.earnings.totalEarnings')}
+        <StatCard
+          label={t('provider.earnings.totalEarnings')}
           value={balance ? `$${parseFloat(balance.totalEarnings).toFixed(2)}` : '$0.00'}
           description={t('provider.earnings.lifetimeEarnings')}
           icon={TrendingUp}
-          variant="info"
+          color="blue"
           isLoading={balanceLoading}
         />
 
-        <EnhancedStatsCard
-          title={t('provider.earnings.totalWithdrawn')}
+        <StatCard
+          label={t('provider.earnings.totalWithdrawn')}
           value={balance ? `$${parseFloat(balance.totalWithdrawals).toFixed(2)}` : '$0.00'}
           description={t('provider.earnings.successfullyWithdrawn')}
           icon={TrendingDown}
-          variant="warning"
+          color="orange"
           isLoading={balanceLoading}
         />
 
-        <EnhancedStatsCard
-          title={t('provider.earnings.pendingWithdrawals')}
+        <StatCard
+          label={t('provider.earnings.pendingWithdrawals')}
           value={balance ? `$${parseFloat(balance.pendingWithdrawals).toFixed(2)}` : '$0.00'}
           description={t('provider.earnings.awaitingApproval')}
           icon={DollarSign}
-          variant="warning"
+          color="orange"
           isLoading={balanceLoading}
         />
       </div>
@@ -271,10 +281,10 @@ export default function EarningsPage() {
               pagination={
                 transactionsData
                   ? {
-                      currentPage: transactionsData.pagination.page,
-                      totalPages: transactionsData.pagination.totalPages,
-                      onPageChange: setPage,
-                    }
+                    currentPage: transactionsData.pagination.page,
+                    totalPages: transactionsData.pagination.totalPages,
+                    onPageChange: setPage,
+                  }
                   : undefined
               }
               emptyMessage={t('provider.earnings.noTransactions')}

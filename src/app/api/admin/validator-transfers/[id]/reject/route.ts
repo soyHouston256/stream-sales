@@ -138,7 +138,7 @@ export async function PUT(
             processedAt: result.processedAt?.toISOString(),
             message: 'Transfer rejected. Fund entries returned to pending.',
         });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Error rejecting validator transfer:', error);
         return NextResponse.json(
             { error: 'Internal server error' },

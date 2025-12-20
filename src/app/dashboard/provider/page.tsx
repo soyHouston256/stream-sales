@@ -5,7 +5,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Package, DollarSign, Wallet, ShoppingCart, ArrowUpRight } from 'lucide-react';
-import { EnhancedStatsCard } from '@/components/ui/enhanced-stats-card';
+import { StatCard } from '@/components/ui/stat-card';
 import { SalesByCategoryChart } from '@/components/provider/SalesByCategoryChart';
 import { DataTable, Column } from '@/components/admin/DataTable';
 import { useProviderStats } from '@/lib/hooks/useProviderStats';
@@ -99,32 +99,32 @@ export default function ProviderDashboard() {
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <div className="col-span-2">
-          <EnhancedStatsCard
-            title={t('provider.earnings.availableBalance')}
+          <StatCard
+            label={t('provider.earnings.availableBalance')}
             value={walletBalance ? formatCurrency(walletBalance.balance) : '$0.00'}
             description={`${walletBalance?.currency || 'USD'} • ${t('provider.earnings.readyForWithdrawal')}`}
             icon={Wallet}
-            variant="success"
+            color="green"
             isLoading={walletLoading}
           />
         </div>
 
-        <EnhancedStatsCard
-          title={t('provider.totalProducts')}
+        <StatCard
+          label={t('provider.totalProducts')}
           value={stats?.totalProducts ?? 0}
           description={`${stats?.availableProducts ?? 0} ${t('provider.availableProducts')}, ${stats?.soldProducts ?? 0} ${t('provider.soldProducts')}`}
           icon={Package}
           isLoading={statsLoading}
-          variant="info"
+          color="blue"
         />
 
-        <EnhancedStatsCard
-          title={t('provider.thisMonth')}
+        <StatCard
+          label={t('provider.thisMonth')}
           value={stats ? `$${parseFloat(stats.thisMonthEarnings).toFixed(2)}` : '$0.00'}
           description={`${stats?.thisMonthSales ?? 0} ${t('provider.salesThisMonth')}`}
           icon={ShoppingCart}
           isLoading={statsLoading}
-          variant="warning"
+          color="orange"
         />
       </div>
 

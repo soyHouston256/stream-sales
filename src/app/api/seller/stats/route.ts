@@ -1,6 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/infrastructure/database/prisma';
 import { verifyJWT } from '@/infrastructure/auth/jwt';
+import { Prisma } from '@prisma/client';
+import { logError } from '@/lib/utils/error-utils';
+
+// Type for order item with variant and order
+type OrderItemWithVariantAndOrder = Prisma.OrderItemGetPayload<{
+  include: {
+    variant: true;
+    order: true;
+  };
+}>;
 
 export const dynamic = 'force-dynamic';
 
@@ -96,7 +106,7 @@ export async function GET(request: NextRequest) {
 
     const totalPurchases = orderItems.length;
     const totalSpent = orderItems
-      .reduce((sum: number, item: any) => sum + Number(item.variant.price), 0)
+      .reduce((sum: number, item: OrderItemWithVariantAndOrder) => sum + Number(item.variant.price), 0)
       .toFixed(2);
 
     // 5. Get this month's statistics
@@ -104,12 +114,12 @@ export async function GET(request: NextRequest) {
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
     const thisMonthItems = orderItems.filter(
-      (item: any) => item.order.createdAt >= startOfMonth
+      (item) => item.order.createdAt >= startOfMonth
     );
 
     const thisMonthPurchases = thisMonthItems.length;
     const thisMonthSpent = thisMonthItems
-      .reduce((sum: number, item: any) => sum + Number(item.variant.price), 0)
+      .reduce((sum: number, item) => sum + Number(item.variant.price), 0)
       .toFixed(2);
 
     // 6. Get pending recharges statistics
@@ -125,7 +135,7 @@ export async function GET(request: NextRequest) {
 
     const pendingRechargesCount = pendingRecharges.length;
     const pendingRechargesAmount = pendingRecharges
-      .reduce((sum: number, r: any) => sum + Number(r.amount), 0)
+      .reduce((sum: number, r) => sum + Number(r.amount), 0)
       .toFixed(2);
 
     // 7. Return stats
@@ -138,8 +148,8 @@ export async function GET(request: NextRequest) {
       pendingRecharges: pendingRechargesCount,
       pendingRechargesAmount,
     });
-  } catch (error: any) {
-    console.error('Error fetching seller stats:', error);
+  } catch (error: unknown) {
+    logError('seller/stats', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

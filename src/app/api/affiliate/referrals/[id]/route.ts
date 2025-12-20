@@ -175,7 +175,7 @@ export async function GET(
       activitySummary,
       commissionTimeline,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching referral details:', error);
     return NextResponse.json(
       { error: 'Internal server error' },

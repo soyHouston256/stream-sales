@@ -133,7 +133,7 @@ export async function GET(request: NextRequest) {
       totalWithdrawals: totalWithdrawals.toFixed(2),
       pendingWithdrawals: pendingWithdrawals.toFixed(2),
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching provider balance:', error);
     return NextResponse.json(
       { error: 'Internal server error' },

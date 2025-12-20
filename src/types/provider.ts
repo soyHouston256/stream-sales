@@ -12,6 +12,33 @@ export type ProductCategory =
   | 'youtube'
   | 'other';
 
+/**
+ * Account details types for different product categories
+ */
+export interface StreamingAccountDetails {
+  email?: string;
+  password?: string;
+  profiles?: { name: string; pin?: string }[];
+  platformType?: string;
+}
+
+export interface LicenseAccountDetails {
+  licenseKey?: string;
+  activationType?: 'serial' | 'email_invite';
+}
+
+export interface DigitalContentDetails {
+  resourceUrl?: string;
+  liveDate?: string;
+  contentType?: 'live_meet' | 'recorded_iframe' | 'ebook_drive';
+}
+
+export type AccountDetails =
+  | StreamingAccountDetails
+  | LicenseAccountDetails
+  | DigitalContentDetails
+  | Record<string, unknown>;
+
 export type ProductStatus = 'available' | 'reserved' | 'sold';
 
 export type TransactionType = 'earning' | 'withdrawal' | 'refund';
@@ -45,7 +72,7 @@ export interface Product {
   durationDays?: number;
   accountEmail?: string;
   accountPassword?: string;
-  accountDetails?: any;
+  accountDetails?: AccountDetails;
 }
 
 export interface CreateProductDTO {
@@ -80,7 +107,7 @@ export interface UpdateProductDTO {
   imageUrl?: string;
   accountEmail?: string;
   accountPassword?: string;
-  accountDetails?: any;
+  accountDetails?: AccountDetails;
 }
 
 export interface ProviderSale {

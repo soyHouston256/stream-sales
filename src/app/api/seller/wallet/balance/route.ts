@@ -77,7 +77,7 @@ export async function GET(request: NextRequest) {
       currency: wallet.currency,
       status: wallet.status,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching wallet balance:', error);
     return NextResponse.json(
       { error: 'Internal server error' },

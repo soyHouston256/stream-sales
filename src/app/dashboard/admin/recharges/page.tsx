@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import Image from 'next/image';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -17,7 +18,7 @@ import { CheckCircle, XCircle, AlertCircle, Search, DollarSign, Inbox, Clock, Wa
 import { tokenManager } from '@/lib/utils/tokenManager';
 import { useToast } from '@/hooks/use-toast';
 import { EmptyState } from '@/components/ui/empty-state';
-import { EnhancedStatsCard } from '@/components/ui/enhanced-stats-card';
+import { StatCard } from '@/components/ui/stat-card';
 
 interface User {
   id: string;
@@ -232,6 +233,7 @@ export default function AdminRechargesPage() {
       cancelled: { variant: 'secondary', label: 'Cancelado' },
     };
 
+    // eslint-disable-next-line security/detect-object-injection
     const config = variants[status] || { variant: 'default', label: status };
     return <Badge variant={config.variant}>{config.label}</Badge>;
   };
@@ -244,6 +246,7 @@ export default function AdminRechargesPage() {
       crypto: 'Criptomoneda',
       mock: 'Prueba',
     };
+    // eslint-disable-next-line security/detect-object-injection
     return labels[method] || method;
   };
 
@@ -258,39 +261,39 @@ export default function AdminRechargesPage() {
 
       {/* Summary Cards */}
       <div className="grid gap-4 md:grid-cols-4">
-        <EnhancedStatsCard
-          title="Pendientes"
+        <StatCard
+          label="Pendientes"
           value={rechargesData?.summary.pending ?? 0}
           description={`$${rechargesData?.summary.totalPendingAmount ?? '0.00'}`}
           icon={Clock}
-          variant="warning"
+          color="orange"
           isLoading={isLoading}
         />
 
-        <EnhancedStatsCard
-          title="Completadas"
+        <StatCard
+          label="Completadas"
           value={rechargesData?.summary.completed ?? 0}
           description={`$${rechargesData?.summary.totalCompletedAmount ?? '0.00'}`}
           icon={CheckCircle}
-          variant="success"
+          color="green"
           isLoading={isLoading}
         />
 
-        <EnhancedStatsCard
-          title="Fallidas"
+        <StatCard
+          label="Fallidas"
           value={rechargesData?.summary.failed ?? 0}
           description="Recargas que no se pudieron procesar"
           icon={XCircle}
-          variant="danger"
+          color="red"
           isLoading={isLoading}
         />
 
-        <EnhancedStatsCard
-          title="Canceladas"
+        <StatCard
+          label="Canceladas"
           value={rechargesData?.summary.cancelled ?? 0}
           description="Recargas rechazadas o canceladas"
           icon={AlertCircle}
-          variant="default"
+          color="purple"
           isLoading={isLoading}
         />
       </div>
@@ -426,7 +429,7 @@ export default function AdminRechargesPage() {
                             <Button
                               size="sm"
                               onClick={() => handleApprove(recharge)}
-                              variant="default"
+                              color="purple"
                             >
                               <CheckCircle className="h-4 w-4 mr-1" />
                               Aprobar
@@ -561,11 +564,14 @@ export default function AdminRechargesPage() {
                 <div className="bg-muted/30 p-4 rounded-lg">
                   <p className="text-xs uppercase font-bold text-muted-foreground mb-3">Comprobante de Pago</p>
                   <div className="border rounded-lg overflow-hidden bg-white">
-                    <img
+                    <Image
                       src={selectedRecharge.metadata.voucherUrl}
                       alt="Comprobante de pago"
+                      width={500}
+                      height={400}
                       className="w-full max-h-[400px] object-contain cursor-pointer"
                       onClick={() => window.open(selectedRecharge.metadata.voucherUrl, '_blank')}
+                      unoptimized
                     />
                   </div>
                   <p className="text-xs text-muted-foreground mt-2 text-center">

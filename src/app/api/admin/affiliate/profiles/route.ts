@@ -121,8 +121,10 @@ export async function GET(request: NextRequest) {
     }
 
     // 5. Build order by clause
-    let orderBy: any = {};
+    // eslint-disable-next-line security/detect-object-injection
+    const orderBy: Record<string, string> = {};
     if (sortBy === 'totalEarnings' || sortBy === 'totalReferrals' || sortBy === 'activeReferrals') {
+      // eslint-disable-next-line security/detect-object-injection
       orderBy[sortBy] = sortOrder;
     } else {
       orderBy.createdAt = sortOrder;
@@ -239,7 +241,7 @@ export async function GET(request: NextRequest) {
         activeReferrals,
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching affiliate profiles:', error);
     return NextResponse.json(
       { error: 'Internal server error' },

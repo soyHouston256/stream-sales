@@ -104,7 +104,7 @@ export async function GET(request: NextRequest) {
 
     // 6. Return recharges
     return NextResponse.json(data);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching recharges:', error);
     return NextResponse.json(
       { error: 'Internal server error' },

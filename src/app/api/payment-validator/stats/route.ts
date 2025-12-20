@@ -61,6 +61,7 @@ export async function GET(request: NextRequest) {
 
     // Normalize to ISO format and get phone format for matching
     const isoCountry = normalizeCountryCode(assignedCountry) || assignedCountry;
+    // eslint-disable-next-line security/detect-object-injection
     const phoneCountry = isoToPhoneMap[isoCountry] || assignedCountry;
     const countryCodes = [isoCountry, phoneCountry];
 
@@ -168,7 +169,7 @@ export async function GET(request: NextRequest) {
         totalProcessed: myRechargesProcessed + myWithdrawalsProcessed,
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching payment validator stats:', error);
     return NextResponse.json(
       { error: 'Internal server error' },

@@ -4,7 +4,7 @@ import { useAuth } from '@/lib/auth/useAuth';
 import { Wallet, CheckCircle, XCircle, Clock, TrendingUp } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { EnhancedStatsCard } from '@/components/ui/enhanced-stats-card';
+import { StatCard } from '@/components/ui/stat-card';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { apiClient } from '@/lib/api/client';
@@ -79,36 +79,36 @@ export default function PaymentValidatorDashboard() {
       <div>
         <h2 className="text-xl font-semibold mb-4">{t('paymentValidator.pendingValidations')}</h2>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <EnhancedStatsCard
-            title={t('paymentValidator.pendingRecharges')}
+          <StatCard
+            label={t('paymentValidator.pendingRecharges')}
             value={stats?.recharges.pending ?? 0}
             icon={Clock}
             description={`${t('paymentValidator.totalAmount')}: $${stats?.recharges.totalPendingAmount ?? '0.00'}`}
-            variant="warning"
+            color="orange"
             isLoading={isLoading}
           />
-          <EnhancedStatsCard
-            title={t('paymentValidator.pendingWithdrawals')}
+          <StatCard
+            label={t('paymentValidator.pendingWithdrawals')}
             value={stats?.withdrawals.pending ?? 0}
             icon={Clock}
             description={`${t('paymentValidator.totalAmount')}: $${stats?.withdrawals.totalPendingAmount ?? '0.00'}`}
-            variant="warning"
+            color="orange"
             isLoading={isLoading}
           />
-          <EnhancedStatsCard
-            title={t('paymentValidator.approvedWithdrawals')}
+          <StatCard
+            label={t('paymentValidator.approvedWithdrawals')}
             value={stats?.withdrawals.approved ?? 0}
             icon={CheckCircle}
             description={t('paymentValidator.waitingCompletion')}
-            variant="success"
+            color="green"
             isLoading={isLoading}
           />
-          <EnhancedStatsCard
-            title={t('paymentValidator.myTotalProcessed')}
+          <StatCard
+            label={t('paymentValidator.myTotalProcessed')}
             value={stats?.myActivity.totalProcessed ?? 0}
             icon={TrendingUp}
             description={t('paymentValidator.validationActivity')}
-            variant="info"
+            color="blue"
             isLoading={isLoading}
           />
         </div>

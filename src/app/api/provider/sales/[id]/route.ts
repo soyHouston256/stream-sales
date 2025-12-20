@@ -143,7 +143,7 @@ export async function GET(
       createdAt: item.order.createdAt.toISOString(),
       // refundedAt: ... // Not tracked in simple Order model yet
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching sale details:', error);
     return NextResponse.json(
       { error: 'Internal server error' },

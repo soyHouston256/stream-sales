@@ -182,7 +182,7 @@ export async function POST(
       } : null,
       newWalletBalance: result.newBalance.toString(),
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error completing withdrawal:', error);
     return NextResponse.json(
       { error: 'Internal server error' },

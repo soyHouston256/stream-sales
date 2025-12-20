@@ -32,6 +32,7 @@ import {
   Upload
 } from 'lucide-react';
 import { ImageUpload } from '@/components/shared/ImageUpload';
+import NextImage from 'next/image';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { tokenManager } from '@/lib/utils/tokenManager';
@@ -40,6 +41,8 @@ interface RechargeDialogProps {
   currentBalance?: string;
   trigger?: React.ReactNode;
   role?: 'seller' | 'affiliate';
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 interface PaymentMethod {
@@ -64,12 +67,28 @@ const TYPE_ICONS = {
   crypto: Coins,
 };
 
-export function RechargeDialog({ currentBalance, trigger, role = 'seller' }: RechargeDialogProps) {
+export function RechargeDialog({
+  currentBalance,
+  trigger,
+  role = 'seller',
+  open: controlledOpen,
+  onOpenChange: controlledOnOpenChange,
+}: RechargeDialogProps) {
   const { t } = useLanguage();
   const { toast } = useToast();
   const { user } = useAuth();
-  const [open, setOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
   const [selectedMethod, setSelectedMethod] = useState<PaymentMethod | null>(null);
+
+  const isControlled = controlledOpen !== undefined;
+  const open = isControlled ? controlledOpen : internalOpen;
+  const setOpen = (value: boolean) => {
+    if (isControlled) {
+      controlledOnOpenChange?.(value);
+    } else {
+      setInternalOpen(value);
+    }
+  };
   const [copied, setCopied] = useState('');
   const [voucherUrl, setVoucherUrl] = useState<string>('');
 
@@ -388,10 +407,13 @@ export function RechargeDialog({ currentBalance, trigger, role = 'seller' }: Rec
                     <div className="flex flex-col items-center">
                       {selectedMethod.qrImage ? (
                         <div className="bg-white p-3 rounded-xl shadow-sm mb-3">
-                          <img
+                          <NextImage
                             src={selectedMethod.qrImage}
                             alt={`QR ${selectedMethod.name}`}
-                            className="w-40 h-40 rounded-lg object-contain"
+                            className="rounded-lg object-contain"
+                            width={160}
+                            height={160}
+                            unoptimized
                           />
                         </div>
                       ) : (

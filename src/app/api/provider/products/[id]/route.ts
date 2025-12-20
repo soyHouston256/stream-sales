@@ -131,7 +131,7 @@ export async function GET(
       updatedAt: product.updatedAt.toISOString(),
       soldAt: null,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching product:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
@@ -390,7 +390,7 @@ export async function PUT(
       createdAt: updatedProduct.createdAt.toISOString(),
       updatedAt: updatedProduct.updatedAt.toISOString(),
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error updating product:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
@@ -473,7 +473,7 @@ export async function DELETE(
       { message: 'Product deactivated successfully' },
       { status: 200 }
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error deleting product:', error);
     return NextResponse.json(
       { error: 'Internal server error' },

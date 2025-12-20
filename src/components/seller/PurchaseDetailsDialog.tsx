@@ -168,7 +168,7 @@ export function PurchaseDetailsDialog({
               </div>
 
               {/* Assigned Profile Info (for profile-based products) */}
-              {accountDetails?.profileName && (
+              {typeof accountDetails?.profileName === 'string' && (
                 <div className="flex items-center justify-between bg-background p-3 rounded-md">
                   <div className="flex items-center gap-2 flex-1">
                     <User className="h-4 w-4 text-muted-foreground" />
@@ -176,7 +176,7 @@ export function PurchaseDetailsDialog({
                       <p className="text-xs text-muted-foreground">{t('purchases.details.profile')}</p>
                       <p className="text-sm font-medium">
                         {accountDetails.profileName}
-                        {accountDetails.pin && (
+                        {typeof accountDetails.pin === 'string' && (
                           <span className="ml-2 text-muted-foreground">
                             (PIN: <span className="font-mono">{accountDetails.pin}</span>)
                           </span>

@@ -105,7 +105,7 @@ export default function SalesPage() {
       label: t('provider.date'),
       render: (sale) =>
         sale.completedAt
-          ? format(new Date(sale.completedAt), 'MMM dd, yyyy HH:mm')
+          ? format(new Date(sale.completedAt), 'MMM dd, yyyy hh:mm a')
           : '-',
     },
     {
@@ -300,10 +300,10 @@ export default function SalesPage() {
         pagination={
           data
             ? {
-                currentPage: data.pagination.page,
-                totalPages: data.pagination.totalPages,
-                onPageChange: setPage,
-              }
+              currentPage: data.pagination.page,
+              totalPages: data.pagination.totalPages,
+              onPageChange: setPage,
+            }
             : undefined
         }
         emptyState={{

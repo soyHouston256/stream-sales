@@ -148,7 +148,7 @@ export async function POST(
       },
       message: 'Withdrawal rejected successfully',
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error rejecting withdrawal:', error);
     return NextResponse.json(
       { error: 'Internal server error' },

@@ -269,7 +269,7 @@ export async function GET(
         email: provider.email,
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching purchase details:', error);
     return NextResponse.json(
       { error: 'Internal server error' },

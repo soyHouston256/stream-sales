@@ -1,6 +1,15 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Prisma } from '@prisma/client';
 import { DisputeMessage } from '../../domain/entities/DisputeMessage';
 import { IDisputeMessageRepository } from '../../domain/repositories/IDisputeMessageRepository';
+
+/**
+ * Type for DisputeMessage with sender from Prisma queries
+ */
+type DisputeMessageWithSender = Prisma.DisputeMessageGetPayload<{
+  include: {
+    sender: { select: { id: true; name: true; email: true } };
+  };
+}>;
 
 /**
  * PrismaDisputeMessageRepository
@@ -12,9 +21,8 @@ import { IDisputeMessageRepository } from '../../domain/repositories/IDisputeMes
  * - No hay método update()
  */
 export class PrismaDisputeMessageRepository
-  implements IDisputeMessageRepository
-{
-  constructor(private readonly prisma: PrismaClient) {}
+  implements IDisputeMessageRepository {
+  constructor(private readonly prisma: PrismaClient) { }
 
   /**
    * Guarda un nuevo mensaje
@@ -65,7 +73,7 @@ export class PrismaDisputeMessageRepository
     disputeId: string,
     includeInternal: boolean = false
   ): Promise<DisputeMessage[]> {
-    const where: any = { disputeId };
+    const where: Prisma.DisputeMessageWhereInput = { disputeId };
 
     // Si no incluir internos, filtrar solo públicos
     if (!includeInternal) {
@@ -80,7 +88,7 @@ export class PrismaDisputeMessageRepository
       },
     });
 
-    return messages.map((m: any) => this.toDomain(m));
+    return messages.map((m) => this.toDomain(m));
   }
 
   /**
@@ -90,7 +98,7 @@ export class PrismaDisputeMessageRepository
     disputeId: string,
     includeInternal: boolean = false
   ): Promise<number> {
-    const where: any = { disputeId };
+    const where: Prisma.DisputeMessageWhereInput = { disputeId };
 
     if (!includeInternal) {
       where.isInternal = false;
@@ -111,7 +119,7 @@ export class PrismaDisputeMessageRepository
       },
     });
 
-    return messages.map((m: any) => this.toDomain(m));
+    return messages.map((m) => this.toDomain(m));
   }
 
   // ============================================
@@ -121,14 +129,14 @@ export class PrismaDisputeMessageRepository
   /**
    * Convierte de Prisma model a Domain entity
    */
-  private toDomain(prismaMessage: any): DisputeMessage {
+  private toDomain(prismaMessage: DisputeMessageWithSender): DisputeMessage {
     return DisputeMessage.fromPersistence({
       id: prismaMessage.id,
       disputeId: prismaMessage.disputeId,
       senderId: prismaMessage.senderId,
       message: prismaMessage.message,
       attachments: Array.isArray(prismaMessage.attachments)
-        ? prismaMessage.attachments
+        ? (prismaMessage.attachments as string[])
         : null,
       isInternal: prismaMessage.isInternal,
       createdAt: prismaMessage.createdAt,

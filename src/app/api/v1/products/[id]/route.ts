@@ -5,6 +5,7 @@ import { PrismaProductRepository } from '../../../../../infrastructure/repositor
 import { UpdateProductUseCase } from '../../../../../application/use-cases/UpdateProductUseCase';
 import { DeleteProductUseCase } from '../../../../../application/use-cases/DeleteProductUseCase';
 import { verifyJWT } from '../../../../../infrastructure/auth/jwt';
+import { getErrorMessage, logError } from '../../../../../lib/utils/error-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -50,7 +51,7 @@ export const dynamic = 'force-dynamic';
 const updateProductSchema = z.object({
   category: z.string().min(1).optional(),
   price: z
-    .union([z.number().positive(), z.string().regex(/^\d+(\.\d+)?$/)], {
+    .union([z.number().positive(), z.string().refine((val) => !isNaN(Number(val)) && Number(val) > 0, 'Must be a positive number')], {
       errorMap: () => ({ message: 'Price must be a positive number' }),
     })
     .transform((val) => (typeof val === 'string' ? parseFloat(val) : val))
@@ -113,32 +114,33 @@ export async function PUT(
 
     // 5. Retornar resultado exitoso
     return NextResponse.json(result, { status: 200 });
-  } catch (error: any) {
-    console.error('PUT /api/v1/products/:id error:', error);
+  } catch (error: unknown) {
+    logError('PUT /api/v1/products/:id', error);
+    const message = getErrorMessage(error);
 
     // Manejo de errores específicos
-    if (error.message?.includes('jwt') || error.message?.includes('token')) {
+    if (message.includes('jwt') || message.includes('token')) {
       return NextResponse.json({ error: 'Invalid or expired token' }, { status: 401 });
     }
 
-    if (error.message?.includes('not found')) {
-      return NextResponse.json({ error: error.message }, { status: 404 });
+    if (message.includes('not found')) {
+      return NextResponse.json({ error: message }, { status: 404 });
     }
 
-    if (error.message?.includes('Unauthorized')) {
-      return NextResponse.json({ error: error.message }, { status: 403 });
+    if (message.includes('Unauthorized')) {
+      return NextResponse.json({ error: message }, { status: 403 });
     }
 
     if (
-      error.message?.includes('Cannot edit') ||
-      error.message?.includes('positive') ||
-      error.message?.includes('required')
+      message.includes('Cannot edit') ||
+      message.includes('positive') ||
+      message.includes('required')
     ) {
-      return NextResponse.json({ error: error.message }, { status: 400 });
+      return NextResponse.json({ error: message }, { status: 400 });
     }
 
     return NextResponse.json(
-      { error: 'Internal server error', details: error.message },
+      { error: 'Internal server error' },
       { status: 500 }
     );
   }
@@ -200,29 +202,31 @@ export async function DELETE(
 
     // 4. Retornar resultado exitoso
     return NextResponse.json(result, { status: 200 });
-  } catch (error: any) {
-    console.error('DELETE /api/v1/products/:id error:', error);
+  } catch (error: unknown) {
+    logError('DELETE /api/v1/products/:id', error);
+    const message = getErrorMessage(error);
 
     // Manejo de errores específicos
-    if (error.message?.includes('jwt') || error.message?.includes('token')) {
+    if (message.includes('jwt') || message.includes('token')) {
       return NextResponse.json({ error: 'Invalid or expired token' }, { status: 401 });
     }
 
-    if (error.message?.includes('not found')) {
-      return NextResponse.json({ error: error.message }, { status: 404 });
+    if (message.includes('not found')) {
+      return NextResponse.json({ error: message }, { status: 404 });
     }
 
-    if (error.message?.includes('Unauthorized')) {
-      return NextResponse.json({ error: error.message }, { status: 403 });
+    if (message.includes('Unauthorized')) {
+      return NextResponse.json({ error: message }, { status: 403 });
     }
 
-    if (error.message?.includes('Cannot delete')) {
-      return NextResponse.json({ error: error.message }, { status: 400 });
+    if (message.includes('Cannot delete')) {
+      return NextResponse.json({ error: message }, { status: 400 });
     }
 
     return NextResponse.json(
-      { error: 'Internal server error', details: error.message },
+      { error: 'Internal server error' },
       { status: 500 }
     );
   }
 }
+

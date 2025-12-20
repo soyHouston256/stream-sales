@@ -138,8 +138,11 @@ export function encryptFields<T extends Record<string, any>>(
     const result = { ...data };
 
     for (const field of fields) {
-        if (result[field] && typeof result[field] === 'string') {
-            result[field] = encrypt(result[field] as string) as T[keyof T];
+        // eslint-disable-next-line security/detect-object-injection
+        const value = result[field];
+        if (value && typeof value === 'string') {
+            // eslint-disable-next-line security/detect-object-injection
+            result[field] = encrypt(value) as T[keyof T];
         }
     }
 
@@ -160,9 +163,12 @@ export function decryptFields<T extends Record<string, any>>(
     const result = { ...data };
 
     for (const field of fields) {
-        if (result[field] && typeof result[field] === 'string') {
+        // eslint-disable-next-line security/detect-object-injection
+        const value = result[field];
+        if (value && typeof value === 'string') {
             try {
-                result[field] = decrypt(result[field] as string) as T[keyof T];
+                // eslint-disable-next-line security/detect-object-injection
+                result[field] = decrypt(value) as T[keyof T];
             } catch {
                 // If decryption fails, leave the field as-is (might not be encrypted)
                 console.warn(`Failed to decrypt field: ${String(field)}`);

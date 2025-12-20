@@ -107,7 +107,7 @@ export async function PUT(
             completedAt: updatedTransfer.completedAt?.toISOString(),
             message: 'Transfer approved successfully',
         });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Error approving validator transfer:', error);
         return NextResponse.json(
             { error: 'Internal server error' },

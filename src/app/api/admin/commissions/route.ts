@@ -91,7 +91,7 @@ export async function GET(request: NextRequest) {
       updatedBy: user.email, // Current admin viewing
       updatedAt: updatedAt?.toISOString() || new Date().toISOString(),
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching commission config:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
@@ -204,7 +204,7 @@ export async function PUT(request: NextRequest) {
       registrationCommission,
       message: 'Commission configuration updated successfully',
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error updating commission config:', error);
     return NextResponse.json(
       { error: 'Internal server error' },

@@ -30,6 +30,7 @@ export function normalizeCountryCode(code: string | null | undefined): string | 
 
     // If it starts with +, it's a phone code - convert to ISO
     if (trimmed.startsWith('+')) {
+        // eslint-disable-next-line security/detect-object-injection
         return phoneToIsoMap[trimmed] || null;
     }
 

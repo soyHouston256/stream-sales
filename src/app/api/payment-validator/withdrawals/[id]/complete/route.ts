@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/infrastructure/database/prisma';
 import { verifyPaymentValidator } from '@/infrastructure/auth/roleAuth';
 import crypto from 'crypto';
+import { isPrismaError, logError } from '@/lib/utils/error-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -90,7 +91,7 @@ export async function POST(
       .digest('hex');
 
     // 6. Execute withdrawal in a transaction
-    const result = await prisma.$transaction(async (tx: any) => {
+    const result = await prisma.$transaction(async (tx) => {
       // 6.1. Update wallet balance (debit)
       const updatedWallet = await tx.wallet.update({
         where: { id: withdrawal.walletId },
@@ -175,11 +176,11 @@ export async function POST(
       },
       message: 'Withdrawal completed successfully',
     });
-  } catch (error: any) {
-    console.error('Error completing withdrawal:', error);
+  } catch (error: unknown) {
+    logError('payment-validator/withdrawals/complete', error);
 
     // Check for idempotency key conflict
-    if (error.code === 'P2002' && error.meta?.target?.includes('idempotencyKey')) {
+    if (isPrismaError(error) && error.code === 'P2002' && error.meta?.target?.includes('idempotencyKey')) {
       return NextResponse.json(
         { error: 'This withdrawal has already been processed' },
         { status: 409 }

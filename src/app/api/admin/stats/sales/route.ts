@@ -134,7 +134,7 @@ export async function GET(request: NextRequest) {
 
     // 8. Return data
     return NextResponse.json(salesData);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching sales data:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
