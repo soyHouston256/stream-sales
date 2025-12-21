@@ -24,7 +24,7 @@ interface CreateDisputeDialogProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: () => void;
-  userType?: 'seller' | 'provider';
+  userType?: 'seller' | 'provider' | 'affiliate';
 }
 
 export function CreateDisputeDialog({

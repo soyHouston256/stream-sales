@@ -18,11 +18,14 @@ import { ShoppingCart, User, ShieldCheck, Zap, Clock } from 'lucide-react';
 import { PurchaseConfirmDialog } from './PurchaseConfirmDialog';
 import { useLanguage } from '@/contexts/LanguageContext';
 
+type UserType = 'seller' | 'affiliate';
+
 interface ProductDetailsDialogProps {
   product: MarketplaceProduct | null;
   isOpen: boolean;
   onClose: () => void;
   isGuest?: boolean;
+  userType?: UserType;
 }
 
 export function ProductDetailsDialog({
@@ -30,6 +33,7 @@ export function ProductDetailsDialog({
   isOpen,
   onClose,
   isGuest = false,
+  userType = 'seller',
 }: ProductDetailsDialogProps) {
   const { t } = useLanguage();
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
@@ -186,6 +190,7 @@ export function ProductDetailsDialog({
           product={product}
           isOpen={showConfirmDialog}
           onClose={handleConfirmClose}
+          userType={userType}
         />
       )}
     </>

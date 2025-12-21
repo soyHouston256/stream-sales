@@ -51,7 +51,7 @@ export function useDisputes(filters: DisputeFilters = {}) {
         },
       };
     },
-    refetchInterval: 30000, // Refetch cada 30 segundos para actualizaciones
+    staleTime: 1000 * 60 * 2, // Consider fresh for 2 minutes
   });
 }
 

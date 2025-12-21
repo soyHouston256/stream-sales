@@ -20,21 +20,25 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { CategoryBadge } from '@/components/provider/CategoryBadge';
 import { useToast } from '@/lib/hooks/useToast';
 
+type UserType = 'seller' | 'affiliate';
+
 interface PurchaseConfirmDialogProps {
   product: MarketplaceProduct | null;
   isOpen: boolean;
   onClose: () => void;
+  userType?: UserType;
 }
 
 export function PurchaseConfirmDialog({
   product,
   isOpen,
   onClose,
+  userType = 'seller',
 }: PurchaseConfirmDialogProps) {
   const { t } = useLanguage();
   const { toast } = useToast();
-  const { data: walletData, isLoading: walletLoading } = useWalletBalance();
-  const createPurchase = useCreatePurchase();
+  const { data: walletData, isLoading: walletLoading } = useWalletBalance(userType);
+  const createPurchase = useCreatePurchase(userType);
 
   if (!product) return null;
 

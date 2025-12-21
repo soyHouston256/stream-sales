@@ -39,7 +39,7 @@ export function useProviderStats() {
   return useQuery({
     queryKey: ['provider', 'stats'],
     queryFn: fetchProviderStats,
-    refetchInterval: 30000, // Refetch every 30 seconds
+    staleTime: 1000 * 60 * 5, // Consider fresh for 5 minutes
   });
 }
 
@@ -47,6 +47,6 @@ export function useSalesByCategory() {
   return useQuery({
     queryKey: ['provider', 'sales', 'by-category'],
     queryFn: fetchSalesByCategory,
-    refetchInterval: 60000, // Refetch every minute
+    staleTime: 1000 * 60 * 10, // Consider fresh for 10 minutes
   });
 }

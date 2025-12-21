@@ -3,6 +3,7 @@ import {
   Users,
   Megaphone,
   Wallet,
+  ShoppingBag,
   Settings,
 } from 'lucide-react';
 import type { NavItem } from '../Sidebar';
@@ -19,6 +20,12 @@ export const getAffiliateNavItems = (t: (key: string) => string): NavItem[] => [
     href: '/dashboard/affiliate/referrals',
     icon: Users,
     description: t('navigation.referredUsers'),
+  },
+  {
+    title: t('navigation.purchases'),
+    href: '/dashboard/affiliate/purchases',
+    icon: ShoppingBag,
+    description: t('navigation.purchasedProducts'),
   },
   {
     title: 'Mi Saldo',
@@ -39,3 +46,4 @@ export const getAffiliateNavItems = (t: (key: string) => string): NavItem[] => [
     description: t('navigation.settingsDesc'),
   },
 ];
+

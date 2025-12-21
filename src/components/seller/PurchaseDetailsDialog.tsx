@@ -1,5 +1,3 @@
-'use client';
-
 import { useState } from 'react';
 import {
   Dialog,
@@ -19,16 +17,20 @@ import { Copy, Check, Mail, Key, FileJson, User, Calendar, AlertCircle } from 'l
 import { format } from 'date-fns';
 import { useLanguage } from '@/contexts/LanguageContext';
 
+type UserType = 'seller' | 'affiliate';
+
 interface PurchaseDetailsDialogProps {
   purchase: Purchase | null;
   isOpen: boolean;
   onClose: () => void;
+  userType?: UserType;
 }
 
 export function PurchaseDetailsDialog({
   purchase,
   isOpen,
   onClose,
+  userType = 'seller',
 }: PurchaseDetailsDialogProps) {
   const { t } = useLanguage();
   const [copiedEmail, setCopiedEmail] = useState(false);
@@ -302,7 +304,7 @@ export function PurchaseDetailsDialog({
           setIsDisputeDialogOpen(false);
           onClose();
         }}
-        userType="seller"
+        userType={userType}
       />
     </Dialog>
   );

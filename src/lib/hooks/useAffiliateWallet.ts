@@ -108,7 +108,7 @@ export function useAffiliateWalletBalance() {
   return useQuery({
     queryKey: ['affiliate', 'wallet', 'balance'],
     queryFn: fetchAffiliateWalletBalance,
-    refetchInterval: 30000, // Refetch every 30 seconds
+    staleTime: 1000 * 60 * 5, // Consider fresh for 5 minutes
   });
 }
 
