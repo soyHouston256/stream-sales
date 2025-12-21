@@ -24,6 +24,18 @@ import { useToast } from '@/hooks/use-toast';
 import { ApiError } from '@/lib/api/client';
 import { useLanguage } from '@/contexts/LanguageContext';
 import type { UserRole } from '@/types/auth';
+import {
+  Mail,
+  Lock,
+  User,
+  Phone,
+  UserCircle,
+  ArrowRight,
+  Loader2,
+  Eye,
+  EyeOff,
+  Shield
+} from 'lucide-react';
 
 // Register form validation schema - messages will be overridden with i18n
 const createRegisterSchema = (t: (key: string) => string) => z.object({
@@ -71,6 +83,8 @@ export function RegisterForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [isUsernameManuallyEdited, setIsUsernameManuallyEdited] = useState(false);
   const [referralFromUrl, setReferralFromUrl] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const roleOptions: { value: UserRole; label: string; description: string }[] = [
     {
@@ -177,33 +191,44 @@ export function RegisterForm() {
   };
 
   return (
-    <Card className="w-full max-w-lg">
-      <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl font-bold text-center">
+    <Card className="w-full max-w-lg border-none shadow-2xl bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl animate-in fade-in-0 zoom-in-95 duration-500">
+      <CardHeader className="space-y-3 pb-6">
+        <div className="mx-auto h-16 w-16 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/50 animate-in zoom-in-50 duration-700">
+          <Shield className="h-8 w-8 text-white" />
+        </div>
+        <CardTitle className="text-3xl font-bold text-center bg-gradient-to-r from-indigo-600 to-purple-600 text-transparent bg-clip-text">
           {t('auth.registerForm.title')}
         </CardTitle>
-        <CardDescription className="text-center">
+        <CardDescription className="text-center text-base">
           {t('auth.registerForm.subtitle')}
         </CardDescription>
       </CardHeader>
       <form onSubmit={handleSubmit(onSubmit)}>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="email">{t('auth.registerForm.email')}</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder={t('auth.registerForm.emailPlaceholder')}
-              autoComplete="email"
-              disabled={isLoading}
-              {...register('email')}
-              aria-invalid={errors.email ? 'true' : 'false'}
-              aria-describedby={errors.email ? 'email-error' : undefined}
-            />
+        <CardContent className="space-y-5">
+          <div className="space-y-2 animate-in slide-in-from-left-5 duration-500 delay-100">
+            <Label htmlFor="email" className="text-sm font-medium">{t('auth.registerForm.email')}</Label>
+            <div className="relative group">
+              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-indigo-500 transition-colors duration-200" />
+              <Input
+                id="email"
+                type="email"
+                placeholder={t('auth.registerForm.emailPlaceholder')}
+                autoComplete="email"
+                disabled={isLoading}
+                {...register('email')}
+                className={`pl-10 h-12 transition-all duration-200 ${
+                  errors.email
+                    ? 'border-red-500 focus-visible:ring-red-500'
+                    : 'focus-visible:ring-indigo-500 focus-visible:border-indigo-500'
+                }`}
+                aria-invalid={errors.email ? 'true' : 'false'}
+                aria-describedby={errors.email ? 'email-error' : undefined}
+              />
+            </div>
             {errors.email && (
               <p
                 id="email-error"
-                className="text-sm text-destructive"
+                className="text-sm text-red-500 flex items-center gap-1 animate-in slide-in-from-left-2"
                 role="alert"
               >
                 {errors.email.message}
@@ -211,24 +236,32 @@ export function RegisterForm() {
             )}
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="username">{t('auth.registerForm.username')}</Label>
-            <Input
-              id="username"
-              type="text"
-              placeholder={t('auth.registerForm.usernamePlaceholder')}
-              autoComplete="username"
-              disabled={isLoading}
-              {...register('username', {
-                onChange: () => setIsUsernameManuallyEdited(true)
-              })}
-              aria-invalid={errors.username ? 'true' : 'false'}
-              aria-describedby={errors.username ? 'username-error' : undefined}
-            />
+          <div className="space-y-2 animate-in slide-in-from-left-5 duration-500 delay-150">
+            <Label htmlFor="username" className="text-sm font-medium">{t('auth.registerForm.username')}</Label>
+            <div className="relative group">
+              <UserCircle className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-indigo-500 transition-colors duration-200" />
+              <Input
+                id="username"
+                type="text"
+                placeholder={t('auth.registerForm.usernamePlaceholder')}
+                autoComplete="username"
+                disabled={isLoading}
+                {...register('username', {
+                  onChange: () => setIsUsernameManuallyEdited(true)
+                })}
+                className={`pl-10 h-12 transition-all duration-200 ${
+                  errors.username
+                    ? 'border-red-500 focus-visible:ring-red-500'
+                    : 'focus-visible:ring-indigo-500 focus-visible:border-indigo-500'
+                }`}
+                aria-invalid={errors.username ? 'true' : 'false'}
+                aria-describedby={errors.username ? 'username-error' : undefined}
+              />
+            </div>
             {errors.username && (
               <p
                 id="username-error"
-                className="text-sm text-destructive"
+                className="text-sm text-red-500 flex items-center gap-1 animate-in slide-in-from-left-2"
                 role="alert"
               >
                 {errors.username.message}
@@ -236,22 +269,30 @@ export function RegisterForm() {
             )}
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="name">{t('auth.registerForm.fullName')}</Label>
-            <Input
-              id="name"
-              type="text"
-              placeholder={t('auth.registerForm.fullNamePlaceholder')}
-              autoComplete="name"
-              disabled={isLoading}
-              {...register('name')}
-              aria-invalid={errors.name ? 'true' : 'false'}
-              aria-describedby={errors.name ? 'name-error' : undefined}
-            />
+          <div className="space-y-2 animate-in slide-in-from-left-5 duration-500 delay-200">
+            <Label htmlFor="name" className="text-sm font-medium">{t('auth.registerForm.fullName')}</Label>
+            <div className="relative group">
+              <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-indigo-500 transition-colors duration-200" />
+              <Input
+                id="name"
+                type="text"
+                placeholder={t('auth.registerForm.fullNamePlaceholder')}
+                autoComplete="name"
+                disabled={isLoading}
+                {...register('name')}
+                className={`pl-10 h-12 transition-all duration-200 ${
+                  errors.name
+                    ? 'border-red-500 focus-visible:ring-red-500'
+                    : 'focus-visible:ring-indigo-500 focus-visible:border-indigo-500'
+                }`}
+                aria-invalid={errors.name ? 'true' : 'false'}
+                aria-describedby={errors.name ? 'name-error' : undefined}
+              />
+            </div>
             {errors.name && (
               <p
                 id="name-error"
-                className="text-sm text-destructive"
+                className="text-sm text-red-500 flex items-center gap-1 animate-in slide-in-from-left-2"
                 role="alert"
               >
                 {errors.name.message}
@@ -259,22 +300,42 @@ export function RegisterForm() {
             )}
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="password">{t('auth.registerForm.password')}</Label>
-            <Input
-              id="password"
-              type="password"
-              placeholder={t('auth.registerForm.passwordPlaceholder')}
-              autoComplete="new-password"
-              disabled={isLoading}
-              {...register('password')}
-              aria-invalid={errors.password ? 'true' : 'false'}
-              aria-describedby={errors.password ? 'password-error' : undefined}
-            />
+          <div className="space-y-2 animate-in slide-in-from-left-5 duration-500 delay-250">
+            <Label htmlFor="password" className="text-sm font-medium">{t('auth.registerForm.password')}</Label>
+            <div className="relative group">
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-indigo-500 transition-colors duration-200" />
+              <Input
+                id="password"
+                type={showPassword ? 'text' : 'password'}
+                placeholder={t('auth.registerForm.passwordPlaceholder')}
+                autoComplete="new-password"
+                disabled={isLoading}
+                {...register('password')}
+                className={`pl-10 pr-10 h-12 transition-all duration-200 ${
+                  errors.password
+                    ? 'border-red-500 focus-visible:ring-red-500'
+                    : 'focus-visible:ring-indigo-500 focus-visible:border-indigo-500'
+                }`}
+                aria-invalid={errors.password ? 'true' : 'false'}
+                aria-describedby={errors.password ? 'password-error' : undefined}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
+                tabIndex={-1}
+              >
+                {showPassword ? (
+                  <EyeOff className="h-5 w-5" />
+                ) : (
+                  <Eye className="h-5 w-5" />
+                )}
+              </button>
+            </div>
             {errors.password && (
               <p
                 id="password-error"
-                className="text-sm text-destructive"
+                className="text-sm text-red-500 flex items-center gap-1 animate-in slide-in-from-left-2"
                 role="alert"
               >
                 {errors.password.message}
@@ -282,22 +343,42 @@ export function RegisterForm() {
             )}
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="confirmPassword">{t('auth.registerForm.confirmPassword')}</Label>
-            <Input
-              id="confirmPassword"
-              type="password"
-              placeholder={t('auth.registerForm.confirmPasswordPlaceholder')}
-              autoComplete="new-password"
-              disabled={isLoading}
-              {...register('confirmPassword')}
-              aria-invalid={errors.confirmPassword ? 'true' : 'false'}
-              aria-describedby={errors.confirmPassword ? 'confirmPassword-error' : undefined}
-            />
+          <div className="space-y-2 animate-in slide-in-from-left-5 duration-500 delay-300">
+            <Label htmlFor="confirmPassword" className="text-sm font-medium">{t('auth.registerForm.confirmPassword')}</Label>
+            <div className="relative group">
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-indigo-500 transition-colors duration-200" />
+              <Input
+                id="confirmPassword"
+                type={showConfirmPassword ? 'text' : 'password'}
+                placeholder={t('auth.registerForm.confirmPasswordPlaceholder')}
+                autoComplete="new-password"
+                disabled={isLoading}
+                {...register('confirmPassword')}
+                className={`pl-10 pr-10 h-12 transition-all duration-200 ${
+                  errors.confirmPassword
+                    ? 'border-red-500 focus-visible:ring-red-500'
+                    : 'focus-visible:ring-indigo-500 focus-visible:border-indigo-500'
+                }`}
+                aria-invalid={errors.confirmPassword ? 'true' : 'false'}
+                aria-describedby={errors.confirmPassword ? 'confirmPassword-error' : undefined}
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
+                tabIndex={-1}
+              >
+                {showConfirmPassword ? (
+                  <EyeOff className="h-5 w-5" />
+                ) : (
+                  <Eye className="h-5 w-5" />
+                )}
+              </button>
+            </div>
             {errors.confirmPassword && (
               <p
                 id="confirmPassword-error"
-                className="text-sm text-destructive"
+                className="text-sm text-red-500 flex items-center gap-1 animate-in slide-in-from-left-2"
                 role="alert"
               >
                 {errors.confirmPassword.message}
@@ -400,20 +481,42 @@ export function RegisterForm() {
           </div>
         </CardContent>
 
-        <CardFooter className="flex flex-col space-y-4">
-          <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? t('auth.registerForm.creatingAccount') : t('auth.registerForm.createAccountBtn')}
+        <CardFooter className="flex flex-col space-y-4 pt-2 animate-in slide-in-from-bottom-5 duration-500 delay-350">
+          <Button
+            type="submit"
+            className="w-full h-12 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold shadow-lg shadow-indigo-500/50 transition-all duration-200 hover:shadow-xl hover:shadow-indigo-500/60 hover:scale-[1.02]"
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                {t('auth.registerForm.creatingAccount')}
+              </>
+            ) : (
+              <>
+                {t('auth.registerForm.createAccountBtn')}
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </>
+            )}
           </Button>
 
-          <p className="text-sm text-center text-muted-foreground">
-            {t('auth.registerForm.haveAccount')}{' '}
-            <Link
-              href="/login"
-              className="font-medium text-primary hover:underline"
-            >
-              {t('auth.registerForm.loginHere')}
-            </Link>
-          </p>
+          <div className="relative w-full">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-slate-200 dark:border-slate-700"></div>
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-white dark:bg-slate-900 px-2 text-slate-500">
+                {t('auth.registerForm.haveAccount')}
+              </span>
+            </div>
+          </div>
+
+          <Link
+            href="/login"
+            className="w-full text-center py-3 px-4 rounded-lg border-2 border-slate-200 dark:border-slate-700 hover:border-indigo-500 dark:hover:border-indigo-500 font-medium text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all duration-200 hover:shadow-md"
+          >
+            {t('auth.registerForm.loginHere')}
+          </Link>
         </CardFooter>
       </form>
     </Card>
