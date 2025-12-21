@@ -23,6 +23,6 @@ export function useSellerStats() {
   return useQuery({
     queryKey: ['seller', 'stats'],
     queryFn: fetchSellerStats,
-    refetchInterval: 30000, // Refetch every 30 seconds
+    staleTime: 1000 * 60 * 5, // Consider fresh for 5 minutes
   });
 }

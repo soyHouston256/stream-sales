@@ -49,6 +49,6 @@ export function useMarketingStats() {
   return useQuery({
     queryKey: ['affiliate', 'marketing', 'stats'],
     queryFn: fetchMarketingStats,
-    refetchInterval: 60000, // Refetch every minute
+    staleTime: 1000 * 60 * 10, // Consider fresh for 10 minutes
   });
 }

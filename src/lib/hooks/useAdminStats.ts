@@ -39,7 +39,7 @@ export function useAdminStats() {
   return useQuery({
     queryKey: ['admin', 'stats'],
     queryFn: fetchAdminStats,
-    refetchInterval: 30000, // Refetch every 30 seconds
+    staleTime: 1000 * 60 * 5, // Consider fresh for 5 minutes
   });
 }
 
@@ -47,6 +47,6 @@ export function useSalesData(days: number = 7) {
   return useQuery({
     queryKey: ['admin', 'sales', days],
     queryFn: () => fetchSalesData(days),
-    refetchInterval: 60000, // Refetch every minute
+    staleTime: 1000 * 60 * 10, // Consider fresh for 10 minutes
   });
 }

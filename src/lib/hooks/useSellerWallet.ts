@@ -14,11 +14,14 @@ import { tokenManager } from '@/lib/utils/tokenManager';
 
 import { useAuth } from '@/lib/auth/useAuth';
 
-async function fetchWalletBalance(): Promise<WalletBalance> {
+type UserType = 'seller' | 'affiliate';
+
+async function fetchWalletBalance(userType: UserType = 'seller'): Promise<WalletBalance> {
   const token = tokenManager.getToken();
   if (!token) throw new Error('No authentication token found');
 
-  const response = await fetch('/api/seller/wallet/balance', {
+  const endpoint = userType === 'affiliate' ? '/api/affiliate/wallet/balance' : '/api/seller/wallet/balance';
+  const response = await fetch(endpoint, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -99,14 +102,14 @@ async function createRecharge(data: RechargeRequest): Promise<Recharge> {
   return response.json();
 }
 
-export function useWalletBalance() {
+export function useWalletBalance(userType: UserType = 'seller') {
   const { isAuthenticated } = useAuth();
 
   return useQuery({
-    queryKey: ['seller', 'wallet', 'balance'],
-    queryFn: fetchWalletBalance,
-    refetchInterval: 30000, // Refetch every 30 seconds
+    queryKey: [userType, 'wallet', 'balance'],
+    queryFn: () => fetchWalletBalance(userType),
     enabled: isAuthenticated,
+    staleTime: 1000 * 60 * 5, // Consider data fresh for 5 minutes
   });
 }
 

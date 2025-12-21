@@ -22,7 +22,7 @@ export function useConciliatorStats() {
 
       return response.json();
     },
-    refetchInterval: 60000, // Refetch cada minuto para stats en tiempo real
+    staleTime: 1000 * 60 * 5, // Consider fresh for 5 minutes
   });
 }
 

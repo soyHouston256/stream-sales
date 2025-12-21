@@ -1044,8 +1044,15 @@
       "actions": "Acciones",
       "approve": "Aprobar",
       "reject": "Rechazar",
-      "noPending": "No hay referidos pendientes",
+      "noPending": "Sin referencias pendientes",
       "allReviewed": "Todos tus referidos han sido aprobados o rechazados"
+    },
+    "purchases": {
+      "title": "Mis Compras",
+      "subtitle": "Ver y gestionar tus productos comprados",
+      "totalPurchases": "Total de Compras",
+      "totalSpent": "Total Gastado",
+      "averagePrice": "Precio Promedio"
     }
   },
   "conciliator": {

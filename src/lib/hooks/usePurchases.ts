@@ -10,8 +10,11 @@ import {
 import { useToast } from './useToast';
 import { tokenManager } from '@/lib/utils/tokenManager';
 
+type UserType = 'seller' | 'affiliate';
+
 async function fetchPurchases(
-  filters: PurchasesFilters
+  filters: PurchasesFilters,
+  userType: UserType = 'seller'
 ): Promise<PaginatedResponse<Purchase>> {
   const token = tokenManager.getToken();
   const params = new URLSearchParams();
@@ -23,7 +26,8 @@ async function fetchPurchases(
   if (filters.startDate) params.append('startDate', filters.startDate);
   if (filters.endDate) params.append('endDate', filters.endDate);
 
-  const response = await fetch(`/api/seller/purchases?${params.toString()}`, {
+  const endpoint = userType === 'affiliate' ? '/api/affiliate/purchases' : '/api/seller/purchases';
+  const response = await fetch(`${endpoint}?${params.toString()}`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -36,9 +40,10 @@ async function fetchPurchases(
   return response.json();
 }
 
-async function fetchPurchaseDetails(id: string): Promise<Purchase> {
+async function fetchPurchaseDetails(id: string, userType: UserType = 'seller'): Promise<Purchase> {
   const token = tokenManager.getToken();
-  const response = await fetch(`/api/seller/purchases/${id}`, {
+  const endpoint = userType === 'affiliate' ? '/api/affiliate/purchases' : '/api/seller/purchases';
+  const response = await fetch(`${endpoint}/${id}`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -51,9 +56,10 @@ async function fetchPurchaseDetails(id: string): Promise<Purchase> {
   return response.json();
 }
 
-async function createPurchase(data: PurchaseRequest): Promise<Purchase> {
+async function createPurchase(data: PurchaseRequest, userType: UserType = 'seller'): Promise<Purchase> {
   const token = tokenManager.getToken();
-  const response = await fetch('/api/seller/purchases', {
+  const endpoint = userType === 'affiliate' ? '/api/affiliate/purchases' : '/api/seller/purchases';
+  const response = await fetch(endpoint, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -70,32 +76,32 @@ async function createPurchase(data: PurchaseRequest): Promise<Purchase> {
   return response.json();
 }
 
-export function usePurchases(filters: PurchasesFilters = {}) {
+export function usePurchases(filters: PurchasesFilters = {}, userType: UserType = 'seller') {
   return useQuery({
-    queryKey: ['seller', 'purchases', filters],
-    queryFn: () => fetchPurchases(filters),
+    queryKey: [userType, 'purchases', filters],
+    queryFn: () => fetchPurchases(filters, userType),
   });
 }
 
-export function usePurchaseDetails(id: string) {
+export function usePurchaseDetails(id: string, userType: UserType = 'seller') {
   return useQuery({
-    queryKey: ['seller', 'purchases', id],
-    queryFn: () => fetchPurchaseDetails(id),
+    queryKey: [userType, 'purchases', id],
+    queryFn: () => fetchPurchaseDetails(id, userType),
     enabled: !!id,
   });
 }
 
-export function useCreatePurchase() {
+export function useCreatePurchase(userType: UserType = 'seller') {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: createPurchase,
+    mutationFn: (data: PurchaseRequest) => createPurchase(data, userType),
     onSuccess: (purchase) => {
-      queryClient.invalidateQueries({ queryKey: ['seller', 'purchases'] });
-      queryClient.invalidateQueries({ queryKey: ['seller', 'stats'] });
-      queryClient.invalidateQueries({ queryKey: ['seller', 'wallet'] });
-      queryClient.invalidateQueries({ queryKey: ['seller', 'marketplace'] });
+      queryClient.invalidateQueries({ queryKey: [userType, 'purchases'] });
+      queryClient.invalidateQueries({ queryKey: [userType, 'stats'] });
+      queryClient.invalidateQueries({ queryKey: [userType, 'wallet'] });
+      queryClient.invalidateQueries({ queryKey: [userType, 'marketplace'] });
     },
     onError: (error: Error) => {
       toast({
@@ -106,3 +112,4 @@ export function useCreatePurchase() {
     },
   });
 }
+

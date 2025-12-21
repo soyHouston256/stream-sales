@@ -39,7 +39,7 @@ export function useAffiliateStats() {
   return useQuery({
     queryKey: ['affiliate', 'stats'],
     queryFn: fetchAffiliateStats,
-    refetchInterval: 30000, // Refetch every 30 seconds
+    staleTime: 1000 * 60 * 5, // Consider fresh for 5 minutes
   });
 }
 
@@ -47,6 +47,6 @@ export function useReferralsByMonth(months: number = 6) {
   return useQuery({
     queryKey: ['affiliate', 'referrals', 'by-month', months],
     queryFn: () => fetchReferralsByMonth(months),
-    refetchInterval: 60000, // Refetch every minute
+    staleTime: 1000 * 60 * 10, // Consider fresh for 10 minutes
   });
 }

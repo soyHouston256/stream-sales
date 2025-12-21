@@ -23,7 +23,11 @@ import { useAuth } from '@/lib/auth/useAuth';
 export default function LandingPage() {
   const { t } = useLanguage();
   const { user, logout } = useAuth();
-  const { data: walletBalance } = useWalletBalance();
+
+  // Determine userType based on user role
+  const userType = user?.role === 'affiliate' ? 'affiliate' : 'seller';
+  const { data: walletBalance } = useWalletBalance(userType as 'seller' | 'affiliate');
+
   const [selectedProduct, setSelectedProduct] = useState<MarketplaceProduct | null>(null);
   const [showProductDetails, setShowProductDetails] = useState(false);
   const [filters, setFilters] = useState<MarketplaceFilters>({
@@ -96,10 +100,15 @@ export default function LandingPage() {
                     <div className="h-8 w-8 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
                       <User className="h-4 w-4" />
                     </div>
-                    <span className="hidden sm:inline">{user.name || user.email}</span>
+                    <span className="hidden sm:inline">
+                      {user.role === 'affiliate' ? 'Affiliate User' :
+                       user.role === 'seller' ? 'Seller User' :
+                       user.role === 'provider' ? 'Provider User' :
+                       user.name || user.email}
+                    </span>
                   </div>
                   <Button variant="ghost" size="sm" asChild>
-                    <Link href="/dashboard/seller">
+                    <Link href={`/dashboard/${user.role}`}>
                       <LayoutDashboard className="h-4 w-4 mr-2" />
                       Dashboard
                     </Link>
@@ -258,6 +267,7 @@ export default function LandingPage() {
             setSelectedProduct(null);
           }}
           isGuest={!user}
+          userType={userType as 'seller' | 'affiliate'}
         />
       </div>
     </div>

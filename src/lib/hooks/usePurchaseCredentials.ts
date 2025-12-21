@@ -14,14 +14,17 @@ export interface PurchaseCredentials {
     category: string;
 }
 
+type UserType = 'seller' | 'affiliate';
+
 /**
  * Fetch decrypted credentials for a purchase
  * Only the purchase owner can access these credentials
  */
-async function fetchCredentials(purchaseId: string): Promise<PurchaseCredentials> {
+async function fetchCredentials(purchaseId: string, userType: UserType = 'seller'): Promise<PurchaseCredentials> {
     const token = tokenManager.getToken();
+    const endpoint = userType === 'affiliate' ? '/api/affiliate/purchases' : '/api/seller/purchases';
 
-    const response = await fetch(`/api/seller/purchases/${purchaseId}/credentials`, {
+    const response = await fetch(`${endpoint}/${purchaseId}/credentials`, {
         headers: {
             Authorization: `Bearer ${token}`,
         },
@@ -40,19 +43,21 @@ async function fetchCredentials(purchaseId: string): Promise<PurchaseCredentials
  * 
  * @param purchaseId - The ID of the purchase (OrderItem)
  * @param enabled - Whether to enable the query (default: false for security)
+ * @param userType - Type of user ('seller' or 'affiliate')
  * 
  * @example
- * const { data, isLoading, error, refetch } = usePurchaseCredentials('purchase_id', false);
+ * const { data, isLoading, error, refetch } = usePurchaseCredentials('purchase_id', false, 'affiliate');
  * // Later, when user clicks "Ver Credenciales":
  * refetch();
  */
-export function usePurchaseCredentials(purchaseId: string, enabled: boolean = false) {
+export function usePurchaseCredentials(purchaseId: string, enabled: boolean = false, userType: UserType = 'seller') {
     return useQuery({
-        queryKey: ['purchase', 'credentials', purchaseId],
-        queryFn: () => fetchCredentials(purchaseId),
+        queryKey: [userType, 'purchase', 'credentials', purchaseId],
+        queryFn: () => fetchCredentials(purchaseId, userType),
         enabled: enabled && !!purchaseId, // Only fetch when explicitly enabled
         staleTime: 0, // Always refetch for security
         gcTime: 0, // Don't cache credentials (previously cacheTime)
         retry: false, // Don't retry on error
     });
 }
+

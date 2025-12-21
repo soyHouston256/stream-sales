@@ -24,7 +24,8 @@ export function useDisputeMessages(disputeId: string) {
       return response.json();
     },
     enabled: !!disputeId,
-    refetchInterval: 10000, // Refetch cada 10 segundos para mensajes en tiempo real
+    staleTime: 1000 * 30, // Consider fresh for 30 seconds
+    refetchOnWindowFocus: true, // Refetch when user returns to tab
   });
 }
 

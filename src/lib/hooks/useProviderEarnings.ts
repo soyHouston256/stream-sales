@@ -96,7 +96,7 @@ export function useProviderBalance() {
   return useQuery({
     queryKey: ['provider', 'earnings', 'balance'],
     queryFn: fetchProviderBalance,
-    refetchInterval: 30000, // Refetch every 30 seconds
+    staleTime: 1000 * 60 * 5, // Consider fresh for 5 minutes
   });
 }
 

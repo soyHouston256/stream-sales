@@ -1047,6 +1047,13 @@
       "reject": "Reject",
       "noPending": "No pending referrals",
       "allReviewed": "All your referrals have been approved or rejected"
+    },
+    "purchases": {
+      "title": "My Purchases",
+      "subtitle": "View and manage your purchased products",
+      "totalPurchases": "Total Purchases",
+      "totalSpent": "Total Spent",
+      "averagePrice": "Average Price"
     }
   },
   "conciliator": {
