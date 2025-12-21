@@ -114,7 +114,7 @@ export function RechargeDialog({
   });
 
   // Fetch exchange rate for user's country
-  const { data: exchangeRateData } = useQuery({
+  const { data: exchangeRateData, isLoading: exchangeRateLoading } = useQuery({
     queryKey: ['exchange-rate', user?.countryCode],
     queryFn: async () => {
       if (!user?.countryCode) return null;
@@ -252,7 +252,7 @@ export function RechargeDialog({
       </DialogTrigger>
       <DialogContent className="max-w-5xl p-0 overflow-hidden">
         {/* Loading State */}
-        {configLoading && (
+        {(configLoading || exchangeRateLoading) && (
           <div className="p-10 flex flex-col items-center justify-center min-h-[400px]">
             <Skeleton className="h-10 w-64 mb-4" />
             <Skeleton className="h-40 w-full max-w-md" />
@@ -270,8 +270,19 @@ export function RechargeDialog({
           </div>
         )}
 
+        {/* No Exchange Rate Error */}
+        {!configLoading && !exchangeRateLoading && paymentConfig && paymentConfig.methods.length > 0 && !exchangeRateData && (
+          <div className="p-10 flex flex-col items-center justify-center min-h-[400px] text-center">
+            <AlertTriangle className="h-16 w-16 text-red-500 mb-4" />
+            <h2 className="text-xl font-bold mb-2">Tipo de cambio no configurado</h2>
+            <p className="text-muted-foreground max-w-md">
+              No se ha configurado el tipo de cambio para tu país ({user?.countryCode}). Por favor contacta al administrador para que configure el tipo de cambio antes de poder recargar saldo.
+            </p>
+          </div>
+        )}
+
         {/* Main Content */}
-        {!configLoading && paymentConfig && paymentConfig.methods.length > 0 && selectedMethod && (
+        {!configLoading && !exchangeRateLoading && paymentConfig && paymentConfig.methods.length > 0 && exchangeRateData && selectedMethod && (
           <div className="flex flex-col md:flex-row min-h-[600px]">
 
             {/* --- LEFT COLUMN: PAYMENT METHODS --- */}
@@ -470,14 +481,14 @@ export function RechargeDialog({
                   <Label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">
                     {t('seller.recharge.amountTransferred')}
                   </Label>
-                  <div className="relative group">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-bold text-2xl transition-colors group-focus-within:text-primary">
+                  <div className="flex items-center gap-3 border-b-2 border-border focus-within:border-primary transition-colors pb-2">
+                    <span className="text-muted-foreground font-bold text-3xl shrink-0">
                       {getCurrency()}
                     </span>
                     <Input
                       type="number"
                       step="0.01"
-                      className="pl-14 pr-4 py-4 text-4xl font-bold h-auto border-b-2 border-x-0 border-t-0 rounded-none focus:border-primary bg-transparent placeholder:text-muted-foreground/30"
+                      className="border-0 px-0 py-0 text-4xl font-bold h-auto rounded-none focus-visible:ring-0 focus-visible:ring-offset-0 bg-transparent placeholder:text-muted-foreground/30 flex-1"
                       placeholder="0.00"
                       {...register('amount', { valueAsNumber: true })}
                     />

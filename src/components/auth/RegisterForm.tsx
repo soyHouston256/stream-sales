@@ -34,7 +34,15 @@ const createRegisterSchema = (t: (key: string) => string) => z.object({
     .email(t('auth.registerForm.validation.emailInvalid')),
   password: z
     .string()
-    .min(6, t('auth.registerForm.validation.passwordMinLength')),
+    .min(8, t('auth.registerForm.validation.passwordMinLength'))
+    .max(128, t('auth.registerForm.validation.passwordMaxLength'))
+    .regex(/[A-Z]/, t('auth.registerForm.validation.passwordUppercase'))
+    .regex(/[a-z]/, t('auth.registerForm.validation.passwordLowercase'))
+    .regex(/[0-9]/, t('auth.registerForm.validation.passwordNumber'))
+    .regex(/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/, t('auth.registerForm.validation.passwordSpecial')),
+  confirmPassword: z
+    .string()
+    .min(1, t('auth.registerForm.validation.confirmPasswordRequired')),
   role: z.enum(['admin', 'provider', 'seller', 'affiliate', 'conciliator', 'payment_validator'], {
     required_error: t('auth.registerForm.validation.roleRequired'),
   }),
@@ -47,6 +55,9 @@ const createRegisterSchema = (t: (key: string) => string) => z.object({
     .max(20, t('auth.registerForm.validation.usernameMaxLength'))
     .regex(/^[a-zA-Z0-9_]+$/, t('auth.registerForm.validation.usernamePattern'))
     .optional(),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: t('auth.registerForm.validation.passwordsDoNotMatch'),
+  path: ['confirmPassword'],
 });
 
 type RegisterFormData = z.infer<ReturnType<typeof createRegisterSchema>>;
@@ -82,6 +93,8 @@ export function RegisterForm() {
     setValue,
   } = useForm<RegisterFormData>({
     resolver: zodResolver(createRegisterSchema(t)),
+    mode: 'onTouched', // Validate when field is touched
+    reValidateMode: 'onChange', // Re-validate on change after first validation
     defaultValues: {
       role: 'seller',
       countryCode: '+51', // Default to Peru
@@ -265,6 +278,29 @@ export function RegisterForm() {
                 role="alert"
               >
                 {errors.password.message}
+              </p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="confirmPassword">{t('auth.registerForm.confirmPassword')}</Label>
+            <Input
+              id="confirmPassword"
+              type="password"
+              placeholder={t('auth.registerForm.confirmPasswordPlaceholder')}
+              autoComplete="new-password"
+              disabled={isLoading}
+              {...register('confirmPassword')}
+              aria-invalid={errors.confirmPassword ? 'true' : 'false'}
+              aria-describedby={errors.confirmPassword ? 'confirmPassword-error' : undefined}
+            />
+            {errors.confirmPassword && (
+              <p
+                id="confirmPassword-error"
+                className="text-sm text-destructive"
+                role="alert"
+              >
+                {errors.confirmPassword.message}
               </p>
             )}
           </div>

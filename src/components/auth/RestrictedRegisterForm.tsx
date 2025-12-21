@@ -35,7 +35,15 @@ const registerSchema = z.object({
         .email('Email inválido'),
     password: z
         .string()
-        .min(6, 'La contraseña debe tener al menos 6 caracteres'),
+        .min(8, 'La contraseña debe tener al menos 8 caracteres')
+        .max(128, 'La contraseña no puede exceder 128 caracteres')
+        .regex(/[A-Z]/, 'Debe contener al menos una letra mayúscula')
+        .regex(/[a-z]/, 'Debe contener al menos una letra minúscula')
+        .regex(/[0-9]/, 'Debe contener al menos un número')
+        .regex(/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/, 'Debe contener al menos un carácter especial (!@#$%^&*...)'),
+    confirmPassword: z
+        .string()
+        .min(1, 'Confirma tu contraseña'),
     role: z.enum(['provider', 'payment_validator'], {
         required_error: 'Rol no válido',
     }),
@@ -47,6 +55,9 @@ const registerSchema = z.object({
         .max(20, 'El usuario no puede tener más de 20 caracteres')
         .regex(/^[a-zA-Z0-9_]+$/, 'Solo letras, números y guión bajo')
         .optional(),
+}).refine((data) => data.password === data.confirmPassword, {
+    message: 'Las contraseñas no coinciden',
+    path: ['confirmPassword'],
 });
 
 type RegisterFormData = z.infer<typeof registerSchema>;
@@ -85,6 +96,8 @@ export function RestrictedRegisterForm({ allowedRole }: RestrictedRegisterFormPr
         setValue,
     } = useForm<RegisterFormData>({
         resolver: zodResolver(registerSchema),
+        mode: 'onTouched', // Validate when field is touched
+        reValidateMode: 'onChange', // Re-validate on change after first validation
         defaultValues: {
             role: allowedRole,
             countryCode: '+51',
@@ -227,7 +240,7 @@ export function RestrictedRegisterForm({ allowedRole }: RestrictedRegisterFormPr
                         <Input
                             id="password"
                             type="password"
-                            placeholder="Mínimo 6 caracteres"
+                            placeholder="Min 8 chars, mayúscula, número y carácter especial"
                             autoComplete="new-password"
                             disabled={isLoading}
                             {...register('password')}
@@ -236,6 +249,24 @@ export function RestrictedRegisterForm({ allowedRole }: RestrictedRegisterFormPr
                         {errors.password && (
                             <p className="text-sm text-destructive" role="alert">
                                 {errors.password.message}
+                            </p>
+                        )}
+                    </div>
+
+                    <div className="space-y-2">
+                        <Label htmlFor="confirmPassword">Confirmar Contraseña</Label>
+                        <Input
+                            id="confirmPassword"
+                            type="password"
+                            placeholder="Repite tu contraseña"
+                            autoComplete="new-password"
+                            disabled={isLoading}
+                            {...register('confirmPassword')}
+                            aria-invalid={errors.confirmPassword ? 'true' : 'false'}
+                        />
+                        {errors.confirmPassword && (
+                            <p className="text-sm text-destructive" role="alert">
+                                {errors.confirmPassword.message}
                             </p>
                         )}
                     </div>
