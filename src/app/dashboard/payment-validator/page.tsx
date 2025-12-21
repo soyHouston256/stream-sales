@@ -1,7 +1,8 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth/useAuth';
-import { Wallet, CheckCircle, XCircle, Clock, TrendingUp } from 'lucide-react';
+import { Wallet, CheckCircle, XCircle, Clock, TrendingUp, Store } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { StatCard } from '@/components/ui/stat-card';
@@ -35,6 +36,7 @@ interface PaymentValidatorStats {
 }
 
 export default function PaymentValidatorDashboard() {
+  const router = useRouter();
   const { user } = useAuth();
   const { t } = useLanguage();
   const [stats, setStats] = useState<PaymentValidatorStats | null>(null);
@@ -68,11 +70,17 @@ export default function PaymentValidatorDashboard() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">{t('paymentValidator.title')}</h1>
-        <p className="text-muted-foreground mt-2">
-          {t('paymentValidator.welcome')}, {user?.name || user?.email}
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold">{t('paymentValidator.title')}</h1>
+          <p className="text-muted-foreground mt-2">
+            {t('paymentValidator.welcome')}, {user?.name || user?.email}
+          </p>
+        </div>
+        <Button onClick={() => router.push('/')} variant="outline">
+          <Store className="mr-2 h-4 w-4" />
+          Marketplace
+        </Button>
       </div>
 
       {/* Pending Validations Section */}

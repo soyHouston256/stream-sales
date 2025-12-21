@@ -1,8 +1,9 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth/useAuth';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Users, DollarSign, AlertCircle, TrendingUp, Wallet } from 'lucide-react';
+import { Users, DollarSign, AlertCircle, TrendingUp, Wallet, Store } from 'lucide-react';
 import { StatCard } from '@/components/ui/stat-card';
 import { SalesChart } from '@/components/admin/SalesChart';
 import { useAdminStats, useSalesData } from '@/lib/hooks/useAdminStats';
@@ -11,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 
 export default function AdminDashboard() {
+  const router = useRouter();
   const { user } = useAuth();
   const { t } = useLanguage();
   const { data: stats, isLoading: statsLoading } = useAdminStats();
@@ -25,11 +27,17 @@ export default function AdminDashboard() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">{t('admin.title')}</h1>
-        <p className="text-muted-foreground mt-2">
-          {t('dashboard.welcome')}, {user?.name || user?.email}
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold">{t('admin.title')}</h1>
+          <p className="text-muted-foreground mt-2">
+            {t('dashboard.welcome')}, {user?.name || user?.email}
+          </p>
+        </div>
+        <Button onClick={() => router.push('/')} variant="outline">
+          <Store className="mr-2 h-4 w-4" />
+          Marketplace
+        </Button>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">

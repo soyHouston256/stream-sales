@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -9,7 +9,6 @@ import Link from 'next/link';
 
 import { useAuth } from '@/lib/auth/useAuth';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { getDashboardRoute } from '@/lib/utils/roleRedirect';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -39,10 +38,9 @@ const loginSchema = z.object({
 type LoginFormData = z.infer<typeof loginSchema>;
 
 export function LoginForm() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const returnTo = searchParams.get('returnTo');
-  const { login, user } = useAuth();
+  const { login } = useAuth();
   const { t } = useLanguage();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
@@ -67,16 +65,14 @@ export function LoginForm() {
         description: t('auth.welcomeBack'),
       });
 
-      // After successful login, redirect to appropriate dashboard based on user role
+      // After successful login, redirect to marketplace
       if (response && response.user) {
-        const dashboardRoute = getDashboardRoute(response.user.role);
-
         // Give a brief moment for the token to be saved to localStorage
         setTimeout(() => {
           if (returnTo) {
             window.location.href = returnTo;
           } else {
-            window.location.href = dashboardRoute;
+            window.location.href = '/';
           }
         }, 200);
       }

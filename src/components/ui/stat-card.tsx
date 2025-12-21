@@ -1,6 +1,7 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import Link from 'next/link';
 
 interface StatCardProps {
   label: string;
@@ -9,6 +10,8 @@ interface StatCardProps {
   color: 'blue' | 'red' | 'green' | 'purple' | 'orange' | 'indigo' | 'emerald';
   description?: string;
   isLoading?: boolean;
+  href?: string;
+  onClick?: () => void;
 }
 
 export function StatCard({
@@ -18,6 +21,8 @@ export function StatCard({
   color,
   description,
   isLoading = false,
+  href,
+  onClick,
 }: StatCardProps) {
   const colorStyles = {
     blue: "from-blue-500 to-blue-600",
@@ -39,9 +44,10 @@ export function StatCard({
     emerald: "bg-emerald-50 dark:bg-emerald-950/30",
   };
 
-  return (
-    // eslint-disable-next-line security/detect-object-injection
-    <Card className={cn("relative overflow-hidden border-0 shadow-lg", bgStyles[color])}>
+  const isClickable = !!href || !!onClick;
+
+  const cardContent = (
+    <>
       {/* eslint-disable-next-line security/detect-object-injection */}
       <div className={cn("absolute top-0 right-0 w-32 h-32 -mr-8 -mt-8 rounded-full opacity-10 bg-gradient-to-br", colorStyles[color])} />
       <CardContent className="p-6">
@@ -63,6 +69,35 @@ export function StatCard({
           </div>
         </div>
       </CardContent>
+    </>
+  );
+
+  if (href) {
+    return (
+      <Link href={href}>
+        {/* eslint-disable-next-line security/detect-object-injection */}
+        <Card className={cn(
+          "relative overflow-hidden border-0 shadow-lg transition-all duration-200",
+          bgStyles[color],
+          "cursor-pointer hover:shadow-xl hover:scale-[1.02]"
+        )}>
+          {cardContent}
+        </Card>
+      </Link>
+    );
+  }
+
+  return (
+    // eslint-disable-next-line security/detect-object-injection
+    <Card
+      className={cn(
+        "relative overflow-hidden border-0 shadow-lg",
+        bgStyles[color],
+        isClickable && "cursor-pointer hover:shadow-xl hover:scale-[1.02] transition-all duration-200"
+      )}
+      onClick={onClick}
+    >
+      {cardContent}
     </Card>
   );
 }

@@ -4,7 +4,7 @@ import { useAuth } from '@/lib/auth/useAuth';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Package, DollarSign, Wallet, ShoppingCart, ArrowUpRight } from 'lucide-react';
+import { Package, DollarSign, Wallet, ShoppingCart, ArrowUpRight, Store } from 'lucide-react';
 import { StatCard } from '@/components/ui/stat-card';
 import { SalesByCategoryChart } from '@/components/provider/SalesByCategoryChart';
 import { DataTable, Column } from '@/components/admin/DataTable';
@@ -81,6 +81,10 @@ export default function ProviderDashboard() {
           </p>
         </div>
         <div className="flex gap-2">
+          <Button onClick={() => router.push('/')} variant="outline">
+            <Store className="mr-2 h-4 w-4" />
+            Marketplace
+          </Button>
           <WithdrawalRequestDialog
             availableBalance={Number(walletBalance?.balance ?? stats?.pendingBalance ?? 0)}
             trigger={

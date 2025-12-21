@@ -257,6 +257,9 @@ export default function ReferralsPage() {
                     <TableHeader>
                       <TableRow>
                         <TableHead>{t('affiliate.referrals.user')}</TableHead>
+                        <TableHead>{t('affiliate.dashboard.username')}</TableHead>
+                        <TableHead>{t('affiliate.dashboard.phone')}</TableHead>
+                        <TableHead>{t('affiliate.dashboard.country')}</TableHead>
                         <TableHead>{t('affiliate.referrals.role')}</TableHead>
                         <TableHead>{t('affiliate.dashboard.registrationDate')}</TableHead>
                         <TableHead>{t('affiliate.dashboard.approvalStatus')}</TableHead>
@@ -273,6 +276,19 @@ export default function ReferralsPage() {
                                 {referral.referredUser.email}
                               </div>
                             </div>
+                          </TableCell>
+                          <TableCell>
+                            <span className="text-sm">{referral.referredUser.username || '-'}</span>
+                          </TableCell>
+                          <TableCell>
+                            <span className="text-sm">
+                              {referral.referredUser.phoneNumber
+                                ? `${referral.referredUser.countryCode || ''} ${referral.referredUser.phoneNumber}`
+                                : '-'}
+                            </span>
+                          </TableCell>
+                          <TableCell>
+                            <span className="text-sm">{referral.referredUser.countryCode || '-'}</span>
                           </TableCell>
                           <TableCell>
                             <span className="capitalize">{referral.referredUser.role}</span>

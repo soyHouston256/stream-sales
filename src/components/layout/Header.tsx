@@ -60,13 +60,54 @@ export function Header({ navItems = [] }: HeaderProps) {
     router.push('/login');
   };
 
+  const getWalletRoute = () => {
+    if (!user) return null;
+
+    switch (user.role) {
+      case 'seller':
+        return '/dashboard/seller/wallet';
+      case 'affiliate':
+        return '/dashboard/affiliate/wallet';
+      case 'provider':
+        return '/dashboard/provider/earnings';
+      default:
+        return null;
+    }
+  };
+
+  const getDashboardRoute = () => {
+    if (!user) return '/';
+
+    switch (user.role) {
+      case 'admin':
+        return '/dashboard/admin';
+      case 'affiliate':
+        return '/dashboard/affiliate';
+      case 'provider':
+        return '/dashboard/provider';
+      case 'seller':
+        return '/dashboard/seller';
+      case 'conciliator':
+        return '/dashboard/conciliator';
+      case 'payment_validator':
+        return '/dashboard/payment-validator';
+      default:
+        return '/';
+    }
+  };
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center px-4">
         <div className="flex flex-1 items-center justify-between">
           <div className="flex items-center gap-2">
             {navItems.length > 0 && <MobileNav items={navItems} />}
-            <h1 className="text-xl font-bold">Stream Sales</h1>
+            <button
+              onClick={() => router.push('/')}
+              className="text-xl font-bold hover:opacity-80 transition-opacity cursor-pointer"
+            >
+              Stream Sales
+            </button>
           </div>
 
           <div className="flex items-center gap-2">
@@ -76,20 +117,34 @@ export function Header({ navItems = [] }: HeaderProps) {
             {user && (
               <>
                 <div className="flex items-center gap-2 text-sm">
-                  <User className="h-4 w-4" />
-                  <span className="hidden sm:inline-block">{user.name || user.email}</span>
+                  <button
+                    onClick={() => router.push(getDashboardRoute())}
+                    className="flex items-center gap-2 hover:opacity-80 transition-opacity cursor-pointer"
+                  >
+                    <User className="h-4 w-4" />
+                    <span className="hidden sm:inline-block">{user.name || user.email}</span>
+                  </button>
 
                   {/* Wallet Balance - Only for seller, affiliate, provider */}
-                  {['seller', 'affiliate', 'provider'].includes(user.role) && walletBalance && (
-                    <span className="flex items-center gap-1 font-medium text-emerald-600 mr-2 md:mr-0">
+                  {['seller', 'affiliate', 'provider'].includes(user.role) && walletBalance && getWalletRoute() && (
+                    <button
+                      onClick={() => {
+                        const route = getWalletRoute();
+                        if (route) router.push(route);
+                      }}
+                      className="flex items-center gap-1 font-medium text-emerald-600 mr-2 md:mr-0 hover:text-emerald-700 transition-colors cursor-pointer"
+                    >
                       <Wallet className="h-3.5 w-3.5" />
                       <span className="text-sm">${walletBalance.balance || '0.00'}</span>
-                    </span>
+                    </button>
                   )}
 
-                  <span className="inline-block rounded-full bg-primary/10 px-2 py-1 text-xs font-medium text-primary">
+                  <button
+                    onClick={() => router.push(getDashboardRoute())}
+                    className="inline-block rounded-full bg-primary/10 px-2 py-1 text-xs font-medium text-primary hover:bg-primary/20 transition-colors cursor-pointer"
+                  >
                     {user.role}
-                  </span>
+                  </button>
                 </div>
 
                 <Button

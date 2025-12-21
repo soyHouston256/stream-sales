@@ -1,12 +1,13 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth/useAuth';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Wallet, ShoppingBag, DollarSign, TrendingUp, ShieldCheck } from 'lucide-react';
+import { Wallet, ShoppingBag, DollarSign, TrendingUp, ShieldCheck, Store } from 'lucide-react';
 import { StatCard } from '@/components/ui/stat-card';
 import { EmptyState } from '@/components/ui/empty-state';
 import { DataTable, Column } from '@/components/admin/DataTable';
@@ -20,6 +21,7 @@ import { format } from 'date-fns';
 import Link from 'next/link';
 
 export default function SellerDashboard() {
+  const router = useRouter();
   const { user } = useAuth();
   const { t } = useLanguage();
   const [selectedProduct, setSelectedProduct] = useState<MarketplaceProduct | null>(null);
@@ -90,7 +92,13 @@ export default function SellerDashboard() {
             {t('dashboard.welcome')}, {user?.name || user?.email}
           </p>
         </div>
-        <RechargeDialog currentBalance={stats ? stats.walletBalance.toString() : '0'} />
+        <div className="flex gap-2">
+          <Button onClick={() => router.push('/')} variant="outline">
+            <Store className="mr-2 h-4 w-4" />
+            Marketplace
+          </Button>
+          <RechargeDialog currentBalance={stats ? stats.walletBalance.toString() : '0'} />
+        </div>
       </div>
 
       {/* Stats Cards */}
