@@ -41,6 +41,9 @@ export interface Referral {
     name: string;
     email: string;
     role: UserRole;
+    username?: string;
+    phoneNumber?: string;
+    countryCode?: string;
   };
   status: 'active' | 'inactive' | 'suspended';
   approvalStatus: 'pending' | 'approved' | 'rejected'; // Nuevo workflow de aprobación

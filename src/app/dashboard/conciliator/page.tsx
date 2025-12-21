@@ -1,9 +1,11 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth/useAuth';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { AlertCircle, CheckCircle, Clock, Inbox } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { AlertCircle, CheckCircle, Clock, Inbox, Store } from 'lucide-react';
 import { useConciliatorStats, useResolutionsByDay } from '@/lib/hooks/useConciliatorStats';
 import { useDisputes } from '@/lib/hooks/useDisputes';
 import { StatCard } from '@/components/ui/stat-card';
@@ -13,6 +15,7 @@ import { DisputesTable } from '@/components/conciliator/DisputesTable';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function ConciliatorDashboard() {
+  const router = useRouter();
   const { user } = useAuth();
   const { t } = useLanguage();
   const { data: stats, isLoading: statsLoading } = useConciliatorStats();
@@ -28,11 +31,17 @@ export default function ConciliatorDashboard() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">{t('conciliator.title')}</h1>
-        <p className="text-muted-foreground mt-2">
-          {t('conciliator.welcome')}, {user?.name || user?.email}
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold">{t('conciliator.title')}</h1>
+          <p className="text-muted-foreground mt-2">
+            {t('conciliator.welcome')}, {user?.name || user?.email}
+          </p>
+        </div>
+        <Button onClick={() => router.push('/')} variant="outline">
+          <Store className="mr-2 h-4 w-4" />
+          Marketplace
+        </Button>
       </div>
 
       {/* Stats Cards */}

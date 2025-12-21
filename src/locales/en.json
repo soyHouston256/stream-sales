@@ -19,7 +19,9 @@
     "saving": "Saving...",
     "days": "days",
     "saveProduct": "Save Product",
-    "saveChanges": "Save Changes"
+    "saveChanges": "Save Changes",
+    "approve": "Approve",
+    "reject": "Reject"
   },
   "settings": {
     "title": "Settings",
@@ -725,7 +727,9 @@
       "noTransactionsFiltered": "No transactions found matching your filter.",
       "tryDifferentFilter": "Try selecting a different transaction type.",
       "transactionsAppearHere": "Your wallet transactions will appear here.",
-      "rechargesAppearHere": "Your recharge history will appear here."
+      "rechargesAppearHere": "Your recharge history will appear here.",
+      "externalTransactionId": "External Transaction ID",
+      "optional": "Optional"
     },
     "recharge": {
       "addFunds": "Add Funds",
@@ -1004,6 +1008,9 @@
       "latestSellers": "Latest sellers registered with your code",
       "viewAll": "View All",
       "user": "User",
+      "username": "Username",
+      "phone": "Phone",
+      "country": "Country",
       "role": "Role",
       "approvalStatus": "Approval Status",
       "registrationDate": "Registration Date",

@@ -232,6 +232,7 @@ export async function GET(request: NextRequest) {
           category: item.variant.product.category,
           name: item.variant.product.name,
           description: item.variant.product.description || '',
+          durationDays: item.variant.durationDays, // Add duration from variant
           // Get credentials from inventoryAccounts and decrypt
           // Note: Order status uses 'paid' while legacy Purchase used 'completed'
           accountEmail: (() => {

@@ -18,15 +18,53 @@ import { Search, Filter, X, LogIn, User, LogOut, LayoutDashboard, Wallet } from 
 import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState } from '@/components/ui/empty-state';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth/useAuth';
 
 export default function LandingPage() {
   const { t } = useLanguage();
   const { user, logout } = useAuth();
+  const router = useRouter();
 
   // Determine userType based on user role
   const userType = user?.role === 'affiliate' ? 'affiliate' : 'seller';
   const { data: walletBalance } = useWalletBalance(userType as 'seller' | 'affiliate');
+
+  const getWalletRoute = () => {
+    if (!user) return null;
+
+    switch (user.role) {
+      case 'seller':
+        return '/dashboard/seller/wallet';
+      case 'affiliate':
+        return '/dashboard/affiliate/wallet';
+      case 'provider':
+        return '/dashboard/provider/earnings';
+      default:
+        return null;
+    }
+  };
+
+  const getDashboardRoute = () => {
+    if (!user) return '/';
+
+    switch (user.role) {
+      case 'admin':
+        return '/dashboard/admin';
+      case 'affiliate':
+        return '/dashboard/affiliate';
+      case 'provider':
+        return '/dashboard/provider';
+      case 'seller':
+        return '/dashboard/seller';
+      case 'conciliator':
+        return '/dashboard/conciliator';
+      case 'payment_validator':
+        return '/dashboard/payment-validator';
+      default:
+        return '/';
+    }
+  };
 
   const [selectedProduct, setSelectedProduct] = useState<MarketplaceProduct | null>(null);
   const [showProductDetails, setShowProductDetails] = useState(false);
@@ -78,9 +116,12 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex items-center">
-              <span className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 text-transparent bg-clip-text">
+              <button
+                onClick={() => router.push('/')}
+                className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 text-transparent bg-clip-text hover:opacity-80 transition-opacity cursor-pointer"
+              >
                 StreamSales
-              </span>
+              </button>
             </div>
 
             <div className="flex items-center gap-4">
@@ -88,15 +129,24 @@ export default function LandingPage() {
               <ThemeSelector />
               {user ? (
                 <>
-                  {walletBalance && (
-                    <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-emerald-50 text-emerald-700 rounded-full text-sm font-medium border border-emerald-100">
+                  {walletBalance && getWalletRoute() && (
+                    <button
+                      onClick={() => {
+                        const route = getWalletRoute();
+                        if (route) router.push(route);
+                      }}
+                      className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400 rounded-full text-sm font-medium border border-emerald-100 dark:border-emerald-800 hover:bg-emerald-100 dark:hover:bg-emerald-950 transition-colors cursor-pointer"
+                    >
                       <Wallet className="h-4 w-4" />
                       <span>
                         {walletBalance.currency} {walletBalance.balance}
                       </span>
-                    </div>
+                    </button>
                   )}
-                  <div className="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-200">
+                  <button
+                    onClick={() => router.push(getDashboardRoute())}
+                    className="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-200 hover:opacity-80 transition-opacity cursor-pointer"
+                  >
                     <div className="h-8 w-8 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
                       <User className="h-4 w-4" />
                     </div>
@@ -106,9 +156,9 @@ export default function LandingPage() {
                        user.role === 'provider' ? 'Provider User' :
                        user.name || user.email}
                     </span>
-                  </div>
+                  </button>
                   <Button variant="ghost" size="sm" asChild>
-                    <Link href={`/dashboard/${user.role}`}>
+                    <Link href={getDashboardRoute()}>
                       <LayoutDashboard className="h-4 w-4 mr-2" />
                       Dashboard
                     </Link>

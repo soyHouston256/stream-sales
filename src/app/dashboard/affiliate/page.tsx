@@ -19,7 +19,7 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { StatCard } from '@/components/ui/stat-card';
-import { Users, Clock, CheckCircle, XCircle, ArrowRight, AlertCircle, Wallet, Plus, CreditCard, ShieldCheck } from 'lucide-react';
+import { Users, Clock, CheckCircle, XCircle, ArrowRight, AlertCircle, Wallet, Plus, CreditCard, ShieldCheck, Store } from 'lucide-react';
 import {
   useAffiliateInfo,
   useAffiliateStats,
@@ -153,6 +153,10 @@ export default function AffiliateDashboard() {
           </p>
         </div>
         <div className="flex gap-2">
+          <Button onClick={() => router.push('/')} variant="outline" className="rounded-xl">
+            <Store className="h-4 w-4 mr-2" />
+            Marketplace
+          </Button>
           <Button onClick={() => router.push('/dashboard/affiliate/wallet')} variant="outline" className="rounded-xl">
             <CreditCard className="h-4 w-4 mr-2" />
             {t('affiliate.dashboard.viewTransactions')}
@@ -184,6 +188,7 @@ export default function AffiliateDashboard() {
           icon={Wallet}
           color="green"
           isLoading={walletLoading}
+          href="/dashboard/affiliate/wallet"
         />
 
         <StatCard
@@ -193,6 +198,7 @@ export default function AffiliateDashboard() {
           icon={Users}
           color="blue"
           isLoading={statsLoading}
+          href="/dashboard/affiliate/referrals"
         />
 
         <StatCard
@@ -202,6 +208,7 @@ export default function AffiliateDashboard() {
           icon={Clock}
           color="orange"
           isLoading={referralsLoading}
+          href="/dashboard/affiliate/referrals"
         />
 
         <StatCard
@@ -211,6 +218,7 @@ export default function AffiliateDashboard() {
           icon={CheckCircle}
           color="emerald"
           isLoading={referralsLoading}
+          href="/dashboard/affiliate/referrals"
         />
       </div>
 

@@ -19,8 +19,8 @@ import { Purchase, PurchasesFilters } from '@/types/seller';
 import { CategoryBadge } from '@/components/provider/CategoryBadge';
 import { PurchaseDetailsDialog } from '@/components/seller';
 import { formatCurrency } from '@/lib/utils/seller';
-import { format } from 'date-fns';
-import { ShoppingBag, DollarSign, TrendingDown, Eye } from 'lucide-react';
+import { format, addDays, differenceInDays } from 'date-fns';
+import { ShoppingBag, DollarSign, TrendingDown, Eye, Calendar, Clock } from 'lucide-react';
 import { ProductCategory } from '@/types/provider';
 import { useLanguage } from '@/contexts/LanguageContext';
 import {
@@ -37,6 +37,46 @@ export default function PurchasesPage() {
     page: 1,
     limit: 10,
   });
+
+  // Helper function to calculate expiration date and remaining days
+  const calculateExpiration = (purchase: Purchase) => {
+    const durationDays = purchase.product.durationDays;
+
+    // Only if durationDays is explicitly 0, it's lifetime
+    if (durationDays === 0) {
+      return {
+        expirationDate: null,
+        daysRemaining: Infinity,
+        isExpired: false,
+        isLifetime: true,
+      };
+    }
+
+    // If durationDays is not defined, return N/A
+    if (!durationDays || durationDays === undefined || durationDays === null) {
+      return {
+        expirationDate: null,
+        daysRemaining: 0,
+        isExpired: false,
+        isLifetime: false,
+        isUndefined: true,
+      };
+    }
+
+    const startDate = new Date(purchase.createdAt);
+    const expirationDate = addDays(startDate, durationDays);
+    const today = new Date();
+    const daysRemaining = differenceInDays(expirationDate, today);
+    const isExpired = daysRemaining < 0;
+
+    return {
+      expirationDate,
+      daysRemaining: Math.max(0, daysRemaining),
+      isExpired,
+      isLifetime: false,
+      isUndefined: false,
+    };
+  };
 
   const { data, isLoading } = usePurchases(filters);
 
@@ -75,13 +115,6 @@ export default function PurchasesPage() {
 
   const columns: Column<Purchase>[] = [
     {
-      key: 'id',
-      label: t('purchases.page.purchaseId'),
-      render: (purchase) => (
-        <span className="font-mono text-xs">{purchase.id.slice(0, 8)}...</span>
-      ),
-    },
-    {
       key: 'product',
       label: t('purchases.page.productLabel'),
       render: (purchase) => (
@@ -104,11 +137,71 @@ export default function PurchasesPage() {
       ),
     },
     {
-      key: 'createdAt',
-      label: t('purchases.purchaseDate'),
+      key: 'startDate',
+      label: 'Fecha de Inicio',
       render: (purchase) => (
-        <span className="text-sm">{format(new Date(purchase.createdAt), 'PPp')}</span>
+        <div className="flex items-center gap-1 text-sm">
+          <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
+          <span>{format(new Date(purchase.createdAt), 'dd/MM/yyyy')}</span>
+        </div>
       ),
+    },
+    {
+      key: 'endDate',
+      label: 'Fecha de Término',
+      render: (purchase) => {
+        const expiration = calculateExpiration(purchase);
+
+        if (expiration.isLifetime) {
+          return <Badge variant="default" className="bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400">De por vida</Badge>;
+        }
+
+        if (expiration.isUndefined) {
+          return <span className="text-xs text-muted-foreground">N/A</span>;
+        }
+
+        return (
+          <div className="flex items-center gap-1 text-sm">
+            <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
+            <span>{expiration.expirationDate ? format(expiration.expirationDate, 'dd/MM/yyyy') : '-'}</span>
+          </div>
+        );
+      },
+    },
+    {
+      key: 'daysRemaining',
+      label: 'Días Restantes',
+      render: (purchase) => {
+        const expiration = calculateExpiration(purchase);
+
+        if (expiration.isLifetime) {
+          return <span className="text-xs text-muted-foreground">∞</span>;
+        }
+
+        if (expiration.isUndefined) {
+          return <span className="text-xs text-muted-foreground">N/A</span>;
+        }
+
+        if (expiration.isExpired) {
+          return <Badge variant="destructive" className="text-xs">Expirado</Badge>;
+        }
+
+        const daysRemaining = expiration.daysRemaining;
+        let colorClass = 'text-green-600 dark:text-green-400';
+
+        if (daysRemaining <= 7) {
+          colorClass = 'text-red-600 dark:text-red-400';
+        } else if (daysRemaining <= 15) {
+          colorClass = 'text-orange-600 dark:text-orange-400';
+        }
+
+        return (
+          <div className="flex items-center gap-1">
+            <Clock className={`h-3.5 w-3.5 ${colorClass}`} />
+            <span className={`font-bold ${colorClass}`}>{daysRemaining}</span>
+          </div>
+        );
+      },
     },
     {
       key: 'status',

@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import {
   Dialog,
   DialogContent,
@@ -35,6 +36,7 @@ export function PurchaseConfirmDialog({
   onClose,
   userType = 'seller',
 }: PurchaseConfirmDialogProps) {
+  const router = useRouter();
   const { t } = useLanguage();
   const { toast } = useToast();
   const { data: walletData, isLoading: walletLoading } = useWalletBalance(userType);
@@ -58,6 +60,16 @@ export function PurchaseConfirmDialog({
         className: 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800',
       });
       onClose();
+
+      // Redirect to purchases page after successful purchase
+      const purchasesRoute = userType === 'affiliate'
+        ? '/dashboard/affiliate/purchases'
+        : '/dashboard/seller/purchases';
+
+      // Small delay to allow the toast to be visible before redirect
+      setTimeout(() => {
+        router.push(purchasesRoute);
+      }, 500);
     } catch (error) {
       // Error is handled by the mutation hook
     }

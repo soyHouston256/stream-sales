@@ -8,7 +8,6 @@ import * as z from 'zod';
 import Link from 'next/link';
 
 import { useAuth } from '@/lib/auth/useAuth';
-import { getDashboardRoute } from '@/lib/utils/roleRedirect';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -156,15 +155,13 @@ export function RegisterForm() {
         description: t('auth.registerForm.success.description'),
       });
 
-      // After successful registration, redirect to appropriate dashboard based on user role
+      // After successful registration, redirect to marketplace
       // Using window.location.href for full page reload to ensure AuthContext initializes properly
       if (response && response.user) {
-        const dashboardRoute = getDashboardRoute(response.user.role);
-
         // Give a brief moment for the token to be saved to localStorage
         // then do a full page navigation (not client-side navigation)
         setTimeout(() => {
-          window.location.href = dashboardRoute;
+          window.location.href = '/';
         }, 200);
       }
     } catch (error) {

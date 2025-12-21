@@ -70,6 +70,7 @@ export interface Purchase {
     accountEmail: string;
     accountPassword: string; // Solo visible en detalles de compra
     accountDetails?: any;
+    durationDays?: number; // Duración del producto en días
   };
   // Provider info
   provider: {
