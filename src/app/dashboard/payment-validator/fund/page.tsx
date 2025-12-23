@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { ImageUpload } from '@/components/shared/ImageUpload';
+import { TimeInput } from '@/components/ui/time-input';
 import {
     Landmark, Send, CheckCircle, XCircle, Clock, ArrowUpRight, Receipt,
     Smartphone, Building2, Coins, Check, User, Image as ImageIcon, CreditCard,
@@ -468,15 +469,10 @@ function TransferDialog({ currentBalance, onSuccess }: { currentBalance?: string
                                 <Label className="block text-xs font-bold text-foreground mb-1.5">
                                     {t('paymentValidator.fund.paymentTime')}
                                 </Label>
-                                <div className="relative">
-                                    <Clock className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
-                                    <Input
-                                        type="time"
-                                        className="pl-10"
-                                        value={paymentTime}
-                                        onChange={(e) => setPaymentTime(e.target.value)}
-                                    />
-                                </div>
+                                <TimeInput
+                                    value={paymentTime}
+                                    onChange={setPaymentTime}
+                                />
                             </div>
 
                             {/* Voucher Upload */}
