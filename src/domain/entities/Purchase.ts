@@ -9,6 +9,15 @@ export interface PurchaseProps {
   adminCommission: Money; // Comisión calculada
   commissionRate: number; // Snapshot de la tasa en el momento de compra (ej: 0.05 = 5%)
   createdAt: Date;
+
+  // Snapshots de pricing config al momento de compra
+  distributorMarkupAmount?: Money;
+  distributorMarkupType?: string;
+  distributorMarkupRate?: number;
+  platformFeeAmount?: Money;
+  platformFeeType?: string;
+  platformFeeRate?: number;
+  basePrice?: Money;
 }
 
 /**
@@ -61,6 +70,13 @@ export class Purchase {
     providerId: string;
     amount: Money;
     commissionRate: number;
+    distributorMarkupAmount?: Money;
+    distributorMarkupType?: string;
+    distributorMarkupRate?: number;
+    platformFeeAmount?: Money;
+    platformFeeType?: string;
+    platformFeeRate?: number;
+    basePrice?: Money;
   }): Purchase {
     // Validaciones
     if (!data.sellerId || data.sellerId.trim().length === 0) {
@@ -95,6 +111,13 @@ export class Purchase {
       adminCommission,
       commissionRate: data.commissionRate,
       createdAt: new Date(),
+      distributorMarkupAmount: data.distributorMarkupAmount,
+      distributorMarkupType: data.distributorMarkupType,
+      distributorMarkupRate: data.distributorMarkupRate,
+      platformFeeAmount: data.platformFeeAmount,
+      platformFeeType: data.platformFeeType,
+      platformFeeRate: data.platformFeeRate,
+      basePrice: data.basePrice,
     });
   }
 
@@ -139,6 +162,34 @@ export class Purchase {
 
   get createdAt(): Date {
     return this.props.createdAt;
+  }
+
+  get distributorMarkupAmount(): Money | undefined {
+    return this.props.distributorMarkupAmount;
+  }
+
+  get distributorMarkupType(): string | undefined {
+    return this.props.distributorMarkupType;
+  }
+
+  get distributorMarkupRate(): number | undefined {
+    return this.props.distributorMarkupRate;
+  }
+
+  get platformFeeAmount(): Money | undefined {
+    return this.props.platformFeeAmount;
+  }
+
+  get platformFeeType(): string | undefined {
+    return this.props.platformFeeType;
+  }
+
+  get platformFeeRate(): number | undefined {
+    return this.props.platformFeeRate;
+  }
+
+  get basePrice(): Money | undefined {
+    return this.props.basePrice;
   }
 
   // ============================================
