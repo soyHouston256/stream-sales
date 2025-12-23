@@ -22,7 +22,6 @@ import {
   Plus,
   Copy,
   Check,
-  Clock,
   User,
   AlertCircle,
   AlertTriangle,
@@ -36,6 +35,7 @@ import NextImage from 'next/image';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { tokenManager } from '@/lib/utils/tokenManager';
+import { TimeInput12h } from '@/components/ui/time-input-12h';
 
 interface RechargeDialogProps {
   currentBalance?: string;
@@ -149,13 +149,6 @@ export function RechargeDialog({
         exchangeRateData?.currencyCode === 'ARS' ? '$' :
           exchangeRateData?.currencyCode || 'S/';
 
-  // Set first available method when config loads
-  useEffect(() => {
-    if (paymentConfig?.methods?.length && !selectedMethod) {
-      setSelectedMethod(paymentConfig.methods[0]);
-    }
-  }, [paymentConfig, selectedMethod]);
-
   const {
     register,
     handleSubmit,
@@ -170,8 +163,16 @@ export function RechargeDialog({
     },
   });
 
+  // Set first available method when config loads
+  useEffect(() => {
+    if (paymentConfig?.methods?.length && !selectedMethod) {
+      setSelectedMethod(paymentConfig.methods[0]);
+    }
+  }, [paymentConfig, selectedMethod]);
+
   const amount = watch('amount');
   const amountInUSD = amount ? (amount / exchangeRate).toFixed(2) : '0.00';
+  const paymentTime = watch('paymentTime');
 
   const copyToClipboard = async (text: string, type: string) => {
     try {
@@ -557,19 +558,12 @@ export function RechargeDialog({
                     </div>
                   </div>
 
-                  <div>
-                    <Label className="block text-xs font-bold text-foreground mb-1.5">
-                      {t('seller.recharge.paymentTime')}
-                    </Label>
-                    <div className="relative">
-                      <Clock className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
-                      <Input
-                        type="time"
-                        className="pl-10"
-                        {...register('paymentTime')}
-                      />
-                    </div>
-                  </div>
+                  <TimeInput12h
+                    label={t('seller.recharge.paymentTime')}
+                    value={paymentTime}
+                    onChange={(value) => setValue('paymentTime', value)}
+                    required
+                  />
                 </div>
 
                 {/* Voucher Upload Section */}

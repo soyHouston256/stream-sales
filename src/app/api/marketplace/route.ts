@@ -80,6 +80,14 @@ export async function GET(request: NextRequest) {
     // 3. Get total count
     const total = await prisma.product.count({ where });
 
+    // 3.5 Get pricing config for markup
+    const pricingConfig = await prisma.pricingConfig.findFirst({
+      where: { isActive: true },
+      orderBy: { createdAt: 'desc' },
+    });
+    const distributorMarkup = pricingConfig ? parseFloat(pricingConfig.distributorMarkup.toString()) : 0;
+    const distributorMarkupType = pricingConfig?.distributorMarkupType || 'percentage';
+
     // 4. Get products with pagination
     const products = await prisma.product.findMany({
       where,
@@ -108,13 +116,22 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    // 5. Transform to response format (hide sensitive data)
+    // 5. Transform to response format (hide sensitive data) with markup applied
     const data = products.map((product: any) => {
       const account = product.inventoryAccounts[0];
       const totalSlots = account?.totalSlots || 1;
       const availableSlots = account?.availableSlots || 0;
       // 'profile' if multiple slots, 'full' if single slot
       const accountType = totalSlots > 1 ? 'profile' : 'full';
+
+      // Apply markup based on type
+      const basePrice = parseFloat(product.variants[0]?.price.toString() || '0');
+      let displayPrice: number;
+      if (distributorMarkupType === 'percentage') {
+        displayPrice = basePrice * (1 + distributorMarkup / 100);
+      } else {
+        displayPrice = basePrice + distributorMarkup; // Fixed amount
+      }
 
       return {
         id: product.id,
@@ -123,7 +140,7 @@ export async function GET(request: NextRequest) {
         category: product.category,
         name: product.name,
         description: product.description,
-        price: product.variants[0]?.price.toString() || '0.00',
+        price: displayPrice.toFixed(2), // Price WITH markup
         durationDays: product.variants[0]?.durationDays ?? 0,
         imageUrl: product.imageUrl,
         accountType,

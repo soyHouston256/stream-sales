@@ -366,6 +366,20 @@ model CommissionConfig {
   @@map("commission_configs")
 }
 
+// NEW: Pricing configuration for marketplace
+model PricingConfig {
+  id                    String   @id @default(cuid())
+  distributorMarkup     Decimal  @db.Decimal(10, 2) @default(15.0)
+  distributorMarkupType String   @default("percentage") // "percentage" | "fixed"
+  platformFee           Decimal  @db.Decimal(10, 2) @default(10.0)
+  platformFeeType       String   @default("percentage") // "percentage" | "fixed"
+  isActive              Boolean  @default(true)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@map("pricing_configs")
+}
+
 model ReferralApprovalConfig {
   id            String   @id @default(cuid())
   approvalFee   Decimal  @db.Decimal(19, 4) // Monto fijo que se cobra al afiliado al aprobar un referido

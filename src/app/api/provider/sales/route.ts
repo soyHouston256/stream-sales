@@ -82,7 +82,17 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // 3. Parse query parameters
+    // 3. Get pricing config for platform fee and markup
+    const pricingConfig = await prisma.pricingConfig.findFirst({
+      where: { isActive: true },
+      orderBy: { createdAt: 'desc' },
+    });
+    const platformFee = pricingConfig ? parseFloat(pricingConfig.platformFee.toString()) : 0;
+    const platformFeeType = pricingConfig?.platformFeeType || 'percentage';
+    const distributorMarkup = pricingConfig ? parseFloat(pricingConfig.distributorMarkup.toString()) : 0;
+    const distributorMarkupType = pricingConfig?.distributorMarkupType || 'percentage';
+
+    // 4. Parse query parameters
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get('page') || '1', 10);
     const limit = Math.min(
@@ -93,7 +103,7 @@ export async function GET(request: NextRequest) {
     const startDate = searchParams.get('startDate') || undefined;
     const endDate = searchParams.get('endDate') || undefined;
 
-    // 4. Build where clause for OrderItems
+    // 5. Build where clause for OrderItems
     const where: any = {
       variant: {
         product: {
@@ -119,10 +129,10 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // 5. Get total count
+    // 6. Get total count
     const total = await prisma.orderItem.count({ where });
 
-    // 6. Get sales with pagination
+    // 7. Get sales with pagination
     const sales = await prisma.orderItem.findMany({
       where,
       skip: (page - 1) * limit,
@@ -162,7 +172,7 @@ export async function GET(request: NextRequest) {
     // If so, I can't include buyer info directly.
     // I will map what I can.
 
-    // 7. Transform to response format
+    // 8. Transform to response format
     const data = await Promise.all(sales.map(async (item: any) => {
       // Fetch buyer if not in relation
       let buyerEmail = 'unknown';
@@ -178,18 +188,45 @@ export async function GET(request: NextRequest) {
         }
       }
 
+      // Calculate pricing breakdown with flexible types
+      const basePrice = parseFloat(item.variant.price.toString());
+
+      // Calculate markup based on type
+      let markupAmount: number;
+      if (distributorMarkupType === 'percentage') {
+        markupAmount = basePrice * (distributorMarkup / 100);
+      } else {
+        markupAmount = distributorMarkup; // Fixed amount
+      }
+
+      const sellerPaidPrice = basePrice + markupAmount;
+
+      // Calculate fee based on type
+      let platformFeeAmount: number;
+      if (platformFeeType === 'percentage') {
+        platformFeeAmount = basePrice * (platformFee / 100);
+      } else {
+        platformFeeAmount = platformFee; // Fixed amount
+      }
+
+      const providerEarnings = basePrice - platformFeeAmount;
+      const platformEarnings = markupAmount + platformFeeAmount;
+
       return {
-        id: item.id, // OrderItem ID
+        id: item.id,
         productId: item.variant.productId,
         productName: item.variant.product.name,
         productCategory: item.variant.product.category,
         buyerId: item.order.userId,
         buyerEmail: buyerEmail,
         buyerName: buyerName,
-        amount: item.variant.price.toString(),
-        providerEarnings: item.variant.price.toString(), // TODO: Commission
-        adminCommission: "0",
-        commissionRate: "0",
+        basePrice: basePrice.toFixed(2),
+        amount: sellerPaidPrice.toFixed(2),
+        providerEarnings: providerEarnings.toFixed(2),
+        platformEarnings: platformEarnings.toFixed(2),
+        adminCommission: platformFeeAmount.toFixed(2),
+        markup: markupAmount.toFixed(2),
+        commissionRate: (platformFee / 100).toFixed(4),
         status: item.order.status,
         completedAt: item.order.status === 'paid' ? item.order.createdAt.toISOString() : undefined,
         createdAt: item.order.createdAt.toISOString(),
@@ -197,7 +234,7 @@ export async function GET(request: NextRequest) {
       };
     }));
 
-    // 8. Return paginated response
+    // 9. Return paginated response
     return NextResponse.json({
       data,
       pagination: {

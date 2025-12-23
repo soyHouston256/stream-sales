@@ -41,7 +41,9 @@ export default function SalesPage() {
   // Calculate totals
   const totals = sales.reduce(
     (acc, sale) => {
-      acc.revenue += parseFloat(sale.amount);
+      // Base price = provider earnings + platform commission
+      const basePrice = parseFloat(sale.providerEarnings) + parseFloat(sale.adminCommission);
+      acc.revenue += basePrice;
       acc.earnings += parseFloat(sale.providerEarnings);
       acc.commission += parseFloat(sale.adminCommission);
       return acc;
@@ -77,7 +79,11 @@ export default function SalesPage() {
     {
       key: 'amount',
       label: t('provider.sales.salePrice'),
-      render: (sale) => <span className="font-medium">${sale.amount}</span>,
+      render: (sale) => {
+        // Calculate base price (provider earnings + platform commission)
+        const basePrice = (parseFloat(sale.providerEarnings) + parseFloat(sale.adminCommission)).toFixed(2);
+        return <span className="font-medium">${basePrice}</span>;
+      },
     },
     {
       key: 'adminCommission',

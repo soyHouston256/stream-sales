@@ -34,10 +34,10 @@ export const getAdminNavItems = (t: (key: string) => string): NavItem[] => [
     matchSubPaths: true,
   },
   {
-    title: t('navigation.affiliates'),
-    href: '/dashboard/admin/affiliates',
+    title: t('navigation.distributors'),
+    href: '/dashboard/admin/distributors',
     icon: UserCheck,
-    description: t('navigation.affiliateManagement'),
+    description: t('navigation.distributorManagement'),
     matchSubPaths: true,
   },
   {
@@ -62,10 +62,10 @@ export const getAdminNavItems = (t: (key: string) => string): NavItem[] => [
     matchSubPaths: true,
   },
   {
-    title: t('navigation.commissions'),
-    href: '/dashboard/admin/commissions',
+    title: 'Precios',
+    href: '/dashboard/admin/pricing',
     icon: Settings,
-    description: t('navigation.commissionConfig'),
+    description: 'Configuración de markup y fees',
     matchSubPaths: true,
   },
   {

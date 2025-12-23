@@ -2,13 +2,13 @@ import { IWalletRepository } from '../../domain/repositories/IWalletRepository';
 import { IProductRepository } from '../../domain/repositories/IProductRepository';
 import { IPurchaseRepository } from '../../domain/repositories/IPurchaseRepository';
 import { IUserRepository } from '../../domain/repositories/IUserRepository';
-import { ICommissionConfigRepository } from '../../domain/repositories/ICommissionConfigRepository';
 import { Purchase } from '../../domain/entities/Purchase';
 import { Money } from '../../domain/value-objects/Money';
 import { Wallet } from '../../domain/entities/Wallet';
 import { User } from '../../domain/entities/User';
 import { Email } from '../../domain/value-objects/Email';
 import { Password } from '../../domain/value-objects/Password';
+import { prisma } from '../../infrastructure/database/prisma';
 
 /**
  * PurchaseProductUseCase
@@ -23,12 +23,12 @@ import { Password } from '../../domain/value-objects/Password';
  * Flow de negocio:
  * 1. Validar que el producto existe y está disponible
  * 2. Validar que el seller tiene saldo suficiente
- * 3. Obtener commission rate (actualmente hardcoded 5%)
- * 4. Crear Purchase entity con comisión calculada
+ * 3. Obtener platform fee desde PricingConfig (percentage o fixed)
+ * 4. Crear Purchase entity con platform fee calculada
  * 5. Reservar producto (status: available -> reserved)
  * 6. Debit de Seller wallet (amount completo)
- * 7. Credit a Admin wallet (adminCommission)
- * 8. Credit a Provider wallet (providerEarnings)
+ * 7. Credit a Admin wallet (platform fee)
+ * 8. Credit a Provider wallet (providerEarnings = price - platform fee)
  * 9. Marcar producto como SOLD
  * 10. Guardar Purchase (audit trail)
  * 11. Guardar todas las wallets actualizadas
@@ -39,8 +39,9 @@ import { Password } from '../../domain/value-objects/Password';
  * Reglas de negocio:
  * - Un producto solo se puede vender UNA vez (productId unique en Purchase)
  * - Seller debe tener saldo suficiente
- * - Commission rate es un snapshot del momento de compra
- * - Flow de dinero: Seller -> (Admin + Provider)
+ * - Platform fee es calculada desde PricingConfig (puede ser percentage o fixed)
+ * - Flow de dinero: Seller -> (Platform fee a Admin + Resto a Provider)
+ * - NO SE COBRAN comisiones de afiliado al provider
  * - Si algo falla, todo se revierte (transacción)
  *
  * @example
@@ -85,15 +86,15 @@ export class PurchaseProductUseCase {
   // Admin user ID (en producción vendría de configuración)
   private readonly ADMIN_USER_ID = 'admin';
 
-  // Default commission rate if no config is found
-  private readonly DEFAULT_COMMISSION_RATE = 0.05; // 5%
+  // Default platform fee if no config is found (10%)
+  private readonly DEFAULT_COMMISSION_RATE = 0.10;
 
   constructor(
     private walletRepository: IWalletRepository,
     private productRepository: IProductRepository,
     private purchaseRepository: IPurchaseRepository,
     private userRepository: IUserRepository,
-    private commissionConfigRepository: ICommissionConfigRepository
+    // NOTE: commissionConfigRepository removed - now using PricingConfig instead
   ) { }
 
   async execute(data: PurchaseProductDTO): Promise<PurchaseProductResponse> {
@@ -198,20 +199,38 @@ export class PurchaseProductUseCase {
     }
 
     // ============================================
-    // 3. OBTENER COMMISSION RATE DESDE CONFIGURACIÓN
+    // 3. OBTENER PLATFORM FEE DESDE PRICING CONFIG
     // ============================================
 
-    // Obtener la configuración activa de comisión de venta
-    const commissionConfig = await this.commissionConfigRepository.findActiveByType('sale');
+    // Get pricing configuration for platform fee (NOT affiliate commission)
+    const pricingConfig = await (prisma as any).pricingConfig.findFirst({
+      where: { isActive: true },
+      orderBy: { createdAt: 'desc' },
+    });
 
-    // Si no hay configuración activa, usar el valor por defecto
-    const commissionRate = commissionConfig
-      ? commissionConfig.rateAsDecimal.toNumber()
-      : this.DEFAULT_COMMISSION_RATE;
+    // Calculate platform fee based on type (percentage or fixed)
+    let platformFeeAmount: number;
+    if (pricingConfig) {
+      const platformFee = parseFloat(pricingConfig.platformFee.toString());
+      const platformFeeType = pricingConfig.platformFeeType;
 
-    console.log(`[PurchaseProductUseCase] Using commission rate: ${(commissionRate * 100).toFixed(2)}%`);
-    if (!commissionConfig) {
-      console.warn('[PurchaseProductUseCase] No active commission config found. Using default rate.');
+      if (platformFeeType === 'percentage') {
+        platformFeeAmount = parseFloat(product.price.amount.toString()) * (platformFee / 100);
+      } else {
+        // Fixed amount
+        platformFeeAmount = platformFee;
+      }
+    } else {
+      // Fallback to 10% if no config
+      platformFeeAmount = parseFloat(product.price.amount.toString()) * this.DEFAULT_COMMISSION_RATE;
+    }
+
+    // Convert to decimal for commission rate (for backward compatibility with Purchase entity)
+    const commissionRate = platformFeeAmount / parseFloat(product.price.amount.toString());
+
+    console.log(`[PurchaseProductUseCase] Platform fee: $${platformFeeAmount.toFixed(2)} (${(commissionRate * 100).toFixed(2)}%)`);
+    if (!pricingConfig) {
+      console.warn('[PurchaseProductUseCase] No active pricing config found. Using default 10% platform fee.');
     }
 
     // ============================================
