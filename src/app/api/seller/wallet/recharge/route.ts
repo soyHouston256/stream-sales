@@ -104,7 +104,49 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 4. Validate request body
+    // 4. Check affiliation status - block if referred and not approved
+    const affiliation = await prisma.affiliation.findUnique({
+      where: { referredUserId: user.id },
+      include: {
+        affiliate: {
+          select: {
+            name: true,
+            email: true,
+          },
+        },
+      },
+    });
+
+    // If user was referred and is NOT approved, block recharge
+    if (affiliation && affiliation.approvalStatus !== 'approved') {
+      const statusMessages = {
+        pending: {
+          error: 'Recharge blocked: Pending approval',
+          message: `You must be approved by your referrer (${affiliation.affiliate.name}) before you can make recharges.`,
+        },
+        rejected: {
+          error: 'Recharge blocked: Application rejected',
+          message: `Your application was rejected by ${affiliation.affiliate.name}. Please contact support for assistance.`,
+        },
+      };
+
+      const statusMessage = statusMessages[affiliation.approvalStatus as 'pending' | 'rejected'] || {
+        error: 'Recharge blocked',
+        message: 'Your account must be approved before making recharges.',
+      };
+
+      return NextResponse.json(
+        {
+          error: statusMessage.error,
+          message: statusMessage.message,
+          approvalStatus: affiliation.approvalStatus,
+          affiliateName: affiliation.affiliate.name,
+        },
+        { status: 403 }
+      );
+    }
+
+    // 5. Validate request body
     const body = await request.json();
     const validationResult = rechargeSchema.safeParse(body);
 
@@ -117,7 +159,7 @@ export async function POST(request: NextRequest) {
 
     const { amount, paymentMethod, paymentDetails, voucherUrl } = validationResult.data;
 
-    // 5. Create recharge request
+    // 6. Create recharge request
     const recharge = await prisma.recharge.create({
       data: {
         walletId: wallet.id,

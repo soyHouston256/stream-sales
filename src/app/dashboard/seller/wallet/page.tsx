@@ -5,6 +5,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import {
   Select,
   SelectContent,
@@ -19,6 +20,7 @@ import {
   useWalletTransactions,
   useRecharges,
 } from '@/lib/hooks/useSellerWallet';
+import { useAffiliationStatus } from '@/lib/hooks/useAffiliationStatus';
 import { WalletTransaction, Recharge, TransactionsFilters } from '@/types/seller';
 import {
   TransactionTypeBadge,
@@ -27,7 +29,7 @@ import {
 } from '@/components/seller';
 import { formatCurrency } from '@/lib/utils/seller';
 import { format } from 'date-fns';
-import { Wallet, TrendingUp, Clock, Receipt, Filter } from 'lucide-react';
+import { Wallet, TrendingUp, Clock, Receipt, Filter, AlertCircle, ShieldAlert } from 'lucide-react';
 
 export default function WalletPage() {
   const { t } = useLanguage();
@@ -41,10 +43,14 @@ export default function WalletPage() {
   const { data: transactionsData, isLoading: transactionsLoading } =
     useWalletTransactions(filters);
   const { data: recharges, isLoading: rechargesLoading } = useRecharges();
+  const { data: affiliationStatus, isLoading: affiliationLoading } = useAffiliationStatus();
 
   const transactions = transactionsData?.data || [];
   const pagination = transactionsData?.pagination;
   const rechargesList = recharges || [];
+
+  // Check if user can make recharges
+  const canRecharge = !affiliationStatus || affiliationStatus.canRecharge;
 
   // Calculate pending recharges stats
   const pendingRecharges = rechargesList.filter((r) => r.status === 'pending');
@@ -187,6 +193,7 @@ export default function WalletPage() {
           trigger={
             <Button
               onClick={() => setRechargeOpen(true)}
+              disabled={!canRecharge || affiliationLoading}
               className="px-6 py-2.5 rounded-xl font-bold shadow-lg shadow-primary/20 transition-all flex items-center gap-2 active:scale-95 hover:shadow-xl hover:shadow-primary/30"
               size="lg"
             >
@@ -197,6 +204,24 @@ export default function WalletPage() {
           }
         />
       </div>
+
+      {/* Affiliation Approval Status Alert */}
+      {!canRecharge && affiliationStatus && (
+        <Alert variant="destructive" className="border-l-4">
+          <ShieldAlert className="h-5 w-5" />
+          <AlertTitle>{t('seller.wallet.pendingApprovalTitle')}</AlertTitle>
+          <AlertDescription
+            dangerouslySetInnerHTML={{
+              __html: affiliationStatus.approvalStatus === 'rejected'
+                ? t('seller.wallet.rejectedByReferrer')
+                : t('seller.wallet.pendingApprovalMessage').replace(
+                  '{affiliateName}',
+                  affiliationStatus.affiliateName || ''
+                ),
+            }}
+          />
+        </Alert>
+      )}
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

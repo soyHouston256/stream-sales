@@ -71,9 +71,15 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // 4. Calculate total earnings from completed sales (exclude refunded)
-    // Note: In the new schema, we sum the price of variants sold. 
-    // TODO: Handle commissions and store net earnings in OrderItem or Transaction.
+    // 4. Get pricing config for platform fee
+    const pricingConfig = await prisma.pricingConfig.findFirst({
+      where: { isActive: true },
+      orderBy: { createdAt: 'desc' },
+    });
+    const platformFee = pricingConfig ? parseFloat(pricingConfig.platformFee.toString()) : 0;
+    const platformFeeType = pricingConfig?.platformFeeType || 'percentage';
+
+    // 5. Calculate total earnings from completed sales with platform fee deducted
     const soldItems = await prisma.orderItem.findMany({
       where: {
         variant: {
@@ -90,12 +96,20 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    const totalEarnings = soldItems.reduce(
-      (sum: number, item: any) => sum + item.variant.price.toNumber(),
-      0
-    );
+    // Calculate earnings based on fee type
+    const totalEarnings = soldItems.reduce((sum: number, item: any) => {
+      const basePrice = item.variant.price.toNumber();
+      let feeAmount: number;
+      if (platformFeeType === 'percentage') {
+        feeAmount = basePrice * (platformFee / 100);
+      } else {
+        feeAmount = platformFee; // Fixed amount
+      }
+      const providerEarning = basePrice - feeAmount;
+      return sum + providerEarning;
+    }, 0);
 
-    // 5. Calculate total withdrawals (completed only)
+    // 6. Calculate total withdrawals (completed only)
     const withdrawalsResult = await prisma.withdrawal.aggregate({
       where: {
         walletId: wallet.id,

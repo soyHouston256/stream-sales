@@ -57,7 +57,7 @@ export default function AffiliateDashboard() {
         <div>
           <h1 className="text-3xl font-bold">{t('affiliate.title')}</h1>
         </div>
-        <Alert variant="destructive">
+        <Alert>
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
             {t('affiliate.notEnrolled')}
@@ -65,17 +65,15 @@ export default function AffiliateDashboard() {
         </Alert>
         <Card>
           <CardHeader>
-            <CardTitle>{t('affiliate.notAffiliateYet')}</CardTitle>
+            <CardTitle>{t('affiliate.waitingAdminApproval')}</CardTitle>
             <CardDescription>
-              {t('affiliate.joinProgram')}
+              {t('affiliate.adminWillApprove')}
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Link href="/affiliate/apply">
-              <Button>
-                {t('affiliate.applyToProgram')}
-              </Button>
-            </Link>
+            <p className="text-sm text-muted-foreground">
+              {t('affiliate.contactAdminForApproval')}
+            </p>
           </CardContent>
         </Card>
       </div>

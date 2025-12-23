@@ -324,18 +324,14 @@ describe('PurchaseProductUseCase', () => {
       role: 'admin',
     });
 
-    // Create default commission config (5%)
-    await commissionConfigRepository.createConfig({
-      type: 'sale',
-      rate: 5.00, // Stored as percentage (5.00 = 5%)
-    });
+    // NOTE: Commission config removed - now using PricingConfig from database
+    // Tests will use the default 10% platform fee fallback
 
     useCase = new PurchaseProductUseCase(
       walletRepository,
       productRepository,
       purchaseRepository,
-      userRepository,
-      commissionConfigRepository
+      userRepository
     );
   });
 
