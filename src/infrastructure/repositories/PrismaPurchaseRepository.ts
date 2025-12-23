@@ -69,9 +69,19 @@ export class PrismaPurchaseRepository implements IPurchaseRepository {
           userId: purchase.sellerId,
           totalAmount: purchase.amount.amount, // Decimal
           status: 'paid', // Assuming immediate payment for now
+          // New snapshots
+          distributorMarkupAmount: purchase.distributorMarkupAmount?.amount,
+          distributorMarkupType: purchase.distributorMarkupType,
+          distributorMarkupRate: purchase.distributorMarkupRate,
+          platformFeeAmount: purchase.platformFeeAmount?.amount,
+          platformFeeType: purchase.platformFeeType,
+          platformFeeRate: purchase.platformFeeRate,
           items: {
             create: {
               productVariantId: variant.id,
+              // New snapshots
+              unitPrice: purchase.amount.amount,
+              basePrice: purchase.basePrice?.amount,
             },
           },
         },
@@ -88,10 +98,17 @@ export class PrismaPurchaseRepository implements IPurchaseRepository {
         },
       });
 
-      return order.items[0]; // Return the created item as the "Purchase"
+      return order.items[0] as any; // Return the created item as the "Purchase"
     });
 
-    return this.toDomain(result, result.orderId, purchase.sellerId, 'paid', result.variant.product.providerId, purchase.createdAt);
+    return this.toDomain(
+      result,
+      result.orderId,
+      purchase.sellerId,
+      'paid',
+      (result as any).variant.product.providerId,
+      purchase.createdAt
+    );
   }
 
   /**
@@ -312,22 +329,34 @@ export class PrismaPurchaseRepository implements IPurchaseRepository {
     providerId: string,
     createdAt: Date
   ): Purchase {
-    const price = Number(orderItem.variant.price);
-    const commissionRate = 0.05;
-    const adminCommission = price * commissionRate;
-    const providerEarnings = price - adminCommission;
+    // Usar snapshots si existen, de lo contrario fallback al precio actual (para compras antiguas)
+    const unitPrice = orderItem.unitPrice ? Number(orderItem.unitPrice) : Number(orderItem.variant.price);
+    const basePrice = orderItem.basePrice ? Number(orderItem.basePrice) : unitPrice;
+
+    // El fee total del admin es la diferencia entre lo que pagó el seller y lo que recibe el provider
+    // En el modelo actual: Seller paga base + markup, Provider recibe base - fee.
+    // Admin gana markup + fee.
+    const platformFeeAmount = orderItem.order?.platformFeeAmount ? Number(orderItem.order.platformFeeAmount) : 0;
+    const adminCommission = (unitPrice - basePrice) + platformFeeAmount;
+    const commissionRate = unitPrice > 0 ? adminCommission / unitPrice : 0;
 
     return Purchase.fromPersistence({
-      id: orderItem.id, // Use OrderItem ID as Purchase ID
+      id: orderItem.id,
       sellerId: sellerId,
       productId: orderItem.variant.productId,
       providerId: providerId,
-      amount: Money.fromPersistence(new Decimal(price), 'USD'),
+      amount: Money.fromPersistence(new Decimal(unitPrice), 'USD'),
       adminCommission: Money.fromPersistence(new Decimal(adminCommission), 'USD'),
       commissionRate: commissionRate,
       createdAt: createdAt,
-      // status: status // Purchase entity might not have status in fromPersistence? Check entity.
-      // Assuming Purchase entity reconstructs itself.
+      // Pass snapshots to domain
+      distributorMarkupAmount: orderItem.order?.distributorMarkupAmount ? Money.fromPersistence(new Decimal(orderItem.order.distributorMarkupAmount), 'USD') : undefined,
+      distributorMarkupType: orderItem.order?.distributorMarkupType,
+      distributorMarkupRate: orderItem.order?.distributorMarkupRate ? Number(orderItem.order.distributorMarkupRate) : undefined,
+      platformFeeAmount: orderItem.order?.platformFeeAmount ? Money.fromPersistence(new Decimal(orderItem.order.platformFeeAmount), 'USD') : undefined,
+      platformFeeType: orderItem.order?.platformFeeType,
+      platformFeeRate: orderItem.order?.platformFeeRate ? Number(orderItem.order.platformFeeRate) : undefined,
+      basePrice: Money.fromPersistence(new Decimal(basePrice), 'USD'),
     });
   }
 }

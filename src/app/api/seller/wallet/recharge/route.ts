@@ -159,7 +159,19 @@ export async function POST(request: NextRequest) {
 
     const { amount, paymentMethod, paymentDetails, voucherUrl } = validationResult.data;
 
-    // 6. Create recharge request
+    // 6. Get exchange rate for user's country (snapshot)
+    const exchangeRate = await prisma.exchangeRate.findFirst({
+      where: {
+        countryCode: user.countryCode || 'PE',
+        isActive: true
+      },
+    });
+
+    const rate = exchangeRate ? parseFloat(exchangeRate.rate.toString()) : 1;
+    const currency = exchangeRate ? exchangeRate.currencyCode : 'USD';
+    const localAmountValue = amount * rate;
+
+    // 7. Create recharge request with snapshots
     const recharge = await prisma.recharge.create({
       data: {
         walletId: wallet.id,
@@ -167,6 +179,10 @@ export async function POST(request: NextRequest) {
         paymentMethod,
         paymentGateway: 'manual', // For now, all recharges are manual/admin-approved
         status: 'pending',
+        // NEW: Audit Trail Snapshots
+        exchangeRate: rate,
+        localCurrency: currency,
+        localAmount: localAmountValue,
         metadata: {
           ...(paymentDetails && { paymentDetails }),
           ...(voucherUrl && { voucherUrl }),

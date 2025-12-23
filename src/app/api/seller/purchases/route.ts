@@ -200,7 +200,8 @@ export async function GET(request: NextRequest) {
     // 7. Transform to response format
     const data = orderItems.map((item: any) => {
       const purchaseStatus = item.order.status;
-      const amount = item.variant.price;
+      // Use the snapshot price if available (the price the seller actually paid)
+      const amount = item.unitPrice || item.variant.price;
 
       // Note: Disputes are temporarily disabled due to schema refactor
       const dispute = undefined;
@@ -286,7 +287,7 @@ export async function GET(request: NextRequest) {
     });
 
     const totalEffectiveSpent = allPaidItems.reduce(
-      (sum: number, item: any) => sum + Number(item.variant.price),
+      (sum: number, item: any) => sum + Number(item.unitPrice || item.variant.price),
       0
     );
 

@@ -208,30 +208,47 @@ export class PurchaseProductUseCase {
       orderBy: { createdAt: 'desc' },
     });
 
-    // Calculate platform fee based on type (percentage or fixed)
-    let platformFeeAmount: number;
+    // --- CALCULATIONS BASED ON THE NEW MODEL ---
+    // 1. Calculate Distributor Markup (What is added to the base price for the market)
+    let markupAmount: number = 0;
+    let markupRate: number = 0;
     if (pricingConfig) {
-      const platformFee = parseFloat(pricingConfig.platformFee.toString());
-      const platformFeeType = pricingConfig.platformFeeType;
-
-      if (platformFeeType === 'percentage') {
-        platformFeeAmount = parseFloat(product.price.amount.toString()) * (platformFee / 100);
+      markupRate = parseFloat(pricingConfig.distributorMarkup.toString());
+      if (pricingConfig.distributorMarkupType === 'percentage') {
+        markupAmount = parseFloat(product.price.amount.toString()) * (markupRate / 100);
       } else {
-        // Fixed amount
-        platformFeeAmount = platformFee;
+        markupAmount = markupRate;
+      }
+    }
+
+    // 2. Calculate Platform Fee (What is deducted from the provider's base price)
+    let platformFeeAmount: number = 0;
+    let platformFeeRate: number = 0;
+    if (pricingConfig) {
+      platformFeeRate = parseFloat(pricingConfig.platformFee.toString());
+      if (pricingConfig.platformFeeType === 'percentage') {
+        platformFeeAmount = parseFloat(product.price.amount.toString()) * (platformFeeRate / 100);
+      } else {
+        platformFeeAmount = platformFeeRate;
       }
     } else {
-      // Fallback to 10% if no config
-      platformFeeAmount = parseFloat(product.price.amount.toString()) * this.DEFAULT_COMMISSION_RATE;
+      // Fallback
+      platformFeeRate = 10;
+      platformFeeAmount = parseFloat(product.price.amount.toString()) * 0.10;
     }
 
-    // Convert to decimal for commission rate (for backward compatibility with Purchase entity)
-    const commissionRate = platformFeeAmount / parseFloat(product.price.amount.toString());
+    // 3. Final Amounts
+    // The seller pays the "Market Price" (Base + Markup)
+    const totalAmountToPay = parseFloat(product.price.amount.toString()) + markupAmount;
+    const finalPricePaid = Money.create(totalAmountToPay, product.price.currency);
 
-    console.log(`[PurchaseProductUseCase] Platform fee: $${platformFeeAmount.toFixed(2)} (${(commissionRate * 100).toFixed(2)}%)`);
-    if (!pricingConfig) {
-      console.warn('[PurchaseProductUseCase] No active pricing config found. Using default 10% platform fee.');
-    }
+    // The admin takes BOTH the markup and the fee
+    const totalAdminCommission = markupAmount + platformFeeAmount;
+
+    // Calculate effective commission rate for the Purchase entity
+    const dynamicCommissionRate = totalAmountToPay > 0 ? totalAdminCommission / totalAmountToPay : 0;
+
+    console.log(`[PurchaseProductUseCase] Base: $${product.price.amount}, Markup: $${markupAmount.toFixed(2)}, Fee: $${platformFeeAmount.toFixed(2)}, Total Paid (Seller): $${totalAmountToPay.toFixed(2)}, Provider Gets: $${(parseFloat(product.price.amount.toString()) - platformFeeAmount).toFixed(2)}`);
 
     // ============================================
     // 4. CREAR PURCHASE
@@ -241,16 +258,24 @@ export class PurchaseProductUseCase {
       sellerId: data.sellerId,
       productId: data.productId,
       providerId: product.providerId,
-      amount: product.price,
-      commissionRate: commissionRate,
+      amount: finalPricePaid, // Marketplace Price (Base + Markup)
+      commissionRate: dynamicCommissionRate,
+      // New snapshots
+      distributorMarkupAmount: Money.create(markupAmount),
+      distributorMarkupType: pricingConfig?.distributorMarkupType || 'percentage',
+      distributorMarkupRate: markupRate,
+      platformFeeAmount: Money.create(platformFeeAmount),
+      platformFeeType: pricingConfig?.platformFeeType || 'percentage',
+      platformFeeRate: platformFeeRate,
+      basePrice: product.price,
     });
 
     // ============================================
     // 5. EJECUTAR TRANSACCIONES DE DINERO
     // ============================================
 
-    // Debit de Seller (paga el precio completo)
-    sellerWallet.debit(product.price);
+    // Debit de Seller (paga el precio completo: base + fee)
+    sellerWallet.debit(finalPricePaid);
 
     // Credit a Admin (comisión)
     adminWallet.credit(purchase.adminCommission);
@@ -262,44 +287,98 @@ export class PurchaseProductUseCase {
     // 6. ACTUALIZAR ESTADO DEL PRODUCTO
     // ============================================
 
-    // NOTE: Product deactivation is now handled by the API route
-    // based on inventory slot availability. For profile-based products,
+    // basée on inventory slot availability. For profile-based products, 
     // the product should remain active until all slots are sold.
     // The API route in /api/seller/purchases handles this logic.
 
-    // DO NOT call product.reserve() or product.markAsSold() here
-    // as it would deactivate the product prematurely for multi-slot products.
+    // Get seller details for transaction logs
+    const seller = await this.userRepository.findById(data.sellerId);
+    if (!seller) throw new Error(`Seller user ${data.sellerId} not found`);
 
     // ============================================
-    // 7. PERSISTIR TODO (IDEALMENTE EN TRANSACCIÓN DB)
+    // 7. PERSISTIR TODO EN TRANSACCIÓN DB
     // ============================================
 
-    // TODO: Envolver en transacción de base de datos cuando esté disponible
-    // await prisma.$transaction([...])
+    const resultTransaction = await prisma.$transaction(async (tx) => {
+      // 1. Guardar Purchase (audit trail)
+      const savedPurchase = await this.purchaseRepository.save(purchase);
 
-    // Guardar Purchase (audit trail)
-    const savedPurchase = await this.purchaseRepository.save(purchase);
+      // 2. Guardar wallets actualizadas (Prisma standard update)
+      const sellerWalletData = sellerWallet.toPersistence();
+      const providerWalletData = providerWallet.toPersistence();
+      const adminWalletData = adminWallet.toPersistence();
 
-    // NOTE: We no longer save the product here since status is managed by API route
-    // await this.productRepository.save(product);
+      await tx.wallet.update({
+        where: { id: sellerWallet.id },
+        data: { balance: sellerWalletData.balance, updatedAt: sellerWalletData.updatedAt }
+      });
 
-    // Guardar wallets actualizadas
-    await this.walletRepository.save(sellerWallet);
-    await this.walletRepository.save(providerWallet);
-    await this.walletRepository.save(adminWallet);
+      await tx.wallet.update({
+        where: { id: providerWallet.id },
+        data: { balance: providerWalletData.balance, updatedAt: providerWalletData.updatedAt }
+      });
+
+      await tx.wallet.update({
+        where: { id: adminWallet.id },
+        data: { balance: adminWalletData.balance, updatedAt: adminWalletData.updatedAt }
+      });
+
+      // 3. Crear registros de Transacción (Logging)
+
+      // Transaction para el Seller (Debit)
+      await tx.transaction.create({
+        data: {
+          sourceWalletId: sellerWallet.id,
+          amount: finalPricePaid.amount,
+          type: 'debit',
+          description: `Purchase: ${product.category.toUpperCase()}`,
+          relatedEntityType: 'Purchase',
+          relatedEntityId: savedPurchase.id,
+          idempotencyKey: `purchase-${savedPurchase.id}-seller-debit`,
+        }
+      });
+
+      // Transaction para el Provider (Credit)
+      await tx.transaction.create({
+        data: {
+          destinationWalletId: providerWallet.id,
+          amount: purchase.providerEarnings.amount,
+          type: 'credit',
+          description: `Sale: ${product.category.toUpperCase()} (Seller: ${seller.name})`,
+          relatedEntityType: 'Purchase',
+          relatedEntityId: savedPurchase.id,
+          idempotencyKey: `purchase-${savedPurchase.id}-provider-credit`,
+        }
+      });
+
+      // Transaction para el Admin (Commission Credit)
+      await tx.transaction.create({
+        data: {
+          destinationWalletId: adminWallet.id,
+          amount: purchase.adminCommission.amount,
+          type: 'credit',
+          description: `Platform Fee: ${product.category.toUpperCase()} (Purchase: ${savedPurchase.id})`,
+          relatedEntityType: 'Purchase',
+          relatedEntityId: savedPurchase.id,
+          idempotencyKey: `purchase-${savedPurchase.id}-admin-commission`,
+        }
+      });
+
+      return savedPurchase;
+    });
 
     // ============================================
-    // 7. RETORNAR RESULTADO
+    // 8. RETORNAR RESULTADO
     // ============================================
 
     return {
-      purchase: savedPurchase.toJSON(),
+      purchase: resultTransaction.toJSON(),
       product: {
         id: product.id,
         category: product.category,
         status: product.status.value,
         accountEmail: product.accountEmail,
-        accountPassword: product.accountPassword, // Ahora el seller tiene acceso
+        accountPassword: product.accountPassword,
       },
       walletBalance: sellerWallet.balance.toPlainString(),
     };
