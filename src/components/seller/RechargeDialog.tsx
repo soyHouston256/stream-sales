@@ -28,14 +28,15 @@ import {
   Smartphone,
   Building2,
   Coins,
-  Upload
+  Upload,
+  Clock
 } from 'lucide-react';
 import { ImageUpload } from '@/components/shared/ImageUpload';
 import NextImage from 'next/image';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { tokenManager } from '@/lib/utils/tokenManager';
-import { TimeInput12h } from '@/components/ui/time-input-12h';
+import { TimeInput } from '@/components/ui/time-input';
 
 interface RechargeDialogProps {
   currentBalance?: string;
@@ -558,12 +559,17 @@ export function RechargeDialog({
                     </div>
                   </div>
 
-                  <TimeInput12h
-                    label={t('seller.recharge.paymentTime')}
-                    value={paymentTime}
-                    onChange={(value) => setValue('paymentTime', value)}
-                    required
-                  />
+                  <div>
+                    <Label className="block text-xs font-bold text-foreground mb-2">
+                      {t('seller.recharge.paymentTime')}
+                      <span className="text-destructive ml-1">*</span>
+                    </Label>
+                    <TimeInput
+                      value={paymentTime}
+                      onChange={(value) => setValue('paymentTime', value)}
+                      required
+                    />
+                  </div>
                 </div>
 
                 {/* Voucher Upload Section */}
