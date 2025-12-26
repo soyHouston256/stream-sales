@@ -12,8 +12,8 @@ import { Purchase } from '@/types/seller';
 import { CategoryBadge } from '@/components/provider/CategoryBadge';
 import { PurchaseStatusBadge } from './PurchaseStatusBadge';
 import { CreateDisputeDialog } from './CreateDisputeDialog';
-import { formatCurrency, copyToClipboard, parseAccountDetails } from '@/lib/utils/seller';
-import { Copy, Check, Mail, Key, FileJson, User, Calendar, AlertCircle } from 'lucide-react';
+import { formatCurrency, copyToClipboard, parseAccountDetails, generateWhatsAppMessage, openWhatsApp } from '@/lib/utils/seller';
+import { Copy, Check, Mail, Key, FileJson, User, Calendar, AlertCircle, MessageCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { useLanguage } from '@/contexts/LanguageContext';
 
@@ -229,6 +229,33 @@ export function PurchaseDetailsDialog({
 
           <Separator />
 
+          {/* Customer Information (if available) */}
+          {(purchase.customerName || purchase.customerPhone) && (
+            <>
+              <div>
+                <h4 className="text-sm font-semibold mb-2 flex items-center gap-2">
+                  <User className="h-4 w-4" />
+                  {t('purchases.details.customerInfo') || 'Datos del Cliente'}
+                </h4>
+                <div className="space-y-2 text-sm">
+                  {purchase.customerName && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">{t('purchases.details.customerName') || 'Nombre'}:</span>
+                      <span className="font-medium">{purchase.customerName}</span>
+                    </div>
+                  )}
+                  {purchase.customerPhone && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">{t('purchases.details.customerPhone') || 'Teléfono'}:</span>
+                      <span className="font-mono">{purchase.customerPhone}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+              <Separator />
+            </>
+          )}
+
           {/* Provider Information */}
           <div>
             <h4 className="text-sm font-semibold mb-2 flex items-center gap-2">
@@ -288,6 +315,37 @@ export function PurchaseDetailsDialog({
             >
               <AlertCircle className="h-4 w-4 mr-2" />
               {t('disputes.openDispute')}
+            </Button>
+          )}
+
+          {/* WhatsApp Share Button */}
+          {purchase.customerPhone && purchase.customerName && (
+            <Button
+              variant="default"
+              className="w-full bg-green-600 hover:bg-green-700"
+              onClick={() => {
+                const accountDetails = parseAccountDetails(purchase.product.accountDetails);
+                const message = generateWhatsAppMessage({
+                  customerName: purchase.customerName || 'Cliente',
+                  productName: purchase.product.name,
+                  productCategory: purchase.product.category,
+                  accountEmail: purchase.product.accountEmail,
+                  accountPassword: purchase.product.accountPassword,
+                  profileName: typeof accountDetails?.profileName === 'string' ? accountDetails.profileName : undefined,
+                  pin: typeof accountDetails?.pin === 'string' ? accountDetails.pin : undefined,
+                  durationDays: purchase.product.durationDays,
+                  purchaseDate: format(new Date(purchase.createdAt), 'dd/MM/yyyy'),
+                  expirationDate: purchase.product.durationDays
+                    ? format(new Date(new Date(purchase.createdAt).getTime() + purchase.product.durationDays * 24 * 60 * 60 * 1000), 'dd/MM/yyyy')
+                    : undefined,
+                  providerName: purchase.provider.name,
+                  providerPhone: purchase.provider.phone,
+                });
+                openWhatsApp(purchase.customerPhone!, message);
+              }}
+            >
+              <MessageCircle className="h-4 w-4 mr-2" />
+              {t('purchases.details.sendWhatsApp') || 'Enviar por WhatsApp'}
             </Button>
           )}
         </div>

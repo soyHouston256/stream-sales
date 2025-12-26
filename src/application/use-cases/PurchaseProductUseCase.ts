@@ -57,6 +57,8 @@ import { prisma } from '../../infrastructure/database/prisma';
 export interface PurchaseProductDTO {
   sellerId: string; // Usuario que compra
   productId: string; // Producto a comprar
+  customerName?: string; // Third-party customer name
+  customerPhone?: string; // Third-party customer phone
 }
 
 export interface PurchaseProductResponse {
@@ -268,6 +270,9 @@ export class PurchaseProductUseCase {
       platformFeeType: pricingConfig?.platformFeeType || 'percentage',
       platformFeeRate: platformFeeRate,
       basePrice: product.price,
+      // Customer data (third-party recipient)
+      customerName: data.customerName,
+      customerPhone: data.customerPhone,
     });
 
     // ============================================

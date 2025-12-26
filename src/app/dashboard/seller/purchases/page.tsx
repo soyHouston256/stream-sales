@@ -20,7 +20,7 @@ import { CategoryBadge } from '@/components/provider/CategoryBadge';
 import { PurchaseDetailsDialog } from '@/components/seller';
 import { formatCurrency } from '@/lib/utils/seller';
 import { format, addDays, differenceInDays } from 'date-fns';
-import { ShoppingBag, DollarSign, TrendingDown, Eye, Calendar, Clock } from 'lucide-react';
+import { ShoppingBag, DollarSign, TrendingDown, Eye, Calendar, Clock, MessageCircle, User } from 'lucide-react';
 import { ProductCategory } from '@/types/provider';
 import { useLanguage } from '@/contexts/LanguageContext';
 import {
@@ -137,6 +137,21 @@ export default function PurchasesPage() {
       ),
     },
     {
+      key: 'customer',
+      label: t('purchases.page.customer') || 'Cliente',
+      render: (purchase) => {
+        if (!purchase.customerName) {
+          return <span className="text-xs text-muted-foreground">—</span>;
+        }
+        return (
+          <div className="flex items-center gap-1">
+            <User className="h-3.5 w-3.5 text-muted-foreground" />
+            <span className="text-sm">{purchase.customerName}</span>
+          </div>
+        );
+      },
+    },
+    {
       key: 'startDate',
       label: 'Fecha de Inicio',
       render: (purchase) => (
@@ -226,14 +241,31 @@ export default function PurchasesPage() {
       key: 'actions',
       label: t('purchases.page.actions'),
       render: (purchase) => (
-        <Button
-          size="sm"
-          variant="outline"
-          onClick={() => handleViewDetails(purchase)}
-        >
-          <Eye className="h-4 w-4 mr-2" />
-          {t('purchases.viewDetails')}
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => handleViewDetails(purchase)}
+          >
+            <Eye className="h-4 w-4 mr-2" />
+            {t('purchases.viewDetails')}
+          </Button>
+          {purchase.customerPhone && (
+            <Button
+              size="icon"
+              variant="ghost"
+              className="h-8 w-8 text-green-600 hover:text-green-700 hover:bg-green-100"
+              onClick={() => {
+                // Open WhatsApp share for this purchase
+                setSelectedPurchase(purchase);
+                setShowDetails(true);
+              }}
+              title={t('purchases.details.sendWhatsApp') || 'Enviar por WhatsApp'}
+            >
+              <MessageCircle className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
       ),
     },
   ];

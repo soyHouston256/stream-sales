@@ -716,7 +716,10 @@
         "readyToPurchaseDesc": "You have sufficient balance to complete this purchase.",
         "cancel": "Cancel",
         "processing": "Processing...",
-        "confirm": "Confirm Purchase"
+        "confirm": "Confirm Purchase",
+        "customerData": "Customer Data (Optional)",
+        "customerName": "Customer name",
+        "customerPhone": "+1 999 888 7777"
       },
       "trust": {
         "securePayment": "Secure Payment",
@@ -1274,7 +1277,11 @@
       "refunded": "Refunded",
       "status": "Status",
       "copyEmail": "Email",
-      "copyPassword": "Password"
+      "copyPassword": "Password",
+      "customerInfo": "Customer Data",
+      "customerName": "Name",
+      "customerPhone": "Phone",
+      "sendWhatsApp": "Send via WhatsApp"
     },
     "page": {
       "title": "My Purchases",
@@ -1309,7 +1316,8 @@
       "completed": "Completed",
       "failed": "Failed",
       "refunded": "Refunded",
-      "startBuyingProducts": "Start Buying Products"
+      "startBuyingProducts": "Start Buying Products",
+      "customer": "Customer"
     }
   },
   "disputes": {

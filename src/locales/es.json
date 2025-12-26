@@ -716,7 +716,10 @@
         "readyToPurchaseDesc": "Tienes saldo suficiente para completar esta compra.",
         "cancel": "Cancelar",
         "processing": "Procesando...",
-        "confirm": "Confirmar Compra"
+        "confirm": "Confirmar Compra",
+        "customerData": "Datos del Cliente (Opcional)",
+        "customerName": "Nombre del cliente",
+        "customerPhone": "+51 999 888 777"
       },
       "trust": {
         "securePayment": "Pago Seguro",
@@ -1273,7 +1276,11 @@
       "refunded": "Reembolsado",
       "status": "Estado",
       "copyEmail": "Correo",
-      "copyPassword": "Contraseña"
+      "copyPassword": "Contraseña",
+      "customerInfo": "Datos del Cliente",
+      "customerName": "Nombre",
+      "customerPhone": "Teléfono",
+      "sendWhatsApp": "Enviar por WhatsApp"
     },
     "page": {
       "title": "Mis Compras",
@@ -1308,7 +1315,8 @@
       "completed": "Completada",
       "failed": "Fallida",
       "refunded": "Reembolsada",
-      "startBuyingProducts": "Comenzar a Comprar Productos"
+      "startBuyingProducts": "Comenzar a Comprar Productos",
+      "customer": "Cliente"
     }
   },
   "disputes": {

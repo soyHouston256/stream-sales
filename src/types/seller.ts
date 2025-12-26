@@ -77,7 +77,11 @@ export interface Purchase {
     id: string;
     name: string;
     email: string;
+    phone?: string; // Provider phone for WhatsApp contact
   };
+  // Customer data (third-party recipient)
+  customerName?: string;
+  customerPhone?: string;
 }
 
 export interface WalletBalance {
@@ -119,6 +123,8 @@ export interface RechargeRequest {
 
 export interface PurchaseRequest {
   productId: string;
+  customerName?: string;  // Third-party customer name
+  customerPhone?: string; // Third-party customer phone with country code
 }
 
 export interface SellerStats {
