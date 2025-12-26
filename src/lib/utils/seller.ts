@@ -88,3 +88,66 @@ export function parseAccountDetails(accountDetails: unknown): Record<string, unk
     return null;
   }
 }
+
+/**
+ * Format a numeric amount to exactly two decimal places.
+ * Use this for all monetary values in API responses and UI display.
+ */
+export function formatAmount(value: string | number | { toString(): string } | null | undefined): string {
+  if (value === null || value === undefined) return '0.00';
+  const numValue = typeof value === 'number' ? value : parseFloat(value.toString());
+  if (isNaN(numValue)) return '0.00';
+  return numValue.toFixed(2);
+}
+
+/**
+ * Generate a WhatsApp message with purchase details for third-party customers.
+ */
+export interface WhatsAppMessageData {
+  customerName: string;
+  productName: string;
+  productCategory: string;
+  accountEmail: string;
+  accountPassword: string;
+  profileName?: string;
+  pin?: string;
+  durationDays?: number;
+  purchaseDate: string;
+  expirationDate?: string;
+  providerName: string;
+  providerPhone?: string;
+  termsOfUse?: string;
+}
+
+export function generateWhatsAppMessage(data: WhatsAppMessageData): string {
+  const expirationStr = data.expirationDate || 'N/A';
+  const durationStr = data.durationDays ? `${data.durationDays} días` : 'Ilimitado';
+  
+  const message = `Hola *${data.customerName}* 👋🏻
+🍿Tu subscripción a *${data.productName.toUpperCase()} (${data.productCategory.toUpperCase()})*🍿
+✉ *usuario*: ${data.accountEmail}
+🔐 *Contraseña:* ${data.accountPassword}
+${data.profileName ? `👥 *Perfil:* ${data.profileName}` : ''}
+${data.pin ? `🔐 *Pin:* ${data.pin}` : ''}
+⏳ *Contratado:* ${durationStr}
+🗓 *Compra:* ${data.purchaseDate}
+🗓 *Vencimiento:* ${expirationStr}
+${data.termsOfUse ? `⚠️ *Condiciones de uso:* ${data.termsOfUse}` : ''}
+👤 *Proveedor:* ${data.providerName}
+${data.providerPhone ? `📞 *Teléfono:* ${data.providerPhone}` : ''}
+🎬🍿🎬🍿🎬🍿🎬🍿🎬🍿🎬
+*¡¡Muchas gracias por su compra!!*`;
+
+  return message.split('\n').filter(line => line.trim()).join('\n');
+}
+
+/**
+ * Open WhatsApp with a pre-filled message to a phone number.
+ */
+export function openWhatsApp(phone: string, message: string): void {
+  // Clean phone number (remove spaces, dashes, etc.)
+  const cleanPhone = phone.replace(/[^0-9+]/g, '');
+  const encodedMessage = encodeURIComponent(message);
+  const url = `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodedMessage}`;
+  window.open(url, '_blank');
+}

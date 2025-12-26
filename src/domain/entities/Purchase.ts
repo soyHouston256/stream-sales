@@ -18,6 +18,9 @@ export interface PurchaseProps {
   platformFeeType?: string;
   platformFeeRate?: number;
   basePrice?: Money;
+  // Customer data (third-party recipient)
+  customerName?: string;
+  customerPhone?: string;
 }
 
 /**
@@ -77,6 +80,8 @@ export class Purchase {
     platformFeeType?: string;
     platformFeeRate?: number;
     basePrice?: Money;
+    customerName?: string;
+    customerPhone?: string;
   }): Purchase {
     // Validaciones
     if (!data.sellerId || data.sellerId.trim().length === 0) {
@@ -118,6 +123,8 @@ export class Purchase {
       platformFeeType: data.platformFeeType,
       platformFeeRate: data.platformFeeRate,
       basePrice: data.basePrice,
+      customerName: data.customerName,
+      customerPhone: data.customerPhone,
     });
   }
 
@@ -190,6 +197,14 @@ export class Purchase {
 
   get basePrice(): Money | undefined {
     return this.props.basePrice;
+  }
+
+  get customerName(): string | undefined {
+    return this.props.customerName;
+  }
+
+  get customerPhone(): string | undefined {
+    return this.props.customerPhone;
   }
 
   // ============================================

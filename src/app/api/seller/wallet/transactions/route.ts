@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/infrastructure/database/prisma';
 import { verifyJWT } from '@/infrastructure/auth/jwt';
+import { formatAmount } from '@/lib/utils/seller';
 
 export const dynamic = 'force-dynamic';
 
@@ -142,7 +143,7 @@ export async function GET(request: NextRequest) {
     const data = transactions.map((tx: any) => {
       // Determine if this is a debit or credit for the seller
       const isDebit = tx.sourceWalletId === wallet.id;
-      const amount = tx.amount.toString();
+      const amount = formatAmount(tx.amount);
 
       return {
         id: tx.id,

@@ -325,6 +325,10 @@ model Order {
   platformFeeType         String?  @default("percentage")
   platformFeeRate         Decimal? @db.Decimal(10, 2)
   
+  // Customer data (third-party recipient)
+  customerName  String?  // Name of the customer who will receive the product
+  customerPhone String?  // Phone number with country code (e.g., +51928538642)
+  
   // Relations
   user        User        @relation(fields: [userId], references: [id])
   items       OrderItem[]

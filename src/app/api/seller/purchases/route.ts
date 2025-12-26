@@ -9,6 +9,7 @@ import { PurchaseProductUseCase } from '@/application/use-cases/PurchaseProductU
 import { verifyJWT } from '@/infrastructure/auth/jwt';
 import { computeEffectiveFields } from '@/lib/utils/purchase-helpers';
 import { safeDecrypt } from '@/infrastructure/security/encryption';
+import { formatAmount } from '@/lib/utils/seller';
 
 export const dynamic = 'force-dynamic';
 
@@ -217,7 +218,7 @@ export async function GET(request: NextRequest) {
         sellerId: item.order.user.id, // The buyer
         productId: item.variant.productId,
         providerId: item.variant.product.providerId,
-        amount: amount.toString(),
+        amount: formatAmount(amount),
         status: purchaseStatus,
         createdAt: item.order.createdAt.toISOString(),
         completedAt: item.order.status === 'paid' ? item.order.createdAt.toISOString() : undefined,
@@ -263,7 +264,11 @@ export async function GET(request: NextRequest) {
           id: item.variant.product.provider.id,
           name: item.variant.product.provider.name || item.variant.product.provider.email,
           email: item.variant.product.provider.email,
+          phone: item.variant.product.provider.phoneNumber || undefined,
         },
+        // Customer data (third-party recipient)
+        customerName: item.order.customerName || undefined,
+        customerPhone: item.order.customerPhone || undefined,
       };
     });
 
@@ -354,6 +359,8 @@ export async function GET(request: NextRequest) {
  */
 const purchaseSchema = z.object({
   productId: z.string().min(1, 'Product ID is required'),
+  customerName: z.string().optional(),
+  customerPhone: z.string().optional(),
 });
 
 export async function POST(request: NextRequest) {
@@ -402,7 +409,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { productId } = validationResult.data;
+    const { productId, customerName, customerPhone } = validationResult.data;
 
     // 4. Check slot availability BEFORE processing payment
     const inventoryCheck = await prisma.inventoryAccount.findFirst({
@@ -434,6 +441,8 @@ export async function POST(request: NextRequest) {
     const result = await purchaseUseCase.execute({
       sellerId: user.id,
       productId,
+      customerName,
+      customerPhone,
     });
 
     // 5. Update Inventory - Decrement available slots

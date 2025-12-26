@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/infrastructure/database/prisma';
 import { verifyJWT } from '@/infrastructure/auth/jwt';
+import { formatAmount } from '@/lib/utils/seller';
 
 export const dynamic = 'force-dynamic';
 
@@ -93,7 +94,7 @@ export async function GET(request: NextRequest) {
     const data = recharges.map((recharge: any) => ({
       id: recharge.id,
       walletId: recharge.walletId,
-      amount: recharge.amount.toString(),
+      amount: formatAmount(recharge.amount),
       paymentMethod: recharge.paymentMethod,
       paymentGateway: recharge.paymentGateway,
       externalTransactionId: recharge.externalTransactionId,

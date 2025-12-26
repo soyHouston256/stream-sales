@@ -1,5 +1,7 @@
 'use client';
 
+import React from 'react';
+
 import { useRouter } from 'next/navigation';
 import {
   Dialog,
@@ -20,6 +22,9 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { CategoryBadge } from '@/components/provider/CategoryBadge';
 import { useToast } from '@/lib/hooks/useToast';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { User, Phone } from 'lucide-react';
 
 type UserType = 'seller' | 'affiliate';
 
@@ -42,6 +47,10 @@ export function PurchaseConfirmDialog({
   const { data: walletData, isLoading: walletLoading } = useWalletBalance(userType);
   const createPurchase = useCreatePurchase(userType);
 
+  // Customer data state for third-party recipient
+  const [customerName, setCustomerName] = React.useState('');
+  const [customerPhone, setCustomerPhone] = React.useState('');
+
   if (!product) return null;
 
   const validation = walletData
@@ -52,7 +61,11 @@ export function PurchaseConfirmDialog({
 
   const handleConfirm = async () => {
     try {
-      await createPurchase.mutateAsync({ productId: product.id });
+      await createPurchase.mutateAsync({
+        productId: product.id,
+        customerName: customerName.trim() || undefined,
+        customerPhone: customerPhone.trim() || undefined,
+      });
       toast({
         title: t('seller.marketplace.success.title'),
         description: t('seller.marketplace.success.description').replace('{name}', product.name),
@@ -110,6 +123,33 @@ export function PurchaseConfirmDialog({
               <div className="text-right">
                 <p className="text-sm font-medium leading-none mb-1">{t('seller.marketplace.purchaseConfirm.price')}</p>
                 <p className="text-xl font-bold text-primary">{formatCurrency(product.price)}</p>
+              </div>
+            </div>
+
+            {/* Customer Data Section */}
+            <div className="bg-muted/30 p-4 rounded-xl border border-border/50 space-y-3">
+              <h4 className="text-sm font-semibold text-muted-foreground">
+                {t('seller.marketplace.purchaseConfirm.customerData') || 'Datos del Cliente (Opcional)'}
+              </h4>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <User className="h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder={t('seller.marketplace.purchaseConfirm.customerName') || 'Nombre del cliente'}
+                    value={customerName}
+                    onChange={(e) => setCustomerName(e.target.value)}
+                    className="flex-1"
+                  />
+                </div>
+                <div className="flex items-center gap-2">
+                  <Phone className="h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder={t('seller.marketplace.purchaseConfirm.customerPhone') || '+51 999 888 777'}
+                    value={customerPhone}
+                    onChange={(e) => setCustomerPhone(e.target.value)}
+                    className="flex-1"
+                  />
+                </div>
               </div>
             </div>
 

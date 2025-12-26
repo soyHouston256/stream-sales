@@ -76,6 +76,9 @@ export class PrismaPurchaseRepository implements IPurchaseRepository {
           platformFeeAmount: purchase.platformFeeAmount?.amount,
           platformFeeType: purchase.platformFeeType,
           platformFeeRate: purchase.platformFeeRate,
+          // Customer data (third-party recipient)
+          customerName: purchase.customerName,
+          customerPhone: purchase.customerPhone,
           items: {
             create: {
               productVariantId: variant.id,
