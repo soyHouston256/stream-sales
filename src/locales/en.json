@@ -413,10 +413,6 @@
       "title": "My Products",
       "subtitle": "Manage your digital product catalog",
       "newProduct": "New Product",
-      "totalProducts": "Total Products",
-      "stockCritical": "Critical Stock",
-      "salesToday": "Sales Today",
-      "activeClients": "Active Clients",
       "filters": "Filters",
       "filtersDescription": "Filter your products by name, category, or status",
       "searchPlaceholder": "Search products...",
@@ -447,7 +443,15 @@
         "title": "Restricted Access",
         "description": "You cannot add products because your provider account has not been approved yet. Please contact the administrator.",
         "button": "Understood"
-      }
+      },
+      "totalProducts": "Total Products",
+      "stockCritical": "Critical Stock",
+      "stock": "Stock",
+      "addStock": "Add Stock",
+      "salesToday": "Sales Today",
+      "activeClients": "Active Clients",
+      "fullAccount": "Full Account",
+      "profile": "Profile"
     },
     "sales": {
       "title": "Sales History",
@@ -649,7 +653,26 @@
       "bulkLabel": "Paste accounts (email:password per line)",
       "bulkHint": "Accepted formats: email:password, email;password, email,password",
       "accountsDetected": "accounts detected",
-      "noAccountsError": "Add at least one account"
+      "noAccountsError": "Add at least one account",
+      "account": "Account",
+      "fullAccount": "Full Account",
+      "profilesAccount": "By Profiles",
+      "profiles": "Profiles",
+      "profileName": "Profile name",
+      "profilePin": "PIN (optional)",
+      "addProfile": "Add Profile"
+    },
+    "inventory": {
+      "title": "Inventory Details",
+      "totalAccounts": "Total Accounts",
+      "slotsAvailable": "Slots Available",
+      "available": "Available",
+      "sold": "Sold",
+      "reserved": "Reserved",
+      "fullAccount": "Full Account (1 slot)",
+      "noAccounts": "No accounts in inventory",
+      "deleteAccount": "Delete account",
+      "confirmDelete": "Delete this account?"
     }
   },
   "seller": {
@@ -678,6 +701,11 @@
     "price": "Price",
     "date": "Date",
     "status": "Status",
+    "productCard": {
+      "fullAccounts": "Accounts",
+      "profiles": "Profiles",
+      "noStock": "No stock"
+    },
     "marketplace": {
       "title": "Marketplace",
       "subtitle": "Browse and purchase digital products",

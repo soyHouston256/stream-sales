@@ -135,6 +135,21 @@ export async function GET(request: NextRequest) {
       const stockTotal = accountStock.total > 0 ? accountStock.total : licenseStock.total;
       const stockAvailable = accountStock.available > 0 ? accountStock.available : licenseStock.available;
 
+      // Determine account type: full accounts have totalSlots === 1, profiles have totalSlots > 1
+      const fullAccounts = product.inventoryAccounts.filter((a: any) => a.totalSlots === 1);
+      const profileAccounts = product.inventoryAccounts.filter((a: any) => a.totalSlots > 1);
+
+      // Determine predominant account type
+      let accountType: 'full' | 'profile' | null = null;
+      if (fullAccounts.length > 0 && profileAccounts.length === 0) {
+        accountType = 'full';
+      } else if (profileAccounts.length > 0 && fullAccounts.length === 0) {
+        accountType = 'profile';
+      } else if (fullAccounts.length > 0 && profileAccounts.length > 0) {
+        // Mixed: determine by predominant type
+        accountType = fullAccounts.length >= profileAccounts.length ? 'full' : 'profile';
+      }
+
       return {
         id: product.id,
         providerId: product.providerId,
@@ -148,6 +163,8 @@ export async function GET(request: NextRequest) {
         // Stock information
         stockTotal,
         stockAvailable,
+        // Account type information
+        accountType,
         variants: product.variants.map((v: any) => ({
           id: v.id,
           productId: v.productId,

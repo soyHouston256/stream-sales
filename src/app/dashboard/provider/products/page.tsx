@@ -19,6 +19,7 @@ import { ProductCreatorWizard } from '@/components/provider/products/wizard/Prod
 import { ProductStatusBadge } from '@/components/provider/ProductStatusBadge';
 import { CategoryBadge } from '@/components/provider/CategoryBadge';
 import { AddStockDialog } from '@/components/provider/AddStockDialog';
+import { InventoryDetailsDialog } from '@/components/provider/InventoryDetailsDialog';
 import { useProducts, useDeleteProduct } from '@/lib/hooks/useProducts';
 import { Product, ProductCategory, ProductStatus } from '@/types/provider';
 import {
@@ -162,6 +163,7 @@ export default function ProductsPage() {
   const [isStatusLoading, setIsStatusLoading] = useState(true);
   const [showRestrictionDialog, setShowRestrictionDialog] = useState(false);
   const [stockDialogProduct, setStockDialogProduct] = useState<{ id: string; name: string } | null>(null);
+  const [inventoryDialogProduct, setInventoryDialogProduct] = useState<{ id: string; name: string } | null>(null);
 
   const { data, isLoading } = useProducts({
     page,
@@ -227,12 +229,27 @@ export default function ProductsPage() {
     {
       key: 'name',
       label: t('provider.products.productName'),
-      render: (product) => (
+      render: (product: any) => (
         <div className="min-w-[200px]">
           <p className="font-semibold">{product.name}</p>
           <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5">
             {product.description}
           </p>
+          {product.accountType && (
+            <Badge
+              variant="outline"
+              className={cn(
+                "mt-1 text-[10px] font-medium",
+                product.accountType === 'full'
+                  ? "border-indigo-300 text-indigo-600 dark:border-indigo-700 dark:text-indigo-400"
+                  : "border-emerald-300 text-emerald-600 dark:border-emerald-700 dark:text-emerald-400"
+              )}
+            >
+              {product.accountType === 'full'
+                ? (t('provider.products.fullAccount') || 'Cuenta Completa')
+                : (t('provider.products.profile') || 'Perfil')}
+            </Badge>
+          )}
         </div>
       ),
     },
@@ -265,15 +282,18 @@ export default function ProductsPage() {
           return <span className="text-xs text-muted-foreground">—</span>;
         }
         return (
-          <div className="flex items-center gap-2">
-            <Package className="h-4 w-4 text-muted-foreground" />
+          <button
+            onClick={() => setInventoryDialogProduct({ id: product.id, name: product.name })}
+            className="flex items-center gap-2 hover:opacity-70 transition-opacity cursor-pointer group"
+          >
+            <Package className="h-4 w-4 text-muted-foreground group-hover:text-indigo-500" />
             <span className={cn(
-              "font-bold",
+              "font-bold underline decoration-dashed underline-offset-2",
               available === 0 ? "text-red-500" : available <= 2 ? "text-amber-500" : "text-emerald-500"
             )}>
               {available}/{total}
             </span>
-          </div>
+          </button>
         );
       },
     },
@@ -572,6 +592,14 @@ export default function ProductsPage() {
           }}
         />
       )}
+
+      {/* Inventory Details Dialog */}
+      <InventoryDetailsDialog
+        productId={inventoryDialogProduct?.id || null}
+        productName={inventoryDialogProduct?.name || ''}
+        isOpen={!!inventoryDialogProduct}
+        onClose={() => setInventoryDialogProduct(null)}
+      />
     </div>
   );
 }

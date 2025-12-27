@@ -118,11 +118,30 @@ export async function GET(request: NextRequest) {
 
     // 5. Transform to response format (hide sensitive data) with markup applied
     const data = products.map((product: any) => {
-      const account = product.inventoryAccounts[0];
-      const totalSlots = account?.totalSlots || 1;
-      const availableSlots = account?.availableSlots || 0;
-      // 'profile' if multiple slots, 'full' if single slot
-      const accountType = totalSlots > 1 ? 'profile' : 'full';
+      // Aggregate stock across ALL inventory accounts
+      let totalFullAccounts = 0;
+      let availableFullAccounts = 0;
+      let totalProfileSlots = 0;
+      let availableProfileSlots = 0;
+
+      for (const account of product.inventoryAccounts) {
+        if (account.totalSlots === 1) {
+          // Full account
+          totalFullAccounts += 1;
+          availableFullAccounts += account.availableSlots;
+        } else {
+          // Profile-based account
+          totalProfileSlots += account.totalSlots;
+          availableProfileSlots += account.availableSlots;
+        }
+      }
+
+      // Total slots is sum of all
+      const totalSlots = totalFullAccounts + totalProfileSlots;
+      const availableSlots = availableFullAccounts + availableProfileSlots;
+
+      // Determine account type based on majority
+      const accountType = totalProfileSlots > totalFullAccounts ? 'profile' : 'full';
 
       // Apply markup based on type
       const basePrice = parseFloat(product.variants[0]?.price.toString() || '0');
@@ -146,6 +165,11 @@ export async function GET(request: NextRequest) {
         accountType,
         totalSlots,
         availableSlots,
+        // New detailed fields
+        totalFullAccounts,
+        availableFullAccounts,
+        totalProfileSlots,
+        availableProfileSlots,
         createdAt: product.createdAt.toISOString(),
       };
     });

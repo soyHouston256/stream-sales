@@ -151,11 +151,30 @@ export async function GET(request: NextRequest) {
 
     // 7. Transform to response format
     const data = products.map((product: any) => {
-      const account = product.inventoryAccounts[0];
-      const totalSlots = account?.totalSlots || 1;
-      const availableSlots = account?.availableSlots || 0;
-      // Determine account type: 'full' if totalSlots is 1, 'profile' if more than 1
-      const accountType = totalSlots > 1 ? 'profile' : 'full';
+      // Aggregate stock across ALL inventory accounts
+      let totalFullAccounts = 0;
+      let availableFullAccounts = 0;
+      let totalProfileSlots = 0;
+      let availableProfileSlots = 0;
+
+      for (const account of product.inventoryAccounts) {
+        if (account.totalSlots === 1) {
+          // Full account
+          totalFullAccounts += 1;
+          availableFullAccounts += account.availableSlots;
+        } else {
+          // Profile-based account
+          totalProfileSlots += account.totalSlots;
+          availableProfileSlots += account.availableSlots;
+        }
+      }
+
+      // Total slots is sum of all
+      const totalSlots = totalFullAccounts + totalProfileSlots;
+      const availableSlots = availableFullAccounts + availableProfileSlots;
+
+      // Determine account type based on majority
+      const accountType = totalProfileSlots > totalFullAccounts ? 'profile' : 'full';
 
       return {
         id: product.id,
@@ -171,6 +190,11 @@ export async function GET(request: NextRequest) {
         accountType, // 'full' or 'profile'
         totalSlots,
         availableSlots,
+        // New fields for display
+        totalFullAccounts,
+        availableFullAccounts,
+        totalProfileSlots,
+        availableProfileSlots,
         createdAt: product.createdAt.toISOString(),
       };
     });

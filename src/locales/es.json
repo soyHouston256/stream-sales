@@ -434,6 +434,8 @@
       "updateSuccess": "Producto actualizado exitosamente",
       "totalProducts": "Total Productos",
       "stockCritical": "Stock Crítico",
+      "stock": "Stock",
+      "addStock": "Agregar Stock",
       "salesToday": "Ventas Hoy",
       "activeClients": "Clientes Activos",
       "restriction": {
@@ -447,7 +449,9 @@
         "3months": "3 Meses",
         "6months": "6 Meses",
         "1year": "1 Año"
-      }
+      },
+      "fullAccount": "Cuenta Completa",
+      "profile": "Perfil"
     },
     "sales": {
       "title": "Historial de Ventas",
@@ -649,7 +653,26 @@
       "bulkLabel": "Pega las cuentas (email:password por línea)",
       "bulkHint": "Formatos aceptados: email:password, email;password, email,password",
       "accountsDetected": "cuentas detectadas",
-      "noAccountsError": "Agrega al menos una cuenta"
+      "noAccountsError": "Agrega al menos una cuenta",
+      "account": "Cuenta",
+      "fullAccount": "Cuenta Completa",
+      "profilesAccount": "Por Perfiles",
+      "profiles": "Perfiles",
+      "profileName": "Nombre del perfil",
+      "profilePin": "PIN (opcional)",
+      "addProfile": "Agregar Perfil"
+    },
+    "inventory": {
+      "title": "Detalle de Inventario",
+      "totalAccounts": "Total de Cuentas",
+      "slotsAvailable": "Slots Disponibles",
+      "available": "Disponible",
+      "sold": "Vendido",
+      "reserved": "Reservado",
+      "fullAccount": "Cuenta Completa (1 slot)",
+      "noAccounts": "No hay cuentas en inventario",
+      "deleteAccount": "Eliminar cuenta",
+      "confirmDelete": "¿Eliminar esta cuenta?"
     }
   },
   "seller": {
@@ -678,6 +701,11 @@
     "price": "Precio",
     "date": "Fecha",
     "status": "Estado",
+    "productCard": {
+      "fullAccounts": "Cuentas",
+      "profiles": "Perfiles",
+      "noStock": "Sin stock"
+    },
     "marketplace": {
       "title": "Marketplace",
       "subtitle": "Explora y compra productos digitales",
