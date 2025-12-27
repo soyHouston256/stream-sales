@@ -636,6 +636,20 @@
           "categoryRequired": "La categoría es requerida"
         }
       }
+    },
+    "stock": {
+      "addStock": "Agregar Stock",
+      "addStockDescription": "Agrega cuentas al inventario de {name}",
+      "manualMode": "Manual",
+      "bulkMode": "Masivo",
+      "emailPlaceholder": "email@ejemplo.com",
+      "passwordPlaceholder": "contraseña",
+      "addAnother": "Agregar otra cuenta",
+      "addToStock": "Agregar al Stock",
+      "bulkLabel": "Pega las cuentas (email:password por línea)",
+      "bulkHint": "Formatos aceptados: email:password, email;password, email,password",
+      "accountsDetected": "cuentas detectadas",
+      "noAccountsError": "Agrega al menos una cuenta"
     }
   },
   "seller": {

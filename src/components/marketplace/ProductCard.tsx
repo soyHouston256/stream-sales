@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { CategoryBadge } from '@/components/provider/CategoryBadge';
 import Link from 'next/link';
 import Image from 'next/image';
+import { Package } from 'lucide-react';
 
 interface MarketplaceProduct {
   id: string;
@@ -18,6 +19,8 @@ interface MarketplaceProduct {
   price: string;
   imageUrl?: string;
   createdAt: string;
+  availableSlots?: number;
+  totalSlots?: number;
 }
 
 interface ProductCardProps {
@@ -28,8 +31,11 @@ interface ProductCardProps {
 export function ProductCard({ product, onViewDetails }: ProductCardProps) {
   const [imageError, setImageError] = useState(false);
 
+  const availableSlots = product.availableSlots ?? 0;
+  const hasStock = availableSlots > 0;
+
   return (
-    <Card className="flex flex-col h-full hover:shadow-lg transition-shadow overflow-hidden">
+    <Card className={`flex flex-col h-full hover:shadow-lg transition-shadow overflow-hidden ${!hasStock ? 'opacity-75' : ''}`}>
       {/* Product Image */}
       {product.imageUrl && !imageError ? (
         <div className="relative w-full aspect-video overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100">
@@ -44,9 +50,24 @@ export function ProductCard({ product, onViewDetails }: ProductCardProps) {
               setImageError(true);
             }}
           />
+          {/* Stock Badge Overlay */}
+          {availableSlots > 0 && (
+            <div className="absolute top-2 right-2">
+              <Badge
+                variant="secondary"
+                className={`text-xs font-bold ${availableSlots <= 2
+                    ? 'bg-amber-100 text-amber-700 border-amber-300'
+                    : 'bg-emerald-100 text-emerald-700 border-emerald-300'
+                  }`}
+              >
+                <Package className="h-3 w-3 mr-1" />
+                {availableSlots} disponibles
+              </Badge>
+            </div>
+          )}
         </div>
       ) : (
-        <div className="w-full aspect-video bg-gradient-to-br from-purple-100 to-blue-100 flex items-center justify-center">
+        <div className="relative w-full aspect-video bg-gradient-to-br from-purple-100 to-blue-100 flex items-center justify-center">
           <div className="text-center text-muted-foreground">
             <svg
               className="mx-auto h-12 w-12 text-gray-400"
@@ -64,6 +85,21 @@ export function ProductCard({ product, onViewDetails }: ProductCardProps) {
             </svg>
             <p className="mt-2 text-sm">{imageError ? 'Image failed to load' : 'No image'}</p>
           </div>
+          {/* Stock Badge Overlay for no-image cards */}
+          {availableSlots > 0 && (
+            <div className="absolute top-2 right-2">
+              <Badge
+                variant="secondary"
+                className={`text-xs font-bold ${availableSlots <= 2
+                    ? 'bg-amber-100 text-amber-700 border-amber-300'
+                    : 'bg-emerald-100 text-emerald-700 border-emerald-300'
+                  }`}
+              >
+                <Package className="h-3 w-3 mr-1" />
+                {availableSlots} disponibles
+              </Badge>
+            </div>
+          )}
         </div>
       )}
 
@@ -85,9 +121,9 @@ export function ProductCard({ product, onViewDetails }: ProductCardProps) {
         </div>
       </CardContent>
       <CardFooter>
-        <Button className="w-full" asChild>
+        <Button className="w-full" asChild disabled={!hasStock}>
           <Link href={`/marketplace/${product.id}`}>
-            View Details
+            {hasStock ? 'View Details' : 'Out of Stock'}
           </Link>
         </Button>
       </CardFooter>

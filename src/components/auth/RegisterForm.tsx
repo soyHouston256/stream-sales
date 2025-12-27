@@ -19,6 +19,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { PhoneInput } from '@/components/ui/phone-input';
 import { useToast } from '@/hooks/use-toast';
 import { ApiError } from '@/lib/api/client';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -213,11 +214,10 @@ export function RegisterForm() {
                 autoComplete="email"
                 disabled={isLoading}
                 {...register('email')}
-                className={`pl-10 h-12 transition-all duration-200 ${
-                  errors.email
-                    ? 'border-red-500 focus-visible:ring-red-500'
-                    : 'focus-visible:ring-indigo-500 focus-visible:border-indigo-500'
-                }`}
+                className={`pl-10 h-12 transition-all duration-200 ${errors.email
+                  ? 'border-red-500 focus-visible:ring-red-500'
+                  : 'focus-visible:ring-indigo-500 focus-visible:border-indigo-500'
+                  }`}
                 aria-invalid={errors.email ? 'true' : 'false'}
                 aria-describedby={errors.email ? 'email-error' : undefined}
               />
@@ -246,11 +246,10 @@ export function RegisterForm() {
                 {...register('username', {
                   onChange: () => setIsUsernameManuallyEdited(true)
                 })}
-                className={`pl-10 h-12 transition-all duration-200 ${
-                  errors.username
-                    ? 'border-red-500 focus-visible:ring-red-500'
-                    : 'focus-visible:ring-indigo-500 focus-visible:border-indigo-500'
-                }`}
+                className={`pl-10 h-12 transition-all duration-200 ${errors.username
+                  ? 'border-red-500 focus-visible:ring-red-500'
+                  : 'focus-visible:ring-indigo-500 focus-visible:border-indigo-500'
+                  }`}
                 aria-invalid={errors.username ? 'true' : 'false'}
                 aria-describedby={errors.username ? 'username-error' : undefined}
               />
@@ -277,11 +276,10 @@ export function RegisterForm() {
                 autoComplete="name"
                 disabled={isLoading}
                 {...register('name')}
-                className={`pl-10 h-12 transition-all duration-200 ${
-                  errors.name
-                    ? 'border-red-500 focus-visible:ring-red-500'
-                    : 'focus-visible:ring-indigo-500 focus-visible:border-indigo-500'
-                }`}
+                className={`pl-10 h-12 transition-all duration-200 ${errors.name
+                  ? 'border-red-500 focus-visible:ring-red-500'
+                  : 'focus-visible:ring-indigo-500 focus-visible:border-indigo-500'
+                  }`}
                 aria-invalid={errors.name ? 'true' : 'false'}
                 aria-describedby={errors.name ? 'name-error' : undefined}
               />
@@ -308,11 +306,10 @@ export function RegisterForm() {
                 autoComplete="new-password"
                 disabled={isLoading}
                 {...register('password')}
-                className={`pl-10 pr-10 h-12 transition-all duration-200 ${
-                  errors.password
-                    ? 'border-red-500 focus-visible:ring-red-500'
-                    : 'focus-visible:ring-indigo-500 focus-visible:border-indigo-500'
-                }`}
+                className={`pl-10 pr-10 h-12 transition-all duration-200 ${errors.password
+                  ? 'border-red-500 focus-visible:ring-red-500'
+                  : 'focus-visible:ring-indigo-500 focus-visible:border-indigo-500'
+                  }`}
                 aria-invalid={errors.password ? 'true' : 'false'}
                 aria-describedby={errors.password ? 'password-error' : undefined}
               />
@@ -351,11 +348,10 @@ export function RegisterForm() {
                 autoComplete="new-password"
                 disabled={isLoading}
                 {...register('confirmPassword')}
-                className={`pl-10 pr-10 h-12 transition-all duration-200 ${
-                  errors.confirmPassword
-                    ? 'border-red-500 focus-visible:ring-red-500'
-                    : 'focus-visible:ring-indigo-500 focus-visible:border-indigo-500'
-                }`}
+                className={`pl-10 pr-10 h-12 transition-all duration-200 ${errors.confirmPassword
+                  ? 'border-red-500 focus-visible:ring-red-500'
+                  : 'focus-visible:ring-indigo-500 focus-visible:border-indigo-500'
+                  }`}
                 aria-invalid={errors.confirmPassword ? 'true' : 'false'}
                 aria-describedby={errors.confirmPassword ? 'confirmPassword-error' : undefined}
               />
@@ -383,50 +379,24 @@ export function RegisterForm() {
             )}
           </div>
 
-          <div className="grid grid-cols-4 gap-2">
-            <div className="col-span-1 space-y-2">
-              <Label htmlFor="countryCode">{t('auth.registerForm.country')}</Label>
-              <select
-                id="countryCode"
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                disabled={isLoading}
-                {...register('countryCode')}
-              >
-                <option value="+51">🇵🇪 +51</option>
-                <option value="+591">🇧🇴 +591</option>
-                <option value="+52">🇲🇽 +52</option>
-                <option value="+593">🇪🇨 +593</option>
-                <option value="+57">🇨🇴 +57</option>
-                <option value="+502">🇬🇹 +502</option>
-                <option value="+503">🇸🇻 +503</option>
-                <option value="+54">🇦🇷 +54</option>
-                <option value="+56">🇨🇱 +56</option>
-                <option value="+55">🇧🇷 +55</option>
-                <option value="+506">🇨🇷 +506</option>
-                <option value="+53">🇨🇺 +53</option>
-                <option value="+504">🇭🇳 +504</option>
-                <option value="+505">🇳🇮 +505</option>
-                <option value="+507">🇵🇦 +507</option>
-                <option value="+595">🇵🇾 +595</option>
-                <option value="+1">🇵🇷 +1</option>
-                <option value="+1">🇩🇴 +1</option>
-                <option value="+598">🇺🇾 +598</option>
-                <option value="+58">🇻🇪 +58</option>
-                <option value="+34">🇪🇸 +34</option>
-                <option value="+1">🇺🇸 +1</option>
-                <option value="">{t('auth.registerForm.other')}</option>
-              </select>
-            </div>
-            <div className="col-span-3 space-y-2">
-              <Label htmlFor="phoneNumber">{t('auth.registerForm.phone')}</Label>
-              <Input
-                id="phoneNumber"
-                type="tel"
-                placeholder={t('auth.registerForm.phonePlaceholder')}
-                autoComplete="tel"
-                disabled={isLoading}
-                {...register('phoneNumber')}
-              />
+          <div className="space-y-2 animate-in slide-in-from-left-5 duration-500 delay-350">
+            <Label>{t('auth.registerForm.phone')}</Label>
+            <div className="relative group">
+              <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-indigo-500 transition-colors duration-200 z-10" />
+              <div className="pl-10">
+                <PhoneInput
+                  value={watch('countryCode') + ' ' + (watch('phoneNumber') || '')}
+                  onChange={(fullPhone) => {
+                    // Parse the full phone to extract country code and number
+                    const parts = fullPhone.split(' ');
+                    const dialCode = parts[0] || '+51';
+                    const number = parts.slice(1).join(' ');
+                    setValue('countryCode', dialCode);
+                    setValue('phoneNumber', number);
+                  }}
+                  placeholder={t('auth.registerForm.phonePlaceholder') || '999 999 999'}
+                />
+              </div>
             </div>
           </div>
 

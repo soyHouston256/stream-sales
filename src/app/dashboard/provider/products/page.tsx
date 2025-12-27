@@ -18,6 +18,7 @@ import { DataTable, Column } from '@/components/admin/DataTable';
 import { ProductCreatorWizard } from '@/components/provider/products/wizard/ProductCreatorWizard';
 import { ProductStatusBadge } from '@/components/provider/ProductStatusBadge';
 import { CategoryBadge } from '@/components/provider/CategoryBadge';
+import { AddStockDialog } from '@/components/provider/AddStockDialog';
 import { useProducts, useDeleteProduct } from '@/lib/hooks/useProducts';
 import { Product, ProductCategory, ProductStatus } from '@/types/provider';
 import {
@@ -160,6 +161,7 @@ export default function ProductsPage() {
   const [providerStatus, setProviderStatus] = useState<string | null>(null);
   const [isStatusLoading, setIsStatusLoading] = useState(true);
   const [showRestrictionDialog, setShowRestrictionDialog] = useState(false);
+  const [stockDialogProduct, setStockDialogProduct] = useState<{ id: string; name: string } | null>(null);
 
   const { data, isLoading } = useProducts({
     page,
@@ -254,6 +256,28 @@ export default function ProductsPage() {
       ),
     },
     {
+      key: 'stock',
+      label: t('provider.products.stock') || 'Stock',
+      render: (product: any) => {
+        const total = product.stockTotal || 0;
+        const available = product.stockAvailable || 0;
+        if (total === 0) {
+          return <span className="text-xs text-muted-foreground">—</span>;
+        }
+        return (
+          <div className="flex items-center gap-2">
+            <Package className="h-4 w-4 text-muted-foreground" />
+            <span className={cn(
+              "font-bold",
+              available === 0 ? "text-red-500" : available <= 2 ? "text-amber-500" : "text-emerald-500"
+            )}>
+              {available}/{total}
+            </span>
+          </div>
+        );
+      },
+    },
+    {
       key: 'createdAt',
       label: t('provider.products.created'),
       render: (product) => (
@@ -267,6 +291,15 @@ export default function ProductsPage() {
       label: '',
       render: (product) => (
         <div className="flex gap-1">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="hover:bg-emerald-50 dark:hover:bg-emerald-950/30"
+            onClick={() => setStockDialogProduct({ id: product.id, name: product.name })}
+            title={t('provider.products.addStock') || 'Agregar Stock'}
+          >
+            <Plus className="h-4 w-4 text-emerald-500" />
+          </Button>
           <Button
             variant="ghost"
             size="icon"
@@ -525,6 +558,20 @@ export default function ProductsPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Add Stock Dialog */}
+      {stockDialogProduct && (
+        <AddStockDialog
+          productId={stockDialogProduct.id}
+          productName={stockDialogProduct.name}
+          isOpen={!!stockDialogProduct}
+          onClose={() => setStockDialogProduct(null)}
+          onSuccess={() => {
+            // Trigger refetch by invalidating query
+            setStockDialogProduct(null);
+          }}
+        />
+      )}
     </div>
   );
 }
