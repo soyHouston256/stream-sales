@@ -146,16 +146,45 @@ export async function GET(request: NextRequest) {
             availableSlots: true,
           },
         },
+        inventoryLicenses: {
+          select: {
+            id: true,
+            status: true,
+          },
+        },
       },
     });
 
     // 7. Transform to response format
     const data = products.map((product: any) => {
-      const account = product.inventoryAccounts[0];
-      const totalSlots = account?.totalSlots || 1;
-      const availableSlots = account?.availableSlots || 0;
-      // Determine account type: 'full' if totalSlots is 1, 'profile' if more than 1
-      const accountType = totalSlots > 1 ? 'profile' : 'full';
+      // Aggregate stock across ALL inventory accounts
+      let totalFullAccounts = 0;
+      let availableFullAccounts = 0;
+      let totalProfileSlots = 0;
+      let availableProfileSlots = 0;
+
+      for (const account of product.inventoryAccounts) {
+        if (account.totalSlots === 1) {
+          // Full account
+          totalFullAccounts += 1;
+          availableFullAccounts += account.availableSlots;
+        } else {
+          // Profile-based account
+          totalProfileSlots += account.totalSlots;
+          availableProfileSlots += account.availableSlots;
+        }
+      }
+
+      // Calculate license stock for license products
+      const totalLicenses = product.inventoryLicenses?.length ?? 0;
+      const availableLicenses = product.inventoryLicenses?.filter((l: any) => l.status === 'available').length ?? 0;
+
+      // Total slots is sum of all (including licenses)
+      const totalSlots = totalFullAccounts + totalProfileSlots + totalLicenses;
+      const availableSlots = availableFullAccounts + availableProfileSlots + availableLicenses;
+
+      // Determine account type based on majority
+      const accountType = totalProfileSlots > totalFullAccounts ? 'profile' : 'full';
 
       return {
         id: product.id,
@@ -167,10 +196,19 @@ export async function GET(request: NextRequest) {
         price: product.variants[0]?.price.toString() || '0',
         durationDays: product.variants[0]?.durationDays ?? 0,
         imageUrl: product.imageUrl,
+        deliveryDetails: product.deliveryDetails || [],
         status: product.isActive ? 'available' : 'unavailable',
         accountType, // 'full' or 'profile'
         totalSlots,
         availableSlots,
+        // New fields for display
+        totalFullAccounts,
+        availableFullAccounts,
+        totalProfileSlots,
+        availableProfileSlots,
+        // License stock
+        totalLicenses,
+        availableLicenses,
         createdAt: product.createdAt.toISOString(),
       };
     });

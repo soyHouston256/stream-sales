@@ -105,6 +105,7 @@ export interface UpdateProductDTO {
   price?: number;
   durationDays?: number;
   imageUrl?: string;
+  deliveryDetails?: string[];
   accountEmail?: string;
   accountPassword?: string;
   accountDetails?: AccountDetails;

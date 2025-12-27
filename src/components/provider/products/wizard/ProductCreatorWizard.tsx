@@ -24,6 +24,7 @@ export type WizardFormData = {
     durationDays?: number;
     imageUrl: string;
     category: ProductCategory | null;
+    deliveryDetails: string[]; // What customer will receive
 
     // Variants (Simplified for now, maybe just one variant or multiple)
     variants: {
@@ -58,6 +59,7 @@ const INITIAL_DATA: WizardFormData = {
     durationDays: 0,
     imageUrl: '',
     category: null,
+    deliveryDetails: [],
     variants: [],
     platformType: 'netflix',
     accountType: 'profile',

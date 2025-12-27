@@ -102,6 +102,24 @@ export function StepBasicInfo({ data, onChange }: StepBasicInfoProps) {
                         onChange={(value) => onChange({ imageUrl: value })}
                     />
                 </div>
+
+                <div className="col-span-2">
+                    <Label htmlFor="deliveryDetails" className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">
+                        {t('provider.wizard.form.deliveryDetails') || 'Lo que recibirá el cliente'}
+                    </Label>
+                    <Textarea
+                        id="deliveryDetails"
+                        value={data.deliveryDetails?.join('\n') || ''}
+                        onChange={(e) => onChange({
+                            deliveryDetails: e.target.value.split('\n').filter(line => line.trim())
+                        })}
+                        placeholder={t('provider.wizard.form.deliveryDetailsPlaceholder') || 'Ej:\nClave de licencia\nInstrucciones de activación\nSoporte 24/7'}
+                        className="bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 focus:ring-indigo-500 min-h-[80px]"
+                    />
+                    <p className="text-xs text-slate-400 mt-1">
+                        {t('provider.wizard.form.deliveryDetailsHint') || 'Un ítem por línea. Aparecerá en la página del producto.'}
+                    </p>
+                </div>
             </div>
         </div>
     );

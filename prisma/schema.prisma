@@ -203,6 +203,7 @@ model Product {
   description String?  @db.Text
   category    String // streaming, license, course, ebook, ai
   imageUrl    String?
+  deliveryDetails Json?  // Array of strings: what customer will receive
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

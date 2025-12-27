@@ -39,6 +39,14 @@ export interface MarketplaceProduct {
   accountType?: 'full' | 'profile'; // Tipo de cuenta
   totalSlots?: number; // Total de perfiles
   availableSlots?: number; // Perfiles disponibles
+  // Detailed counts
+  totalFullAccounts?: number;
+  availableFullAccounts?: number;
+  totalProfileSlots?: number;
+  availableProfileSlots?: number;
+  totalLicenses?: number;
+  availableLicenses?: number;
+  deliveryDetails?: string[];
   createdAt: string;
 }
 

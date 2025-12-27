@@ -434,6 +434,8 @@
       "updateSuccess": "Producto actualizado exitosamente",
       "totalProducts": "Total Productos",
       "stockCritical": "Stock Crítico",
+      "stock": "Stock",
+      "addStock": "Agregar Stock",
       "salesToday": "Ventas Hoy",
       "activeClients": "Clientes Activos",
       "restriction": {
@@ -447,7 +449,9 @@
         "3months": "3 Meses",
         "6months": "6 Meses",
         "1year": "1 Año"
-      }
+      },
+      "fullAccount": "Cuenta Completa",
+      "profile": "Perfil"
     },
     "sales": {
       "title": "Historial de Ventas",
@@ -632,10 +636,46 @@
         "meetPlaceholder": "https://meet.google.com/...",
         "iframePlaceholder": "<iframe src='...'></iframe>",
         "defaultProfileName": "Perfil",
+        "deliveryDetails": "Lo que recibirá el cliente",
+        "deliveryDetailsPlaceholder": "Ej:\nClave de licencia\nInstrucciones de activación\nSoporte 24/7",
+        "deliveryDetailsHint": "Un ítem por línea. Aparecerá en la página del producto.",
         "errors": {
           "categoryRequired": "La categoría es requerida"
         }
       }
+    },
+    "stock": {
+      "addStock": "Agregar Stock",
+      "addStockDescription": "Agrega cuentas al inventario de {name}",
+      "manualMode": "Manual",
+      "bulkMode": "Masivo",
+      "emailPlaceholder": "email@ejemplo.com",
+      "passwordPlaceholder": "contraseña",
+      "addAnother": "Agregar otra cuenta",
+      "addToStock": "Agregar al Stock",
+      "bulkLabel": "Pega las cuentas (email:password por línea)",
+      "bulkHint": "Formatos aceptados: email:password, email;password, email,password",
+      "accountsDetected": "cuentas detectadas",
+      "noAccountsError": "Agrega al menos una cuenta",
+      "account": "Cuenta",
+      "fullAccount": "Cuenta Completa",
+      "profilesAccount": "Por Perfiles",
+      "profiles": "Perfiles",
+      "profileName": "Nombre del perfil",
+      "profilePin": "PIN (opcional)",
+      "addProfile": "Agregar Perfil"
+    },
+    "inventory": {
+      "title": "Detalle de Inventario",
+      "totalAccounts": "Total de Cuentas",
+      "slotsAvailable": "Slots Disponibles",
+      "available": "Disponible",
+      "sold": "Vendido",
+      "reserved": "Reservado",
+      "fullAccount": "Cuenta Completa (1 slot)",
+      "noAccounts": "No hay cuentas en inventario",
+      "deleteAccount": "Eliminar cuenta",
+      "confirmDelete": "¿Eliminar esta cuenta?"
     }
   },
   "seller": {
@@ -664,6 +704,12 @@
     "price": "Precio",
     "date": "Fecha",
     "status": "Estado",
+    "productCard": {
+      "fullAccounts": "Cuentas",
+      "profiles": "Perfiles",
+      "licenses": "Licencias",
+      "noStock": "Sin stock"
+    },
     "marketplace": {
       "title": "Marketplace",
       "subtitle": "Explora y compra productos digitales",
@@ -697,6 +743,11 @@
         "accountPassword": "Contraseña de la cuenta",
         "additionalDetails": "Detalles adicionales (si aplica)",
         "instantAccess": "Acceso instantáneo después de la compra",
+        "licenseKey": "Clave de licencia",
+        "activationInstructions": "Instrucciones de activación",
+        "accessLink": "Enlace de acceso",
+        "courseMaterials": "Materiales del curso",
+        "downloadLink": "Enlace de descarga",
         "cancel": "Cancelar",
         "loginToPurchase": "Iniciar sesión para comprar",
         "purchaseNow": "Comprar Ahora",

@@ -98,29 +98,83 @@ export async function GET(request: NextRequest) {
       orderBy: { createdAt: 'desc' },
       include: {
         variants: true,
+        inventoryAccounts: {
+          select: {
+            id: true,
+            totalSlots: true,
+            availableSlots: true,
+          },
+        },
+        inventoryLicenses: {
+          select: {
+            id: true,
+            status: true,
+          },
+        },
       },
     });
 
-    // 7. Transform to response format
-    const data = products.map((product: any) => ({
-      id: product.id,
-      providerId: product.providerId,
-      category: product.category,
-      name: product.name,
-      description: product.description,
-      imageUrl: product.imageUrl,
-      isActive: product.isActive,
-      createdAt: product.createdAt.toISOString(),
-      updatedAt: product.updatedAt.toISOString(),
-      variants: product.variants.map((v: any) => ({
-        id: v.id,
-        productId: v.productId,
-        name: v.name,
-        price: v.price.toString(),
-        durationDays: v.durationDays,
-        isRenewable: v.isRenewable,
-      })),
-    }));
+    // 7. Transform to response format with stock counting
+    const data = products.map((product: any) => {
+      // Calculate stock from inventory accounts (streaming/AI products)
+      const accountStock = product.inventoryAccounts.reduce(
+        (acc: { total: number; available: number }, account: any) => ({
+          total: acc.total + account.totalSlots,
+          available: acc.available + account.availableSlots,
+        }),
+        { total: 0, available: 0 }
+      );
+
+      // Calculate stock from licenses (license products)
+      const licenseStock = {
+        total: product.inventoryLicenses.length,
+        available: product.inventoryLicenses.filter((l: any) => l.status === 'available').length,
+      };
+
+      // Use whichever has stock
+      const stockTotal = accountStock.total > 0 ? accountStock.total : licenseStock.total;
+      const stockAvailable = accountStock.available > 0 ? accountStock.available : licenseStock.available;
+
+      // Determine account type: full accounts have totalSlots === 1, profiles have totalSlots > 1
+      const fullAccounts = product.inventoryAccounts.filter((a: any) => a.totalSlots === 1);
+      const profileAccounts = product.inventoryAccounts.filter((a: any) => a.totalSlots > 1);
+
+      // Determine predominant account type
+      let accountType: 'full' | 'profile' | null = null;
+      if (fullAccounts.length > 0 && profileAccounts.length === 0) {
+        accountType = 'full';
+      } else if (profileAccounts.length > 0 && fullAccounts.length === 0) {
+        accountType = 'profile';
+      } else if (fullAccounts.length > 0 && profileAccounts.length > 0) {
+        // Mixed: determine by predominant type
+        accountType = fullAccounts.length >= profileAccounts.length ? 'full' : 'profile';
+      }
+
+      return {
+        id: product.id,
+        providerId: product.providerId,
+        category: product.category,
+        name: product.name,
+        description: product.description,
+        imageUrl: product.imageUrl,
+        isActive: product.isActive,
+        createdAt: product.createdAt.toISOString(),
+        updatedAt: product.updatedAt.toISOString(),
+        // Stock information
+        stockTotal,
+        stockAvailable,
+        // Account type information
+        accountType,
+        variants: product.variants.map((v: any) => ({
+          id: v.id,
+          productId: v.productId,
+          name: v.name,
+          price: v.price.toString(),
+          durationDays: v.durationDays,
+          isRenewable: v.isRenewable,
+        })),
+      };
+    });
 
     // 8. Return paginated response
     return NextResponse.json({
@@ -182,6 +236,7 @@ const createProductSchema = z.object({
   resourceUrl: z.string().optional(),
   liveDate: z.string().optional(),
   coverImageUrl: z.string().optional(),
+  deliveryDetails: z.array(z.string()).optional(), // What customer will receive
 });
 
 export async function POST(request: NextRequest) {
@@ -227,6 +282,7 @@ export async function POST(request: NextRequest) {
           description: data.description,
           category: data.category,
           imageUrl: data.imageUrl,
+          deliveryDetails: data.deliveryDetails || [],
           isActive: true,
         },
       });

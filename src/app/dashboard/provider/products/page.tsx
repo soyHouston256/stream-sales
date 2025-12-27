@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -18,6 +19,8 @@ import { DataTable, Column } from '@/components/admin/DataTable';
 import { ProductCreatorWizard } from '@/components/provider/products/wizard/ProductCreatorWizard';
 import { ProductStatusBadge } from '@/components/provider/ProductStatusBadge';
 import { CategoryBadge } from '@/components/provider/CategoryBadge';
+import { AddStockDialog } from '@/components/provider/AddStockDialog';
+import { InventoryDetailsDialog } from '@/components/provider/InventoryDetailsDialog';
 import { useProducts, useDeleteProduct } from '@/lib/hooks/useProducts';
 import { Product, ProductCategory, ProductStatus } from '@/types/provider';
 import {
@@ -151,6 +154,7 @@ const PendingApprovalBanner = ({ status }: { status: string }) => {
 
 export default function ProductsPage() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { t } = useLanguage();
   const [page, setPage] = useState(1);
   const [category, setCategory] = useState<ProductCategory | 'all'>('all');
@@ -160,6 +164,8 @@ export default function ProductsPage() {
   const [providerStatus, setProviderStatus] = useState<string | null>(null);
   const [isStatusLoading, setIsStatusLoading] = useState(true);
   const [showRestrictionDialog, setShowRestrictionDialog] = useState(false);
+  const [stockDialogProduct, setStockDialogProduct] = useState<{ id: string; name: string } | null>(null);
+  const [inventoryDialogProduct, setInventoryDialogProduct] = useState<{ id: string; name: string } | null>(null);
 
   const { data, isLoading } = useProducts({
     page,
@@ -225,12 +231,27 @@ export default function ProductsPage() {
     {
       key: 'name',
       label: t('provider.products.productName'),
-      render: (product) => (
+      render: (product: any) => (
         <div className="min-w-[200px]">
           <p className="font-semibold">{product.name}</p>
           <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5">
             {product.description}
           </p>
+          {product.accountType && (
+            <Badge
+              variant="outline"
+              className={cn(
+                "mt-1 text-[10px] font-medium",
+                product.accountType === 'full'
+                  ? "border-indigo-300 text-indigo-600 dark:border-indigo-700 dark:text-indigo-400"
+                  : "border-emerald-300 text-emerald-600 dark:border-emerald-700 dark:text-emerald-400"
+              )}
+            >
+              {product.accountType === 'full'
+                ? (t('provider.products.fullAccount') || 'Cuenta Completa')
+                : (t('provider.products.profile') || 'Perfil')}
+            </Badge>
+          )}
         </div>
       ),
     },
@@ -254,6 +275,31 @@ export default function ProductsPage() {
       ),
     },
     {
+      key: 'stock',
+      label: t('provider.products.stock') || 'Stock',
+      render: (product: any) => {
+        const total = product.stockTotal || 0;
+        const available = product.stockAvailable || 0;
+        if (total === 0) {
+          return <span className="text-xs text-muted-foreground">—</span>;
+        }
+        return (
+          <button
+            onClick={() => setInventoryDialogProduct({ id: product.id, name: product.name })}
+            className="flex items-center gap-2 hover:opacity-70 transition-opacity cursor-pointer group"
+          >
+            <Package className="h-4 w-4 text-muted-foreground group-hover:text-indigo-500" />
+            <span className={cn(
+              "font-bold underline decoration-dashed underline-offset-2",
+              available === 0 ? "text-red-500" : available <= 2 ? "text-amber-500" : "text-emerald-500"
+            )}>
+              {available}/{total}
+            </span>
+          </button>
+        );
+      },
+    },
+    {
       key: 'createdAt',
       label: t('provider.products.created'),
       render: (product) => (
@@ -267,6 +313,15 @@ export default function ProductsPage() {
       label: '',
       render: (product) => (
         <div className="flex gap-1">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="hover:bg-emerald-50 dark:hover:bg-emerald-950/30"
+            onClick={() => setStockDialogProduct({ id: product.id, name: product.name })}
+            title={t('provider.products.addStock') || 'Agregar Stock'}
+          >
+            <Plus className="h-4 w-4 text-emerald-500" />
+          </Button>
           <Button
             variant="ghost"
             size="icon"
@@ -525,6 +580,33 @@ export default function ProductsPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Add Stock Dialog */}
+      {stockDialogProduct && (
+        <AddStockDialog
+          productId={stockDialogProduct.id}
+          productName={stockDialogProduct.name}
+          isOpen={!!stockDialogProduct}
+          onClose={() => setStockDialogProduct(null)}
+          onSuccess={() => {
+            // Invalidate products cache to refresh the list
+            queryClient.invalidateQueries({ queryKey: ['provider', 'products'] });
+            setStockDialogProduct(null);
+          }}
+        />
+      )}
+
+      {/* Inventory Details Dialog */}
+      <InventoryDetailsDialog
+        productId={inventoryDialogProduct?.id || null}
+        productName={inventoryDialogProduct?.name || ''}
+        isOpen={!!inventoryDialogProduct}
+        onClose={() => {
+          // Invalidate products cache when closing inventory dialog (may have deleted items)
+          queryClient.invalidateQueries({ queryKey: ['provider', 'products'] });
+          setInventoryDialogProduct(null);
+        }}
+      />
     </div>
   );
 }

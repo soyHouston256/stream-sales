@@ -31,6 +31,7 @@ export function ProductEditor({ initialData }: ProductEditorProps) {
             durationDays: data.durationDays || 0,
             imageUrl: data.imageUrl || '',
             category: data.category,
+            deliveryDetails: data.deliveryDetails || [],
 
             // Variants - assuming single variant for now based on current wizard
             variants: [],
@@ -71,6 +72,7 @@ export function ProductEditor({ initialData }: ProductEditorProps) {
                     price: formData.price ? parseFloat(formData.price) : undefined,
                     durationDays: formData.durationDays,
                     imageUrl: formData.imageUrl || undefined,
+                    deliveryDetails: formData.deliveryDetails,
                     accountEmail: formData.email || undefined,
                     accountPassword: formData.password || undefined, // Only send if changed
                     accountDetails: {

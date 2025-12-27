@@ -18,7 +18,7 @@ import { usePurchases } from '@/lib/hooks/usePurchases';
 import { Purchase, PurchasesFilters } from '@/types/seller';
 import { CategoryBadge } from '@/components/provider/CategoryBadge';
 import { PurchaseDetailsDialog } from '@/components/seller';
-import { formatCurrency } from '@/lib/utils/seller';
+import { formatCurrency, generateWhatsAppMessage, openWhatsApp } from '@/lib/utils/seller';
 import { format, addDays, differenceInDays } from 'date-fns';
 import { ShoppingBag, DollarSign, TrendingDown, Eye, Calendar, Clock, MessageCircle, User } from 'lucide-react';
 import { ProductCategory } from '@/types/provider';
@@ -250,15 +250,31 @@ export default function PurchasesPage() {
             <Eye className="h-4 w-4 mr-2" />
             {t('purchases.viewDetails')}
           </Button>
-          {purchase.customerPhone && (
+          {purchase.customerPhone && purchase.customerName && (
             <Button
               size="icon"
               variant="ghost"
               className="h-8 w-8 text-green-600 hover:text-green-700 hover:bg-green-100"
               onClick={() => {
-                // Open WhatsApp share for this purchase
-                setSelectedPurchase(purchase);
-                setShowDetails(true);
+                // Directly open WhatsApp with pre-filled message
+                const accountDetails = purchase.product.accountDetails || {};
+                const message = generateWhatsAppMessage({
+                  customerName: purchase.customerName || 'Cliente',
+                  productName: purchase.product.name,
+                  productCategory: purchase.product.category,
+                  accountEmail: purchase.product.accountEmail,
+                  accountPassword: purchase.product.accountPassword,
+                  profileName: typeof accountDetails?.profileName === 'string' ? accountDetails.profileName : undefined,
+                  pin: typeof accountDetails?.pin === 'string' ? accountDetails.pin : undefined,
+                  durationDays: purchase.product.durationDays,
+                  purchaseDate: format(new Date(purchase.createdAt), 'dd/MM/yyyy'),
+                  expirationDate: purchase.product.durationDays
+                    ? format(addDays(new Date(purchase.createdAt), purchase.product.durationDays), 'dd/MM/yyyy')
+                    : undefined,
+                  providerName: purchase.provider.name,
+                  providerPhone: purchase.provider.phone,
+                });
+                openWhatsApp(purchase.customerPhone!, message);
               }}
               title={t('purchases.details.sendWhatsApp') || 'Enviar por WhatsApp'}
             >

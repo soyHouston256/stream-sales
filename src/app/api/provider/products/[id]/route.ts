@@ -123,6 +123,7 @@ export async function GET(
       price: variant?.price.toString() || '0',
       durationDays: variant?.durationDays || 0,
       imageUrl: product.imageUrl,
+      deliveryDetails: product.deliveryDetails || [],
       accountEmail: account?.email || '',
       accountPassword: '', // Don't return hash
       accountDetails: accountDetails,
@@ -164,6 +165,7 @@ const updateProductSchema = z.object({
   price: z.number().positive().optional(),
   durationDays: z.number().min(0).optional(),
   imageUrl: z.string().optional().or(z.literal('')),
+  deliveryDetails: z.array(z.string()).optional(),
   accountEmail: z.string().email().optional(),
   accountPassword: z.string().min(1).optional(),
   accountDetails: z.any().optional(),
@@ -267,6 +269,7 @@ export async function PUT(
       ...(data.name && { name: data.name }),
       ...(data.description && { description: data.description }),
       ...(data.imageUrl !== undefined && { imageUrl: data.imageUrl || null }),
+      ...(data.deliveryDetails !== undefined && { deliveryDetails: data.deliveryDetails }),
     };
 
     // Update Product

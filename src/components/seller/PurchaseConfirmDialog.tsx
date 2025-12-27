@@ -24,6 +24,7 @@ import { CategoryBadge } from '@/components/provider/CategoryBadge';
 import { useToast } from '@/lib/hooks/useToast';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { PhoneInput } from '@/components/ui/phone-input';
 import { User, Phone } from 'lucide-react';
 
 type UserType = 'seller' | 'affiliate';
@@ -49,7 +50,7 @@ export function PurchaseConfirmDialog({
 
   // Customer data state for third-party recipient
   const [customerName, setCustomerName] = React.useState('');
-  const [customerPhone, setCustomerPhone] = React.useState('');
+  const [customerPhone, setCustomerPhone] = React.useState('+51 ');
 
   if (!product) return null;
 
@@ -142,74 +143,74 @@ export function PurchaseConfirmDialog({
                   />
                 </div>
                 <div className="flex items-center gap-2">
-                  <Phone className="h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder={t('seller.marketplace.purchaseConfirm.customerPhone') || '+51 999 888 777'}
+                  <Phone className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                  <PhoneInput
                     value={customerPhone}
-                    onChange={(e) => setCustomerPhone(e.target.value)}
+                    onChange={setCustomerPhone}
+                    placeholder="999 888 777"
                     className="flex-1"
                   />
                 </div>
               </div>
             </div>
+          </div>
 
-            {/* Wallet Balance Logic */}
-            {walletLoading ? (
-              <div className="space-y-2">
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-4 w-3/4" />
-              </div>
-            ) : walletData && validation ? (
-              <div className="space-y-4">
-                <div className="bg-card border border-border rounded-xl p-4 shadow-sm">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-2 text-muted-foreground">
-                      <Wallet className="h-4 w-4" />
-                      <span className="text-sm">{t('seller.marketplace.purchaseConfirm.currentBalance')}</span>
-                    </div>
-                    <span className="font-mono font-medium">{formatCurrency(walletData.balance)}</span>
+          {/* Wallet Balance Logic */}
+          {walletLoading ? (
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-3/4" />
+            </div>
+          ) : walletData && validation ? (
+            <div className="space-y-4">
+              <div className="bg-card border border-border rounded-xl p-4 shadow-sm">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Wallet className="h-4 w-4" />
+                    <span className="text-sm">{t('seller.marketplace.purchaseConfirm.currentBalance')}</span>
                   </div>
+                  <span className="font-mono font-medium">{formatCurrency(walletData.balance)}</span>
+                </div>
 
-                  <div className="relative flex items-center justify-center py-2">
-                    <div className="absolute inset-0 flex items-center">
-                      <div className="w-full border-t border-dashed border-border"></div>
-                    </div>
-                    <div className="relative bg-card px-2 text-muted-foreground">
-                      <ArrowRight className="h-4 w-4" />
-                    </div>
+                <div className="relative flex items-center justify-center py-2">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-dashed border-border"></div>
                   </div>
-
-                  <div className="flex items-center justify-between mt-2">
-                    <div className="flex items-center gap-2 text-muted-foreground">
-                      <CreditCard className="h-4 w-4" />
-                      <span className="text-sm">{t('seller.marketplace.purchaseConfirm.balanceAfter')}</span>
-                    </div>
-                    <span className={`font-mono font-bold text-lg ${validation.canPurchase ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                      {formatCurrency(validation.balanceAfter)}
-                    </span>
+                  <div className="relative bg-card px-2 text-muted-foreground">
+                    <ArrowRight className="h-4 w-4" />
                   </div>
                 </div>
 
-                {!validation.canPurchase && (
-                  <Alert variant="destructive" className="bg-destructive/10 border-destructive/20 text-destructive">
-                    <AlertCircle className="h-4 w-4" />
-                    <AlertTitle>{t('seller.marketplace.purchaseConfirm.insufficientBalance')}</AlertTitle>
-                    <AlertDescription>
-                      {t('seller.marketplace.purchaseConfirm.insufficientBalanceDesc')}
-                    </AlertDescription>
-                  </Alert>
-                )}
-
-                {validation.canPurchase && validation.warning && (
-                  <Alert variant="warning" className="bg-yellow-500/10 border-yellow-500/20 text-yellow-600 dark:text-yellow-400">
-                    <AlertCircle className="h-4 w-4" />
-                    <AlertTitle>{t('seller.marketplace.purchaseConfirm.lowBalance')}</AlertTitle>
-                    <AlertDescription>{validation.warning}</AlertDescription>
-                  </Alert>
-                )}
+                <div className="flex items-center justify-between mt-2">
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <CreditCard className="h-4 w-4" />
+                    <span className="text-sm">{t('seller.marketplace.purchaseConfirm.balanceAfter')}</span>
+                  </div>
+                  <span className={`font-mono font-bold text-lg ${validation.canPurchase ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                    {formatCurrency(validation.balanceAfter)}
+                  </span>
+                </div>
               </div>
-            ) : null}
-          </div>
+
+              {!validation.canPurchase && (
+                <Alert variant="destructive" className="bg-destructive/10 border-destructive/20 text-destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertTitle>{t('seller.marketplace.purchaseConfirm.insufficientBalance')}</AlertTitle>
+                  <AlertDescription>
+                    {t('seller.marketplace.purchaseConfirm.insufficientBalanceDesc')}
+                  </AlertDescription>
+                </Alert>
+              )}
+
+              {validation.canPurchase && validation.warning && (
+                <Alert variant="warning" className="bg-yellow-500/10 border-yellow-500/20 text-yellow-600 dark:text-yellow-400">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertTitle>{t('seller.marketplace.purchaseConfirm.lowBalance')}</AlertTitle>
+                  <AlertDescription>{validation.warning}</AlertDescription>
+                </Alert>
+              )}
+            </div>
+          ) : null}
 
           <DialogFooter className="gap-3 sm:gap-0">
             <Button variant="ghost" onClick={onClose} disabled={createPurchase.isPending} className="w-full sm:w-auto">
