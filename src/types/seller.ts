@@ -44,6 +44,9 @@ export interface MarketplaceProduct {
   availableFullAccounts?: number;
   totalProfileSlots?: number;
   availableProfileSlots?: number;
+  totalLicenses?: number;
+  availableLicenses?: number;
+  deliveryDetails?: string[];
   createdAt: string;
 }
 

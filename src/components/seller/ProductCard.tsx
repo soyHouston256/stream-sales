@@ -2,7 +2,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { MarketplaceProduct } from '@/types/seller';
-import { Plus, User, Users, Package } from 'lucide-react';
+import { Plus, User, Users, Package, Key } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { CATEGORY_STYLES } from '@/lib/utils/seller';
 
@@ -20,11 +20,14 @@ export function ProductCard({ product, onBuyClick }: ProductCardProps) {
   const availableFullAccounts = product.availableFullAccounts ?? 0;
   const totalProfileSlots = product.totalProfileSlots ?? 0;
   const availableProfileSlots = product.availableProfileSlots ?? 0;
+  const totalLicenses = product.totalLicenses ?? 0;
+  const availableLicenses = product.availableLicenses ?? 0;
 
   // Total available for purchase
-  const totalAvailable = availableFullAccounts + availableProfileSlots;
+  const totalAvailable = availableFullAccounts + availableProfileSlots + availableLicenses;
   const hasFullAccounts = totalFullAccounts > 0;
   const hasProfileSlots = totalProfileSlots > 0;
+  const hasLicenses = totalLicenses > 0;
 
   return (
     <Card className="overflow-hidden border-none shadow-lg hover:shadow-xl transition-all duration-300 group bg-white dark:bg-slate-900 rounded-3xl">
@@ -84,8 +87,19 @@ export function ProductCard({ product, onBuyClick }: ProductCardProps) {
             </span>
           )}
 
+          {/* Licenses Badge */}
+          {hasLicenses && (
+            <span className={`text-xs font-bold px-2.5 py-1 rounded-md flex items-center gap-1 ${availableLicenses > 0
+              ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300'
+              : 'bg-slate-100 dark:bg-slate-800 text-slate-500'
+              }`}>
+              <Key size={12} />
+              {availableLicenses}/{totalLicenses} {t('seller.productCard.licenses') || 'Licencias'}
+            </span>
+          )}
+
           {/* If no inventory at all, show empty hint */}
-          {!hasFullAccounts && !hasProfileSlots && (
+          {!hasFullAccounts && !hasProfileSlots && !hasLicenses && (
             <span className="bg-slate-100 dark:bg-slate-800 text-slate-500 text-xs font-bold px-2.5 py-1 rounded-md flex items-center gap-1">
               <Package size={12} />
               {t('seller.productCard.noStock') || 'Sin stock'}

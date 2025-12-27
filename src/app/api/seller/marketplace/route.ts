@@ -146,6 +146,12 @@ export async function GET(request: NextRequest) {
             availableSlots: true,
           },
         },
+        inventoryLicenses: {
+          select: {
+            id: true,
+            status: true,
+          },
+        },
       },
     });
 
@@ -169,9 +175,13 @@ export async function GET(request: NextRequest) {
         }
       }
 
-      // Total slots is sum of all
-      const totalSlots = totalFullAccounts + totalProfileSlots;
-      const availableSlots = availableFullAccounts + availableProfileSlots;
+      // Calculate license stock for license products
+      const totalLicenses = product.inventoryLicenses?.length ?? 0;
+      const availableLicenses = product.inventoryLicenses?.filter((l: any) => l.status === 'available').length ?? 0;
+
+      // Total slots is sum of all (including licenses)
+      const totalSlots = totalFullAccounts + totalProfileSlots + totalLicenses;
+      const availableSlots = availableFullAccounts + availableProfileSlots + availableLicenses;
 
       // Determine account type based on majority
       const accountType = totalProfileSlots > totalFullAccounts ? 'profile' : 'full';
@@ -186,6 +196,7 @@ export async function GET(request: NextRequest) {
         price: product.variants[0]?.price.toString() || '0',
         durationDays: product.variants[0]?.durationDays ?? 0,
         imageUrl: product.imageUrl,
+        deliveryDetails: product.deliveryDetails || [],
         status: product.isActive ? 'available' : 'unavailable',
         accountType, // 'full' or 'profile'
         totalSlots,
@@ -195,6 +206,9 @@ export async function GET(request: NextRequest) {
         availableFullAccounts,
         totalProfileSlots,
         availableProfileSlots,
+        // License stock
+        totalLicenses,
+        availableLicenses,
         createdAt: product.createdAt.toISOString(),
       };
     });

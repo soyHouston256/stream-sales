@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -153,6 +154,7 @@ const PendingApprovalBanner = ({ status }: { status: string }) => {
 
 export default function ProductsPage() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { t } = useLanguage();
   const [page, setPage] = useState(1);
   const [category, setCategory] = useState<ProductCategory | 'all'>('all');
@@ -587,7 +589,8 @@ export default function ProductsPage() {
           isOpen={!!stockDialogProduct}
           onClose={() => setStockDialogProduct(null)}
           onSuccess={() => {
-            // Trigger refetch by invalidating query
+            // Invalidate products cache to refresh the list
+            queryClient.invalidateQueries({ queryKey: ['provider', 'products'] });
             setStockDialogProduct(null);
           }}
         />
@@ -598,7 +601,11 @@ export default function ProductsPage() {
         productId={inventoryDialogProduct?.id || null}
         productName={inventoryDialogProduct?.name || ''}
         isOpen={!!inventoryDialogProduct}
-        onClose={() => setInventoryDialogProduct(null)}
+        onClose={() => {
+          // Invalidate products cache when closing inventory dialog (may have deleted items)
+          queryClient.invalidateQueries({ queryKey: ['provider', 'products'] });
+          setInventoryDialogProduct(null);
+        }}
       />
     </div>
   );

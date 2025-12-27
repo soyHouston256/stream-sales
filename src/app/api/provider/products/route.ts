@@ -236,6 +236,7 @@ const createProductSchema = z.object({
   resourceUrl: z.string().optional(),
   liveDate: z.string().optional(),
   coverImageUrl: z.string().optional(),
+  deliveryDetails: z.array(z.string()).optional(), // What customer will receive
 });
 
 export async function POST(request: NextRequest) {
@@ -281,6 +282,7 @@ export async function POST(request: NextRequest) {
           description: data.description,
           category: data.category,
           imageUrl: data.imageUrl,
+          deliveryDetails: data.deliveryDetails || [],
           isActive: true,
         },
       });

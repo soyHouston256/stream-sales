@@ -155,17 +155,55 @@ export function ProductDetailsDialog({
                   {t('seller.marketplace.productDetails.whatYouReceive')}
                 </h4>
                 <ul className="grid gap-2">
-                  {[
-                    t('seller.marketplace.productDetails.accountEmail'),
-                    t('seller.marketplace.productDetails.accountPassword'),
-                    t('seller.marketplace.productDetails.additionalDetails'),
-                    t('seller.marketplace.productDetails.instantAccess')
-                  ].map((item, i) => (
-                    <li key={i} className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <div className="h-1.5 w-1.5 rounded-full bg-primary" />
-                      {item}
-                    </li>
-                  ))}
+                  {(() => {
+                    // Use custom delivery details if provided
+                    const customDetails = product.deliveryDetails as string[] | undefined;
+                    if (customDetails && customDetails.length > 0) {
+                      return customDetails.map((item, i) => (
+                        <li key={i} className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <div className="h-1.5 w-1.5 rounded-full bg-primary" />
+                          {item}
+                        </li>
+                      ));
+                    }
+
+                    // Fallback: category-based defaults
+                    const categoryDefaults: Record<string, string[]> = {
+                      license: [
+                        t('seller.marketplace.productDetails.licenseKey') || 'Clave de licencia',
+                        t('seller.marketplace.productDetails.activationInstructions') || 'Instrucciones de activación',
+                        t('seller.marketplace.productDetails.instantAccess'),
+                      ],
+                      streaming: [
+                        t('seller.marketplace.productDetails.accountEmail'),
+                        t('seller.marketplace.productDetails.accountPassword'),
+                        t('seller.marketplace.productDetails.instantAccess'),
+                      ],
+                      course: [
+                        t('seller.marketplace.productDetails.accessLink') || 'Enlace de acceso',
+                        t('seller.marketplace.productDetails.courseMaterials') || 'Materiales del curso',
+                        t('seller.marketplace.productDetails.instantAccess'),
+                      ],
+                      ebook: [
+                        t('seller.marketplace.productDetails.downloadLink') || 'Enlace de descarga',
+                        t('seller.marketplace.productDetails.instantAccess'),
+                      ],
+                    };
+
+                    const defaults = categoryDefaults[product.category] || [
+                      t('seller.marketplace.productDetails.accountEmail'),
+                      t('seller.marketplace.productDetails.accountPassword'),
+                      t('seller.marketplace.productDetails.additionalDetails'),
+                      t('seller.marketplace.productDetails.instantAccess'),
+                    ];
+
+                    return defaults.map((item, i) => (
+                      <li key={i} className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <div className="h-1.5 w-1.5 rounded-full bg-primary" />
+                        {item}
+                      </li>
+                    ));
+                  })()}
                 </ul>
               </div>
             </div>

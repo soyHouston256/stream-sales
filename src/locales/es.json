@@ -636,6 +636,9 @@
         "meetPlaceholder": "https://meet.google.com/...",
         "iframePlaceholder": "<iframe src='...'></iframe>",
         "defaultProfileName": "Perfil",
+        "deliveryDetails": "Lo que recibirá el cliente",
+        "deliveryDetailsPlaceholder": "Ej:\nClave de licencia\nInstrucciones de activación\nSoporte 24/7",
+        "deliveryDetailsHint": "Un ítem por línea. Aparecerá en la página del producto.",
         "errors": {
           "categoryRequired": "La categoría es requerida"
         }
@@ -704,6 +707,7 @@
     "productCard": {
       "fullAccounts": "Cuentas",
       "profiles": "Perfiles",
+      "licenses": "Licencias",
       "noStock": "Sin stock"
     },
     "marketplace": {
@@ -739,6 +743,11 @@
         "accountPassword": "Contraseña de la cuenta",
         "additionalDetails": "Detalles adicionales (si aplica)",
         "instantAccess": "Acceso instantáneo después de la compra",
+        "licenseKey": "Clave de licencia",
+        "activationInstructions": "Instrucciones de activación",
+        "accessLink": "Enlace de acceso",
+        "courseMaterials": "Materiales del curso",
+        "downloadLink": "Enlace de descarga",
         "cancel": "Cancelar",
         "loginToPurchase": "Iniciar sesión para comprar",
         "purchaseNow": "Comprar Ahora",
